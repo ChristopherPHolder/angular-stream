@@ -1,5 +1,5 @@
-import {RxState} from '@rx-angular/state';
-import {DOCUMENT} from '@angular/common';
+import { RxState } from '@rx-angular/state';
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -10,11 +10,21 @@ import {
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
-import {filter, fromEvent, map, merge, Observable, startWith, switchMap, take, withLatestFrom,} from 'rxjs';
-import {preventDefault, RxActionFactory} from '@rx-angular/state/actions';
-import {coerceObservable} from '@rx-angular/cdk/coercing';
-import {RxLet} from '@rx-angular/template/let';
-import {FastSvgComponent} from '@push-based/ngx-fast-svg';
+import {
+  filter,
+  fromEvent,
+  map,
+  merge,
+  Observable,
+  startWith,
+  switchMap,
+  take,
+  withLatestFrom,
+} from 'rxjs';
+import { preventDefault, rxActions } from '@rx-angular/state/actions';
+import { coerceObservable } from '@rx-angular/cdk/coercing';
+import { RxLet } from '@rx-angular/template/let';
+import { FastSvgComponent } from '@push-based/ngx-fast-svg';
 
 type UiActions = {
   searchChange: string;
@@ -58,21 +68,20 @@ type UiActions = {
   styleUrls: ['search-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
-  providers: [RxState, RxActionFactory],
+  providers: [RxState],
 })
 export class SearchBarComponent {
   private readonly document = inject(DOCUMENT);
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly state = inject<RxState<{ search: string; open: boolean }>>(RxState);
-  private readonly actions = inject<RxActionFactory<UiActions>>(RxActionFactory);
-  
-  @ViewChild('searchInput') inputRef!: ElementRef<HTMLInputElement>;
-  @ViewChild('form') formRef!: ElementRef<HTMLFormElement>;
-
-  ui = this.actions.create({
+  private readonly state =
+    inject<RxState<{ search: string; open: boolean }>>(RxState);
+  readonly ui = rxActions<UiActions>(({transforms}) => transforms({
     searchChange: String,
     formSubmit: preventDefault,
-  });
+  }));
+
+  @ViewChild('searchInput') inputRef!: ElementRef<HTMLInputElement>;
+  @ViewChild('form') formRef!: ElementRef<HTMLFormElement>;
 
   @Input()
   set query(v: string | Observable<string>) {
@@ -117,7 +126,7 @@ export class SearchBarComponent {
   private readonly classList = this.elementRef.nativeElement.classList;
 
   constructor() {
-    this.state.set({open: false});
+    this.state.set({ open: false });
     this.state.connect('search', this.ui.searchChange$.pipe(startWith('')));
     this.state.connect(
       'open',

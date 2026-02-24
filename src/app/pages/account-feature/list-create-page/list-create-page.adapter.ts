@@ -5,7 +5,7 @@ import { map, startWith, withLatestFrom } from 'rxjs';
 
 import { TMDBListCreateUpdateParams } from '../../../data-access/api/model/list.model';
 import { ListDetailAdapter } from '../list-detail-page/list-detail-page.adapter';
-import { RxActionFactory } from '@rx-angular/state/actions';
+import { rxActions } from '@rx-angular/state/actions';
 import { ListState } from '../../../state/list.state';
 
 interface Actions {
@@ -33,7 +33,7 @@ export class ListCreatePageAdapter extends RxState<{
 }> {
   private readonly state = inject(ListState);
   private readonly detailsAdapter = inject(ListDetailAdapter);
-  readonly ui = new RxActionFactory<Actions>().create();
+  readonly ui = rxActions<Actions>()
 
   readonly showHeader$ = this.select(
     map((state) => state.mode === FormMode.Create)

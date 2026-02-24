@@ -1,22 +1,22 @@
-import {RxState} from '@rx-angular/state';
-import {selectSlice} from '@rx-angular/state/selections';
-import {TMDBMovieModel} from '../../data-access/api/model/movie.model';
-import {inject, Injectable} from '@angular/core';
-import {infiniteScroll} from '../../shared/cdk/infinite-scroll/infiniteScroll';
-import {RxActionFactory} from '@rx-angular/state/actions';
-import {RouterState} from '../../shared/router/router.state';
-import {combineLatestWith, map, switchMap, withLatestFrom} from 'rxjs';
-import {W300H450} from '../../data-access/images/image-sizes';
-import {ImageTag} from '../../shared/cdk/image/image-tag.interface';
-import {addImageTag} from '../../shared/cdk/image/image-tag.transform';
-import {getIdentifierOfTypeAndLayoutUtil} from '../../shared/router/get-identifier-of-type-and-layout.util';
-import {TMDBPersonModel} from '../../data-access/api/model/person.model';
-import {PersonState} from '../../state/person.state';
-import {WithContext} from '../../shared/cdk/loading/context.interface';
-import {MoviesSortValue} from '../../data-access/api/sort/sort.data';
-import {DiscoverResource} from '../../data-access/api/resources/discover.resource';
+import { RxState } from '@rx-angular/state';
+import { selectSlice } from '@rx-angular/state/selections';
+import { TMDBMovieModel } from '../../data-access/api/model/movie.model';
+import { inject, Injectable } from '@angular/core';
+import { infiniteScroll } from '../../shared/cdk/infinite-scroll/infiniteScroll';
+import { rxActions } from '@rx-angular/state/actions';
+import { RouterState } from '../../shared/router/router.state';
+import { combineLatestWith, map, switchMap, withLatestFrom } from 'rxjs';
+import { W300H450 } from '../../data-access/images/image-sizes';
+import { ImageTag } from '../../shared/cdk/image/image-tag.interface';
+import { addImageTag } from '../../shared/cdk/image/image-tag.transform';
+import { getIdentifierOfTypeAndLayoutUtil } from '../../shared/router/get-identifier-of-type-and-layout.util';
+import { TMDBPersonModel } from '../../data-access/api/model/person.model';
+import { PersonState } from '../../state/person.state';
+import { WithContext } from '../../shared/cdk/loading/context.interface';
+import { MoviesSortValue } from '../../data-access/api/sort/sort.data';
+import { DiscoverResource } from '../../data-access/api/resources/discover.resource';
 
-import {Movie} from '../../state/movie.state';
+import { Movie } from '../../state/movie.state';
 
 export type MoviePerson = TMDBPersonModel & ImageTag;
 export type Actions = {
@@ -58,7 +58,7 @@ export class PersonDetailAdapter extends RxState<PersonDetailPageAdapterState> {
   private readonly routerState = inject(RouterState);
   private readonly personState = inject(PersonState);
   private readonly discoverResource = inject(DiscoverResource);
-  private readonly actions = new RxActionFactory<Actions>().create();
+  private readonly actions = rxActions<Actions>();
   readonly paginate = this.actions.paginate;
   readonly toggleSorting = this.actions.toggleSorting;
   readonly sortBy = this.actions.sortBy;

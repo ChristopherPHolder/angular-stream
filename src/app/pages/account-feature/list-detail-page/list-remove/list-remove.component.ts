@@ -7,7 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { RxState } from '@rx-angular/state';
-import { RxActionFactory, rxActions } from '@rx-angular/state/actions';
+import { rxActions } from '@rx-angular/state/actions';
 import { merge } from 'rxjs';
 import { ListDetailAdapter } from '../list-detail-page.adapter';
 
@@ -22,7 +22,6 @@ type Actions = {
   templateUrl: './list-remove.component.html',
   styleUrls: ['./list-remove.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RxActionFactory],
 })
 export default class ListRemoveComponent
   extends RxState<never>

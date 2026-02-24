@@ -4,9 +4,8 @@ import {
   Input,
   Output,
   ViewEncapsulation,
-  inject,
 } from '@angular/core';
-import { RxActionFactory } from '@rx-angular/state/actions';
+import { rxActions } from '@rx-angular/state/actions';
 
 import { BackdropComponent } from '../backdrop/backdrop.component';
 
@@ -26,11 +25,9 @@ import { BackdropComponent } from '../backdrop/backdrop.component';
   styleUrls: ['./side-drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
-  providers: [RxActionFactory],
 })
 export class SideDrawerComponent {
-  private readonly actions = inject<RxActionFactory<{ openedChange: boolean }>>(RxActionFactory);
-  ui = this.actions.create();
+  readonly ui = rxActions<{ openedChange: boolean }>();
   @Input() opened = false;
   @Output() openedChange = this.ui.openedChange$;
 }

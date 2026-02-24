@@ -1,15 +1,18 @@
-import {RxState} from '@rx-angular/state';
-import {patch, toDictionary} from '@rx-angular/cdk/transformations';
-import {DestroyRef, inject, Injectable} from '@angular/core';
-import {map} from 'rxjs';
-import {optimizedFetch} from '../shared/cdk/optimized-fetch';
-import {RxActionFactory} from '@rx-angular/state/actions';
-import {withLoadingEmission} from '../shared/cdk/loading/withLoadingEmissions';
-import {PersonResource, PersonResponse,} from '../data-access/api/resources/person.resource';
-import {AppInitializer} from '../shared/cdk/app-initializer';
-import {WithContext} from '../shared/cdk/loading/context.interface';
-import {pluck} from '../shared/cdk/get';
-import {TMDBSortOptions} from '../data-access/api/sort/sort.interface';
+import { RxState } from '@rx-angular/state';
+import { patch, toDictionary } from '@rx-angular/cdk/transformations';
+import { inject, Injectable } from '@angular/core';
+import { map } from 'rxjs';
+import { optimizedFetch } from '../shared/cdk/optimized-fetch';
+import { rxActions } from '@rx-angular/state/actions';
+import { withLoadingEmission } from '../shared/cdk/loading/withLoadingEmissions';
+import {
+  PersonResource,
+  PersonResponse,
+} from '../data-access/api/resources/person.resource';
+import { AppInitializer } from '../shared/cdk/app-initializer';
+import { WithContext } from '../shared/cdk/loading/context.interface';
+import { pluck } from '../shared/cdk/get';
+import { TMDBSortOptions } from '../data-access/api/sort/sort.interface';
 
 export interface State {
   person: WithContext<Record<string, PersonResponse>>;
@@ -24,12 +27,10 @@ interface Actions {
   providedIn: 'root',
 })
 export class PersonState extends RxState<State> implements AppInitializer {
-  private readonly actionsF = new RxActionFactory<Actions>();
+  private readonly actions = rxActions<Actions>();
 
   private personResource = inject(PersonResource);
-  private actions = this.actionsF.create();
   fetchPerson = this.actions.fetchPerson;
-  sortMovies = this.actions.sortMovies;
 
   personByIdCtx = (id: string) =>
     this.select(
@@ -40,7 +41,6 @@ export class PersonState extends RxState<State> implements AppInitializer {
     );
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => this.actionsF.destroy());
     super();
     this.connect(
       'person',
