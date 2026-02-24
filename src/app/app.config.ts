@@ -13,14 +13,12 @@ import {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection(),
+    provideZoneChangeDetection({ eventCoalescing: true }),
     provideHttpClient(
       withInterceptors([tmdbContentTypeInterceptor, tmdbReadAccessInterceptor])
     ),
     provideTmdbImageLoader(),
-    provideFastSVG({
-      url: (name: string) => `assets/svg-icons/${name}.svg`,
-    }),
+    provideFastSVG({ url: (name: string) => `assets/svg-icons/${name}.svg`, }),
     provideRouter(ROUTES),
     provideClientHydration(withEventReplay()),
   ],

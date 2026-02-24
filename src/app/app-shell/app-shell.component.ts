@@ -1,4 +1,4 @@
-import { RxState } from '@rx-angular/state';
+import { rxState, RxState } from '@rx-angular/state';
 import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -23,10 +23,7 @@ import {
 import { TMDBMovieGenreModel } from '../data-access/api/model/movie-genre.model';
 import { trackByProp } from '../shared/cdk/track-by';
 import { rxActions } from '@rx-angular/state/actions';
-import {
-  fallbackRouteToDefault,
-  RouterState,
-} from '../shared/router/router.state';
+import { RouterState } from '../shared/router/router.state';
 import { getIdentifierOfTypeAndLayoutUtil } from '../shared/router/get-identifier-of-type-and-layout.util';
 import { GenreResource } from '../data-access/api/resources/genre.resource';
 import { rxEffects } from '@rx-angular/state/effects';
@@ -66,14 +63,18 @@ type Actions = {
   providers: [RxState],
 })
 export class AppShellComponent {
-  private readonly state =
-    inject<RxState<{ sideDrawerOpen: boolean }>>(RxState);
   private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
   public readonly routerState = inject(RouterState);
   public readonly effects = rxEffects();
   public genreResource = inject(GenreResource);
   readonly ui = rxActions<Actions>();
+  private readonly state = rxState<{ sideDrawerOpen: boolean }>(
+    ({ connect, set }) => {
+      set({ sideDrawerOpen: false });
+      connect('sideDrawerOpen', this.ui.sideDrawerOpenToggle$);
+    }
+  );
 
   search$ = this.routerState.select(
     getIdentifierOfTypeAndLayoutUtil('search', 'list')
@@ -87,31 +88,16 @@ export class AppShellComponent {
   );
 
   constructor() {
-    this.state.set({ sideDrawerOpen: false });
-    this.state.connect('sideDrawerOpen', this.ui.sideDrawerOpenToggle$);
 
-    this.effects.register(
-      this.router.events.pipe(
-        filter((e) => e instanceof NavigationEnd),
-        map((e) => (e as NavigationEnd).urlAfterRedirects),
-        distinctUntilChanged()
-      ),
-      () => this.closeSidenav()
-    );
-    /**
-     * **🚀 Perf Tip for TBT:**
-     *
-     * Disable initial sync navigation in router config and schedule it in router-outlet container component.
-     * We use a scheduling API (setTimeout) to run it in a separate task from the bootstrap phase
-     */
-    setTimeout(() => {
-      this.router.navigate([
-        // The pathname route seems to work correctly on SSR but when pre-rendering it is an empty string.
-        // We have to fall back to document URL as a fix.
-        fallbackRouteToDefault(
-          this.document.location.pathname || this.document.URL
+    rxEffects(({ register }) => {
+      register(
+        this.router.events.pipe(
+          filter((e) => e instanceof NavigationEnd),
+          map((e) => (e as NavigationEnd).urlAfterRedirects),
+          distinctUntilChanged()
         ),
-      ]);
+        () => this.closeSidenav()
+      );
     });
   }
 

@@ -1,5 +1,4 @@
-import { RxLet } from '@rx-angular/template/let';
-import { RxState, rxState } from '@rx-angular/state';
+import { rxState } from '@rx-angular/state';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -13,12 +12,6 @@ import { rxEffects } from '@rx-angular/state/effects';
 import { RxIf } from '@rx-angular/template/if';
 import { AccountState } from '../../state/account.state';
 
-export const imports = [RouterLink, RxLet, RxIf];
-
-type Actions = {
-  signOut: Event;
-  signIn: Event;
-};
 
 @Component({
   standalone: true,
@@ -28,7 +21,6 @@ type Actions = {
   styleUrls: ['./account-menu.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
-  providers: [RxState],
 })
 export default class AccountMenuComponent {
   private readonly authEffects = inject(AuthEffects);
@@ -37,7 +29,7 @@ export default class AccountMenuComponent {
     connect('loggedIn', this.accountState.loggedIn$);
   });
 
-  ui = rxActions<Actions>();
+  ui = rxActions<{ signOut: Event; signIn: Event; }>();
 
   loggedIn$ = this.state.select('loggedIn');
 
