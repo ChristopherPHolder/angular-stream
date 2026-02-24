@@ -29,7 +29,7 @@ import {
 } from '../shared/router/router.state';
 import { getIdentifierOfTypeAndLayoutUtil } from '../shared/router/get-identifier-of-type-and-layout.util';
 import { GenreResource } from '../data-access/api/resources/genre.resource';
-import { RxEffects } from '@rx-angular/state/effects';
+import { rxEffects } from '@rx-angular/state/effects';
 import { HamburgerButtonComponent } from '../ui/component/hamburger-button/hamburger-button.component';
 import { RxLet } from '@rx-angular/template/let';
 import { SideDrawerComponent } from '../ui/component/side-drawer/side-drawer.component';
@@ -63,7 +63,7 @@ type Actions = {
   styleUrls: ['./app-shell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
-  providers: [RxState, RxEffects],
+  providers: [RxState],
 })
 export class AppShellComponent {
   private readonly state =
@@ -71,7 +71,7 @@ export class AppShellComponent {
   private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
   public readonly routerState = inject(RouterState);
-  public readonly effects = inject(RxEffects);
+  public readonly effects = rxEffects();
   public genreResource = inject(GenreResource);
   readonly ui = rxActions<Actions>();
 

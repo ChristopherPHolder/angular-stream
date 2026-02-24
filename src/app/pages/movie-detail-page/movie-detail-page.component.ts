@@ -14,7 +14,7 @@ import { TMDBMovieGenreModel } from '../../data-access/api/model/movie-genre.mod
 
 import { MovieCast, MovieDetailAdapter } from './movie-detail-page.adapter';
 import { rxActions } from '@rx-angular/state/actions';
-import { RxEffects } from '@rx-angular/state/effects';
+import { rxEffects } from '@rx-angular/state/effects';
 import { DetailGridComponent } from '../../ui/component/detail-grid/detail-grid.component';
 import { StarRatingComponent } from '../../ui/pattern/star-rating/star-rating.component';
 import { MovieListComponent } from '../../ui/pattern/movie-list/movie-list.component';
@@ -44,12 +44,11 @@ import { RouterLink } from '@angular/router';
   styleUrls: ['./movie-detail-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
-  providers: [RxEffects],
 })
 export default class MovieDetailPageComponent {
   private readonly location = inject(Location);
   private readonly adapter = inject(MovieDetailAdapter);
-  private readonly effects = inject(RxEffects);
+  private readonly effects = rxEffects();
 
   private readonly movieCtx$ = this.adapter.routedMovieCtx$;
   readonly ui = rxActions<{

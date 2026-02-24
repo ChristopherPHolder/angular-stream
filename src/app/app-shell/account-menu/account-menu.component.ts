@@ -1,5 +1,5 @@
 import { RxLet } from '@rx-angular/template/let';
-import { RxState } from '@rx-angular/state';
+import { RxState, rxState } from '@rx-angular/state';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -9,7 +9,7 @@ import {
 import { rxActions } from '@rx-angular/state/actions';
 import { AuthEffects } from '../../auth/auth.effects';
 import { RouterLink } from '@angular/router';
-import { RxEffects } from '@rx-angular/state/effects';
+import { rxEffects } from '@rx-angular/state/effects';
 import { RxIf } from '@rx-angular/template/if';
 import { AccountState } from '../../state/account.state';
 
@@ -28,22 +28,23 @@ type Actions = {
   styleUrls: ['./account-menu.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
-  providers: [RxState, RxEffects],
+  providers: [RxState],
 })
 export default class AccountMenuComponent {
-  private readonly effects = inject(RxEffects);
   private readonly authEffects = inject(AuthEffects);
   private readonly accountState = inject(AccountState);
-  private readonly state = inject<RxState<{ loggedIn: boolean }>>(RxState);
-
+  private readonly state = rxState<{ loggedIn: boolean }>(({ connect }) => {
+    connect('loggedIn', this.accountState.loggedIn$);
+  });
 
   ui = rxActions<Actions>();
 
   loggedIn$ = this.state.select('loggedIn');
 
   constructor() {
-    this.state.connect('loggedIn', this.accountState.loggedIn$);
-    this.effects.register(this.ui.signOut$, this.authEffects.signOut);
-    this.effects.register(this.ui.signIn$, this.authEffects.signInStart);
+    rxEffects(({ register }) => {
+      register(this.ui.signOut$, this.authEffects.signOut);
+      register(this.ui.signIn$, this.authEffects.signInStart);
+    });
   }
 }

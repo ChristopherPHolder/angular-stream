@@ -24,14 +24,14 @@ import { TMDBMovieDetailsModel } from '../../data-access/api/model/movie-details
 import { LinkTag } from '../../shared/cdk/link/a-tag.interface';
 import { ImageTag } from '../../shared/cdk/image/image-tag.interface';
 import { VideoTag } from '../../shared/cdk/video/video.interface';
-import { RxEffects } from '@rx-angular/state/effects';
+import { rxEffects } from '@rx-angular/state/effects';
 
 type Actions = { paginateRecommendations: void };
 
 @Injectable({
   providedIn: 'root',
 })
-export class MovieDetailAdapter extends RxEffects {
+export class MovieDetailAdapter {
   private readonly movieState = inject(MovieState);
   private readonly routerState = inject(RouterState);
   private readonly movieResource = inject(MovieResource);
@@ -77,8 +77,9 @@ export class MovieDetailAdapter extends RxEffects {
   );
 
   constructor() {
-    super();
-    this.register(this.routerMovieId$, this.movieState.fetchMovie);
+    rxEffects(({ register }) => {
+      register(this.routerMovieId$, this.movieState.fetchMovie)
+    })
   }
 }
 
