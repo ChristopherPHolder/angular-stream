@@ -1,6 +1,10 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideFastSVG } from '@push-based/ngx-fast-svg';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withFetch,
+  withInterceptors,
+} from '@angular/common/http';
 import { tmdbContentTypeInterceptor } from './data-access/api/tmdbContentTypeInterceptor';
 import { tmdbReadAccessInterceptor } from './auth/tmdb-http-interceptor.feature';
 import { provideTmdbImageLoader } from './data-access/images/image-loader';
@@ -9,17 +13,19 @@ import { ROUTES } from './routes';
 import {
   provideClientHydration,
   withEventReplay,
+  withIncrementalHydration,
 } from '@angular/platform-browser';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideHttpClient(
+      withFetch(),
       withInterceptors([tmdbContentTypeInterceptor, tmdbReadAccessInterceptor])
     ),
     provideTmdbImageLoader(),
-    provideFastSVG({ url: (name: string) => `assets/svg-icons/${name}.svg`, }),
+    provideFastSVG({ url: (name: string) => `assets/svg-icons/${name}.svg` }),
     provideRouter(ROUTES),
-    provideClientHydration(withEventReplay()),
+    provideClientHydration(withEventReplay(), withIncrementalHydration()),
   ],
 };

@@ -16,9 +16,7 @@ export interface AccountListPageAdapterState {
   lists: ListWithPoster[];
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AccountListPageAdapter extends RxState<AccountListPageAdapterState> {
   private readonly list = inject(ListState);
 

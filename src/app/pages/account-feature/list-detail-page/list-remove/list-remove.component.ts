@@ -6,7 +6,7 @@ import {
   inject,
   ViewChild,
 } from '@angular/core';
-import { RxState } from '@rx-angular/state';
+import { rxState, RxState } from '@rx-angular/state';
 import { rxActions } from '@rx-angular/state/actions';
 import { merge } from 'rxjs';
 import { ListDetailAdapter } from '../list-detail-page.adapter';

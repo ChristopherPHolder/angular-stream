@@ -1,4 +1,3 @@
-import { rxState } from '@rx-angular/state';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -9,13 +8,12 @@ import { rxActions } from '@rx-angular/state/actions';
 import { AuthEffects } from '../../auth/auth.effects';
 import { RouterLink } from '@angular/router';
 import { rxEffects } from '@rx-angular/state/effects';
-import { RxIf } from '@rx-angular/template/if';
 import { AccountState } from '../../state/account.state';
-
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   standalone: true,
-  imports: [RouterLink, RxIf],
+  imports: [RouterLink],
   selector: 'ct-account-menu',
   templateUrl: './account-menu.component.html',
   styleUrls: ['./account-menu.component.scss'],
@@ -25,13 +23,9 @@ import { AccountState } from '../../state/account.state';
 export default class AccountMenuComponent {
   private readonly authEffects = inject(AuthEffects);
   private readonly accountState = inject(AccountState);
-  private readonly state = rxState<{ loggedIn: boolean }>(({ connect }) => {
-    connect('loggedIn', this.accountState.loggedIn$);
-  });
+  protected readonly loggedIn = toSignal(this.accountState.loggedIn$);
 
-  ui = rxActions<{ signOut: Event; signIn: Event; }>();
-
-  loggedIn$ = this.state.select('loggedIn');
+  ui = rxActions<{ signOut: Event; signIn: Event }>();
 
   constructor() {
     rxEffects(({ register }) => {

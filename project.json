@@ -54,6 +54,9 @@
       "defaultConfiguration": "production"
     },
     "serve": {
+      "options": {
+        "hmr": false
+      },
       "continuous": true,
       "executor": "@angular/build:dev-server",
       "configurations": {

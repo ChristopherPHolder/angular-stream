@@ -1,5 +1,4 @@
-import { rxState, RxState } from '@rx-angular/state';
-import { DOCUMENT } from '@angular/common';
+import { rxState } from '@rx-angular/state';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -60,13 +59,10 @@ type Actions = {
   styleUrls: ['./app-shell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
-  providers: [RxState],
 })
 export class AppShellComponent {
   private readonly router = inject(Router);
-  private readonly document = inject(DOCUMENT);
   public readonly routerState = inject(RouterState);
-  public readonly effects = rxEffects();
   public genreResource = inject(GenreResource);
   readonly ui = rxActions<Actions>();
   private readonly state = rxState<{ sideDrawerOpen: boolean }>(
@@ -88,7 +84,6 @@ export class AppShellComponent {
   );
 
   constructor() {
-
     rxEffects(({ register }) => {
       register(
         this.router.events.pipe(
@@ -103,7 +98,7 @@ export class AppShellComponent {
 
   readonly genres$ = this.genreResource.getGenresCached();
 
-  readonly viewState$ = this.state.select();
+  protected readonly sideDrawerOpen = this.state.signal('sideDrawerOpen');
 
   readonly trackByGenre: TrackByFunction<TMDBMovieGenreModel> =
     trackByProp<TMDBMovieGenreModel>('name');

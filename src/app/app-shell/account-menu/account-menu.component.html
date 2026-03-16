@@ -1,4 +1,4 @@
-<ng-container *rxIf="loggedIn$; else guest">
+@if (loggedIn()) {
   <div><a [routerLink]="['account/list/create']">Create New List</a></div>
   <div><a [routerLink]="['account/my-lists']">My Lists</a></div>
   <div>
@@ -11,8 +11,7 @@
       Logout
     </a>
   </div>
-</ng-container>
-<ng-template #guest>
+} @else {
   <div><p>Guest Profile</p></div>
   <div>
     <button
@@ -25,4 +24,4 @@
       Login
     </button>
   </div>
-</ng-template>
+}
