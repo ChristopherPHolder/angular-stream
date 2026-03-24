@@ -41,5 +41,6 @@
       "unitTestRunner": "vitest-analog"
     }
   },
-  "defaultProject": "angular-stream"
+  "defaultProject": "angular-stream",
+  "analytics": false
 }
