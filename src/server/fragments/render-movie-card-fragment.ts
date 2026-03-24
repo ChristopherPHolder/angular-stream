@@ -1,6 +1,13 @@
-import { ApplicationConfig, mergeApplicationConfig } from '@angular/core';
-import { bootstrapApplication, BootstrapContext } from '@angular/platform-browser';
-import { provideServerRendering, renderApplication } from '@angular/platform-server';
+import assert from 'node:assert/strict';
+import { DOCUMENT } from '@angular/common';
+import { ApplicationConfig, createComponent, PlatformRef } from '@angular/core';
+import { createApplication } from '@angular/platform-browser';
+import {
+  INITIAL_CONFIG,
+  platformServer,
+  provideServerRendering,
+  ɵrenderInternal as renderInternal,
+} from '@angular/platform-server';
 import {
   FragmentMovieCardData,
   FRAGMENT_MOVIE_CARD_DATA,
@@ -28,43 +35,74 @@ export async function renderMovieCardFragment(id: string): Promise<string> {
     throw new FragmentRenderNotFoundError(id);
   }
 
-  const renderedDocument = await renderMovieCardFragmentDocument(movie);
-  return extractRenderedFragmentHtml(renderedDocument);
+  return renderMovieCardFragmentDocument(movie);
 }
 
 async function renderMovieCardFragmentDocument(
   movie: FragmentMovieCardData
 ): Promise<string> {
-  return renderApplication(
-    (context: BootstrapContext) =>
-      bootstrapApplication(
-        FragmentMovieCardComponent,
-        mergeApplicationConfig(FRAGMENT_APP_CONFIG, {
-          providers: [
-            {
-              provide: FRAGMENT_MOVIE_CARD_DATA,
-              useValue: movie,
-            },
-          ],
-        }),
-        context
-      ),
+  const platformRef = platformServer([
     {
-      document: FRAGMENT_DOCUMENT,
-      url: `/fragments/movie-card/${movie.id}`,
-    }
-  );
+      provide: INITIAL_CONFIG,
+      useValue: {
+        document: FRAGMENT_DOCUMENT,
+        url: `/fragments/movie-card/${movie.id}`,
+      },
+    },
+  ]);
+
+  try {
+    const appRef = await createApplication(
+      {
+        ...FRAGMENT_APP_CONFIG,
+        providers: [
+          ...(FRAGMENT_APP_CONFIG.providers ?? []),
+          {
+            provide: FRAGMENT_MOVIE_CARD_DATA,
+            useValue: movie,
+          },
+        ],
+      },
+      { platformRef }
+    );
+
+    const document = appRef.injector.get(DOCUMENT);
+    const hostElement = document.querySelector('exp-fragment-movie-card');
+
+    assert(hostElement, 'Angular fragment render could not find the fragment host element.');
+
+    const componentRef = createComponent(FragmentMovieCardComponent, {
+      environmentInjector: appRef.injector,
+      hostElement,
+    });
+
+    appRef.attachView(componentRef.hostView);
+    componentRef.changeDetectorRef.detectChanges();
+    await appRef.whenStable();
+    await renderInternal(platformRef, appRef);
+
+    const renderedHostElement = document.querySelector('exp-fragment-movie-card');
+
+    assert(
+      renderedHostElement,
+      'Angular fragment render completed, but the rendered host element was not found.'
+    );
+
+    const fragmentHtml = renderedHostElement.outerHTML.trim();
+
+    assert(fragmentHtml, 'Angular fragment render completed, but the fragment HTML was empty.');
+
+    return fragmentHtml;
+  } finally {
+    await destroyPlatform(platformRef);
+  }
 }
 
-function extractRenderedFragmentHtml(documentHtml: string): string {
-  const fragmentHtml = documentHtml
-    .replace(/^[\s\S]*<body[^>]*>/i, '')
-    .replace(/<\/body>[\s\S]*$/i, '')
-    .trim();
-
-  if (!fragmentHtml) {
-    throw new Error('Angular fragment render completed, but the body was empty.');
-  }
-
-  return fragmentHtml;
+function destroyPlatform(platformRef: PlatformRef): Promise<void> {
+  return new Promise<void>((resolve) => {
+    setTimeout(() => {
+      platformRef.destroy();
+      resolve();
+    }, 0);
+  });
 }
