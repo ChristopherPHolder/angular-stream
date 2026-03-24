@@ -1,12 +1,11 @@
 import { isMainModule } from '@angular/ssr/node';
-import Fastify, { FastifyInstance } from 'fastify';
+import Fastify from 'fastify';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fastifyStatic from '@fastify/static';
 import angularSsr, { createFastifyRequestHandler } from './server/ssr.plugin';
-import fragmentsPlugin from './server/fragments/fragments.plugin';
 
-export function buildServer() {
+function buildServer() {
   const app = Fastify({ logger: false });
 
   app.register(fastifyStatic, {
@@ -18,18 +17,12 @@ export function buildServer() {
     return reply.code(200).send('OK');
   });
 
-  app.register(fragmentsPlugin);
   app.register(angularSsr);
 
   return app;
 }
 
-let serverApp: FastifyInstance | undefined;
-
-function getServerApp() {
-  serverApp ??= buildServer();
-  return serverApp;
-}
+const serverApp = buildServer();
 
 /**
  * Start the server if this module is the main entry point.
@@ -37,10 +30,12 @@ function getServerApp() {
  */
 if (isMainModule(import.meta.url)) {
   const port = process.env['PORT'] || 4000;
-  await getServerApp().listen({ port: Number(port), host: '0.0.0.0' });
+  await serverApp.listen({ port: Number(port), host: '0.0.0.0' });
+} else {
+  serverApp.log.info('Build dev server');
 }
 
 /**
  * Expose request handler for angular dev server
  */
-export const reqHandler = createFastifyRequestHandler(getServerApp);
+export const reqHandler = createFastifyRequestHandler(serverApp);
