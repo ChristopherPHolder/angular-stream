@@ -30,8 +30,15 @@ export default fastifyPlugin(angularSsrPlugin, {
   name: 'angular-ssr-plugin',
 });
 
-export function createFastifyRequestHandler(instance: FastifyInstance) {
+export function createFastifyRequestHandler(
+  instanceOrFactory: FastifyInstance | (() => FastifyInstance)
+) {
   return createNodeRequestHandler(async (req, res) => {
+    const instance =
+      typeof instanceOrFactory === 'function'
+        ? instanceOrFactory()
+        : instanceOrFactory;
+
     await instance.ready();
     instance.server.emit('request', req, res);
   });
