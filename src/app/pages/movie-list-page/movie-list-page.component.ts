@@ -5,20 +5,19 @@ import {
   inject,
   ViewEncapsulation,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { map, Observable } from 'rxjs';
 import {
   MovieListPageAdapter,
   MovieListPageModel,
 } from './movie-list-page.adapter';
-import { RxLet } from '@rx-angular/template/let';
-import { RxIf } from '@rx-angular/template/if';
 import { MovieListComponent } from '../../ui/pattern/movie-list/movie-list.component';
 
 type Heading = { main: string; sub: string };
 
 @Component({
   standalone: true,
-  imports: [RxLet, RxIf, MovieListComponent],
+  imports: [MovieListComponent],
   selector: 'ct-movies-list',
   templateUrl: './movie-list-page.component.html',
   styleUrls: ['./movie-list-page.component.scss'],
@@ -34,6 +33,8 @@ export default class MovieListPageComponent {
     selectSlice(['identifier', 'type', 'genres']),
     map(toHeading)
   );
+  readonly headings = toSignal(this.headings$, { initialValue: { main: '', sub: '' } });
+  readonly loading = toSignal(this.loading$, { initialValue: false });
 
   constructor() {
     this.adapter.set({ loading: true });

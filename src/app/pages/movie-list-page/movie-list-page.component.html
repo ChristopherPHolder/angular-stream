@@ -1,8 +1,11 @@
 <article>
-  <header *rxLet="headings$; let headings">
-    <h1 data-uf="header-main">{{ headings.main }}</h1>
-    <h2 data-uf="header-sub">{{ headings.sub }}</h2>
+  <header>
+    <h1 data-uf="header-main">{{ headings().main }}</h1>
+    <h2 data-uf="header-sub">{{ headings().sub }}</h2>
   </header>
-  <ui-movie-list (paginate)="paginate()" [movies]="movies$"> </ui-movie-list>
-  <div *rxIf="loading$" class="loader"></div>
+  <ui-movie-list (paginate)="paginate()" [movies]="movies$">
+  </ui-movie-list>
+  @if (loading()) {
+    <div class="loader"></div>
+  }
 </article>

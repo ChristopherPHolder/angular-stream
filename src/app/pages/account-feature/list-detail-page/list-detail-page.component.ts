@@ -1,6 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { RxLet } from '@rx-angular/template/let';
-import { RxFor } from '@rx-angular/template/for';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FastSvgComponent } from '@push-based/ngx-fast-svg';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ListDetailAdapter } from './list-detail-page.adapter';
@@ -10,8 +13,6 @@ import { ListDetailAdapter } from './list-detail-page.adapter';
   imports: [
     RouterLink,
     RouterOutlet,
-    RxLet,
-    RxFor,
     FastSvgComponent,
     RouterLinkActive,
   ],
@@ -22,6 +23,9 @@ import { ListDetailAdapter } from './list-detail-page.adapter';
 })
 export default class ListDetailPageComponent {
   public readonly adapter = inject(ListDetailAdapter);
+  readonly listName = toSignal(this.adapter.listName$, {
+    initialValue: 'Loading...',
+  });
   readonly tabs = [
     {
       name: 'View List',

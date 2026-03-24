@@ -1,5 +1,5 @@
 <article class="movie-detail-wrapper">
-  <ng-container *rxLet="movie$; let movie">
+  @if (movie(); as movie) {
     <ui-detail-grid [style.opacity]="!!movie ? 1 : 0">
       <div detailGridMedia>
         <img
@@ -155,13 +155,14 @@
             To get out the best performance use the native HTML attribute loading="lazy" instead of a directive.
             This avoids bootstrap and template evaluation time and reduces scripting time in general.
             -->
-            <iframe
-              *rxIf="loadIframe$"
-              [bypassSrc]="movie.videoUrl"
-              loading="lazy"
-              width="460"
-              height="230"
-            ></iframe>
+            @if (loadIframe()) {
+              <iframe
+                [bypassSrc]="movie.videoUrl"
+                loading="lazy"
+                width="460"
+                height="230"
+              ></iframe>
+            }
           </dialog>
           <button
             aria-label="Back"
@@ -174,12 +175,12 @@
             </button>
           </section>
         </div>
-      </ui-detail-grid>
-      @if (!movie) {
-        <div class="loader"></div>
-      }
-    </ng-container>
-  </article>
+    </ui-detail-grid>
+  }
+  @else {
+    <div class="loader"></div>
+  }
+</article>
   <article class="recommendations">
     <header>
       <h1>Recommended</h1>

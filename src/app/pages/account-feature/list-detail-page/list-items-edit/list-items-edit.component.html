@@ -1,23 +1,17 @@
-<ng-container *rxLet="adapter.vm$; let vm">
-  <fieldset>
-    <label for="list-name"> Add Item </label>
-    <input
-      id="list-name"
-      placeholder="Search for a movie..."
-      #itemInput
-      type="text"
-      [value]="vm.searchValue"
-      (focus)="adapter.ui.toggleResults(true)"
-      (input)="adapter.ui.search(itemInput.value)"
-    />
-    <ul class="results" [hidden]="!vm.showResults || !vm.searchResults.length">
-      <li
-        class="item"
-        *rxFor="
-          let movie of vm.searchResults;
-          trackBy: trackByMovieId
-        "
-      >
+<fieldset>
+  <label for="list-name"> Add Item </label>
+  <input
+    id="list-name"
+    placeholder="Search for a movie..."
+    #itemInput
+    type="text"
+    [value]="vm().searchValue"
+    (focus)="adapter.ui.toggleResults(true)"
+    (input)="adapter.ui.search(itemInput.value)"
+  />
+  <ul class="results" [hidden]="!vm().showResults || !vm().searchResults.length">
+    @for (movie of vm().searchResults; track trackByMovieId($index, movie)) {
+      <li class="item">
         <button class="poster" (click)="adapter.ui.addMovie(movie)">
           <img
             class="result-image gradient"
@@ -31,14 +25,13 @@
         </button>
         <h3 class="title">{{ movie.title }}</h3>
       </li>
-    </ul>
-  </fieldset>
+    }
+  </ul>
+</fieldset>
 
-  <ol class="list">
-    <li
-      class="item selected"
-      *rxFor="let item of vm.items; trackBy: trackByResultId"
-    >
+<ol class="list">
+  @for (item of vm().items; track trackByResultId($index, item)) {
+    <li class="item selected">
       <div class="box">
         {{ item.title }}
         <button
@@ -50,15 +43,15 @@
         </button>
       </div>
     </li>
-  </ol>
+  }
+</ol>
 
-  <button
-    type="button"
-    class="results-overlay"
-    (click)="adapter.ui.toggleResults(false)"
-    (focus)="adapter.ui.toggleResults(false)"
-    [hidden]="!vm.searchResults.length"
-  >
-    &nbsp;
-  </button>
-</ng-container>
+<button
+  type="button"
+  class="results-overlay"
+  (click)="adapter.ui.toggleResults(false)"
+  (focus)="adapter.ui.toggleResults(false)"
+  [hidden]="!vm().searchResults.length"
+>
+  &nbsp;
+</button>

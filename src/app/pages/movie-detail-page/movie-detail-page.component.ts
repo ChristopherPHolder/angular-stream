@@ -9,6 +9,7 @@ import {
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, mergeWith, tap } from 'rxjs';
 import { TMDBMovieGenreModel } from '../../data-access/api/model/movie-genre.model';
 
@@ -22,7 +23,6 @@ import { RxLet } from '@rx-angular/template/let';
 import { BypassSrcDirective } from '../../shared/cdk/bypass-src.directive';
 import { RxFor } from '@rx-angular/template/for';
 import { FastSvgComponent } from '@push-based/ngx-fast-svg';
-import { RxIf } from '@rx-angular/template/if';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -34,7 +34,6 @@ import { RouterLink } from '@angular/router';
     StarRatingComponent,
     MovieListComponent,
     RxFor,
-    RxIf,
     RxLet,
     BypassSrcDirective,
     FastSvgComponent,
@@ -55,18 +54,23 @@ export default class MovieDetailPageComponent {
     dialog: 'show' | 'close';
     iframe: 'load' | 'unload';
   }>();
-  readonly loadIframe$ = this.ui.iframe$.pipe(
-    mergeWith(
-      this.movieCtx$.pipe(
-        // select changes of video nested property
-        selectSlice(['value'], { value: ({ video }) => video })
-      )
+  readonly loadIframe = toSignal(
+    this.ui.iframe$.pipe(
+      mergeWith(
+        this.movieCtx$.pipe(
+          // select changes of video nested property
+          selectSlice(['value'], { value: ({ video }) => video })
+        )
+      ),
+      map((e) => e === 'load')
     ),
-    map((e) => e === 'load')
+    { initialValue: false }
   );
-  readonly movie$ = this.movieCtx$.pipe(
-    map((ctx) => ctx?.value || null),
-    filter((movie) => !!movie)
+  readonly movie = toSignal(
+    this.movieCtx$.pipe(
+      map((ctx) => ctx?.value || null),
+      filter((movie) => !!movie)
+    )
   );
   readonly castList$ = this.adapter.movieCastById$;
   readonly castListLoading$ = this.adapter.movieCastById$.pipe(

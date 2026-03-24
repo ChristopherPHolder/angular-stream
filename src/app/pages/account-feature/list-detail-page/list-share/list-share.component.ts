@@ -5,9 +5,9 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ListDetailAdapter } from '../list-detail-page.adapter';
 import { DOCUMENT } from '@angular/common';
-import { RxLet } from '@rx-angular/template/let';
 // TODO
 @Component({
   standalone: true,
@@ -15,11 +15,13 @@ import { RxLet } from '@rx-angular/template/let';
   templateUrl: './list-share.component.html',
   styleUrls: ['./list-share.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RxLet],
 })
 export class ListShareComponent implements OnInit, OnDestroy {
   public readonly body = inject(DOCUMENT).body;
   public readonly adapter = inject(ListDetailAdapter);
+  readonly listName = toSignal(this.adapter.listName$, {
+    initialValue: 'Loading...',
+  });
   listRef = location.href;
 
   ngOnInit(): void {

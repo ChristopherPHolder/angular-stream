@@ -1,7 +1,7 @@
 <article class="overlay">
   <section class="modal">
-    <header *rxLet="adapter.listName$; let name">
-      <h2>Share {{ name }}</h2>
+    <header>
+      <h2>Share {{ listName() }}</h2>
     </header>
     <p>{{ listRef }}</p>
     <footer></footer>

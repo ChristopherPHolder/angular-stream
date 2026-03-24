@@ -22,14 +22,14 @@ Mark a line `[x]` only after the template usage has been migrated safely, the co
 
 ## Template Migration Checklist
 
-- [ ] `src/app/pages/account-feature/list-create-page/list-create-page.component.ts:11` - `*rxIf="adapter.showHeader$"`
-- [ ] `src/app/pages/movie-detail-page/movie-detail-page.component.html:159` - `*rxIf="loadIframe$"`
-- [ ] `src/app/pages/movie-list-page/movie-list-page.component.html:7` - `*rxIf="loading$"`
-- [ ] `src/app/ui/pattern/movie-list/movie-list.component.ts:40` - `*rxIf="moviesListVisible$; else noData"`
+- [x] `src/app/pages/account-feature/list-create-page/list-create-page.component.ts:11` - `*rxIf="adapter.showHeader$"`
+- [x] `src/app/pages/movie-detail-page/movie-detail-page.component.html:159` - `*rxIf="loadIframe$"`
+- [x] `src/app/pages/movie-list-page/movie-list-page.component.html:7` - `*rxIf="loading$"`
+- [x] `src/app/ui/pattern/movie-list/movie-list.component.ts:40` - `*rxIf="moviesListVisible$; else noData"`
 
 ## Import Cleanup Checklist
 
-- [ ] `src/app/pages/account-feature/list-create-page/list-create-page.component.ts:4` - remove `RxIf` from `@rx-angular/template/if` when the file no longer needs it.
-- [ ] `src/app/pages/movie-detail-page/movie-detail-page.component.ts:25` - remove `RxIf` from `@rx-angular/template/if` when the file no longer needs it.
-- [ ] `src/app/pages/movie-list-page/movie-list-page.component.ts:14` - remove `RxIf` from `@rx-angular/template/if` when the file no longer needs it.
-- [ ] `src/app/ui/pattern/movie-list/movie-list.component.ts:21` - remove `RxIf` from `@rx-angular/template/if` when the file no longer needs it.
+- [x] `src/app/pages/account-feature/list-create-page/list-create-page.component.ts:4` - remove `RxIf` from `@rx-angular/template/if` when the file no longer needs it.
+- [x] `src/app/pages/movie-detail-page/movie-detail-page.component.ts:25` - remove `RxIf` from `@rx-angular/template/if` when the file no longer needs it.
+- [x] `src/app/pages/movie-list-page/movie-list-page.component.ts:14` - remove `RxIf` from `@rx-angular/template/if` when the file no longer needs it.
+- [x] `src/app/ui/pattern/movie-list/movie-list.component.ts:21` - remove `RxIf` from `@rx-angular/template/if` when the file no longer needs it.

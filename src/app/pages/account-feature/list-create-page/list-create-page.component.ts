@@ -1,40 +1,46 @@
-import {RxLet} from '@rx-angular/template/let';
-import {ChangeDetectionStrategy, Component, inject, OnDestroy,} from '@angular/core';
-import {ListCreatePageAdapter} from './list-create-page.adapter';
-import {RxIf} from '@rx-angular/template/if';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnDestroy,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ListCreatePageAdapter } from './list-create-page.adapter';
 
 @Component({
   standalone: true,
-  imports: [RxLet, RxIf],
+  imports: [],
   template: `
     <article>
-      <header *rxIf="adapter.showHeader$">
-        <h1>Create new list</h1>
-      </header>
+      @if (showHeader()) {
+        <header>
+          <h1>Create new list</h1>
+        </header>
+      }
       <form>
-        <fieldset *rxLet="adapter.name$; let name">
+        <fieldset>
           <label for="list-name"> Name </label>
           <input
             id="list-name"
             #nameInput
             type="text"
-            [value]="name"
+            [value]="name()"
             (input)="adapter.ui.update({ name: nameInput.value })"
           />
         </fieldset>
 
-        <fieldset *rxLet="adapter.description$; let description">
+        <fieldset>
           <label for="list-description"> Description </label>
           <textarea
             id="list-description"
             #descriptionInput
             (input)="adapter.ui.update({ description: descriptionInput.value })"
             rows="8"
-            >{{ description }}</textarea
+            >{{ description() }}</textarea
           >
         </fieldset>
 
-        <fieldset *rxLet="adapter.private$; let private">
+        <fieldset>
           <label for="list-privacy"> Private </label>
           <div class="select-wrapper">
             <select
@@ -43,23 +49,21 @@ import {RxIf} from '@rx-angular/template/if';
               #privateInput
               (change)="adapter.ui.update({ private: privateInput.value })"
             >
-              <option [selected]="private" [value]="true">Yes</option>
-              <option [selected]="!private" [value]="false">No</option>
+              <option [selected]="isPrivate()" [value]="true">Yes</option>
+              <option [selected]="!isPrivate()" [value]="false">No</option>
             </select>
           </div>
         </fieldset>
       </form>
-      <ng-container *rxLet="adapter.valid$; let valid">
-        <button
-          [disabled]="!valid"
-          (click)="adapter.ui.submit()"
-          class="btn primary-button"
-          name="save"
-          aria-label="Save list"
-        >
-          Save
-        </button>
-      </ng-container>
+      <button
+        [disabled]="!valid()"
+        (click)="adapter.ui.submit()"
+        class="btn primary-button"
+        name="save"
+        aria-label="Save list"
+      >
+        Save
+      </button>
     </article>
   `,
   styleUrls: [
@@ -70,6 +74,11 @@ import {RxIf} from '@rx-angular/template/if';
 })
 export default class ListCreateEditPageComponent implements OnDestroy {
   public readonly adapter = inject(ListCreatePageAdapter);
+  readonly showHeader = toSignal(this.adapter.showHeader$, { initialValue: false });
+  readonly name = toSignal(this.adapter.name$, { initialValue: '' });
+  readonly description = toSignal(this.adapter.description$, { initialValue: '' });
+  readonly isPrivate = toSignal(this.adapter.private$, { initialValue: true });
+  readonly valid = toSignal(this.adapter.valid$, { initialValue: false });
 
   ngOnDestroy(): void {
     this.adapter.resetForm();

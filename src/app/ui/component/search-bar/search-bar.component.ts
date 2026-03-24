@@ -10,6 +10,7 @@ import {
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   filter,
   fromEvent,
@@ -23,7 +24,6 @@ import {
 } from 'rxjs';
 import { preventDefault, rxActions } from '@rx-angular/state/actions';
 import { coerceObservable } from '@rx-angular/cdk/coercing';
-import { RxLet } from '@rx-angular/template/let';
 import { FastSvgComponent } from '@push-based/ngx-fast-svg';
 
 type UiActions = {
@@ -35,7 +35,7 @@ type UiActions = {
 
 @Component({
   standalone: true,
-  imports: [RxLet, FastSvgComponent],
+  imports: [FastSvgComponent],
   selector: 'ui-search-bar',
   template: `
     <form
@@ -55,10 +55,9 @@ type UiActions = {
       </button>
       <input
         data-uf="q"
-        *rxLet="search$; let search"
         aria-label="Search Input"
         #searchInput
-        [value]="search"
+        [value]="search()"
         (change)="ui.searchChange($any(searchInput.value))"
         placeholder="Search for a movie..."
         class="input"
@@ -88,7 +87,9 @@ export class SearchBarComponent {
     this.state.connect('search', coerceObservable(v) as Observable<string>);
   }
 
-  search$ = this.state.select('search');
+  readonly search = toSignal(this.state.select('search'), {
+    initialValue: '',
+  });
   @Output() searchSubmit = this.ui.formSubmit$.pipe(
     withLatestFrom(this.state.select('search')),
     map(([, search]) => search)

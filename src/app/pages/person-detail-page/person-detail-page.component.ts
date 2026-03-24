@@ -5,6 +5,7 @@ import {
   inject,
   ViewEncapsulation,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { PersonDetailAdapter } from './person-detail-page.adapter';
 import { SORT_VALUES } from '../../data-access/api/sort/sort.data';
 import { merge } from 'rxjs';
@@ -33,8 +34,15 @@ export default class PersonDetailPageComponent {
   private readonly adapter = inject(PersonDetailAdapter);
   private readonly location = inject(Location);
   sortOptions = SORT_VALUES;
-  readonly personCtx$ = this.adapter.routedPersonCtx$;
-  readonly sortingModel$ = this.adapter.sortingModel$;
+  readonly personCtx = toSignal(this.adapter.routedPersonCtx$, {
+    initialValue: null,
+  });
+  readonly sortingModel = toSignal(this.adapter.sortingModel$, {
+    initialValue: {
+      activeSorting: this.sortOptions[0].name,
+      showSorting: false,
+    },
+  });
 
   readonly sortBy = this.adapter.sortBy;
   readonly toggleSorting = this.adapter.toggleSorting;

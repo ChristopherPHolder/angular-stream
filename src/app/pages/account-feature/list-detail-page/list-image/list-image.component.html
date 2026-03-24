@@ -1,15 +1,11 @@
 <ui-grid-list class="movies-list--grid">
-  <button
-    class="ui-grid-list-item"
-    [class.selected]="movie.selected"
-    *rxFor="
-      let movie of adapter.posters$;
-      index as idx;
-      trackBy: trackByPosterId
-    "
-    [attr.data-uf]="'movie-' + idx"
-    (click)="adapter.ui.listPosterUpdate(movie.backdrop_path)"
-  >
+  @for (movie of posters(); track trackByPosterId($index, movie)) {
+    <button
+      class="ui-grid-list-item"
+      [class.selected]="movie.selected"
+      [attr.data-uf]="'movie-' + $index"
+      (click)="adapter.ui.listPosterUpdate(movie.backdrop_path)"
+    >
     <!--
       **🚀 Perf Tip for LCP:**
       To get out the best performance use the native HTML attribute loading="lazy" instead of a directive.
@@ -32,5 +28,6 @@
         </h2>
       </h3>
     </div>
-  </button>
-</ui-grid-list>
+    </button>
+  }
+  </ui-grid-list>

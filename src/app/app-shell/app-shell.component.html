@@ -3,7 +3,7 @@
   (openedChange)="ui.sideDrawerOpenToggle(false)"
 >
   <a class="navigation-header" aria-label="Main page" href="/">
-    <fast-svg name="movies-logo" size="150"></fast-svg>
+    <fast-svg name="movies-logo" size="150" />
   </a>
   <nav class="navigation">
     <h3 class="navigation--headline">Discover</h3>
@@ -15,10 +15,7 @@
       routerLinkActive="active"
     >
       <div class="navigation--menu-item">
-        <fast-svg
-          class="navigation--menu-item-icon"
-          name="popular"
-        ></fast-svg>
+        <fast-svg class="navigation--menu-item-icon" name="popular" />
         Popular
       </div>
     </a>
@@ -99,7 +96,7 @@
           (mouseenter)="ui.loadAccountMenu()"
         >
           <div class="focus-overlay"></div>
-          <fast-svg name="account"></fast-svg>
+          <fast-svg name="account" />
         </button>
         <div class="profile-menu-content" data-uf="profile-menu-content">
           <ng-container
@@ -112,7 +109,7 @@
       </div>
     </div>
   </div>
-  <div *rxLet="[]" class="content">
+  <div class="content">
     <ng-content />
   </div>
 </div>

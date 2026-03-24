@@ -5,7 +5,7 @@
   </header>
 
   <ui-grid-list>
-    <ng-container *rxFor="let list of lists$; trackBy: trackById">
+    @for (list of lists(); track trackById($index, list)) {
       <a
         class="ui-grid-list-item"
         [routerLink]="[
@@ -39,6 +39,6 @@
           </p>
         </div>
       </a>
-    </ng-container>
+    }
   </ui-grid-list>
 </article>

@@ -1,5 +1,5 @@
-<article *rxLet="personCtx$; let personCtx">
-  @if (personCtx?.value; as person) {
+<article>
+  @if (personCtx()?.value; as person) {
     <ui-detail-grid>
       <div detailGridMedia>
         <img
@@ -45,7 +45,7 @@
   } @else {
     <div class="loader"></div>
   }
-  @if (personCtx?.value; as person) {
+  @if (personCtx()?.value; as person) {
     <ui-detail-grid>
       <div detailGridMedia>
         <img
@@ -93,40 +93,44 @@
   }
 </article>
 <article>
-  <header *rxLet="personCtx$; let p">
-    <h1>{{ p?.value?.name || '...' }} in</h1>
-    <h2>Movies</h2>
-  </header>
-  <label for="sort">Sort</label>
-  <div class="select-wrapper" *rxLet="sortingModel$; let sorting">
-    <input
-      id="sort"
-      type="text"
-      readonly
-      class="select"
-      [value]="sorting.activeSorting"
-      (click)="toggleSorting(true)"
-      />
-    <ul class="options" [hidden]="!sorting.showSorting">
-      @for (option of sortOptions; track option) {
-        <li
-          [ngClass]="{ selected: option.name === sorting.activeSorting }"
-          class="option"
-          >
-          <button class="functionality-only-button" (click)="sortBy(option)">
-            {{ option.name }}
-          </button>
-        </li>
-      }
-    </ul>
-    <button
-      class="select-wrapper-overlay"
-      (click)="toggleSorting(false)"
-      [hidden]="!sorting.showSorting"
-      >
-      &nbsp;
-    </button>
-  </div>
+  @if (personCtx()?.value; as p) {
+    <header>
+      <h1>{{ p.name || '...' }} in</h1>
+      <h2>Movies</h2>
+    </header>
+  }
+  @if (sortingModel(); as sorting) {
+    <label for="sort">Sort</label>
+    <div class="select-wrapper">
+      <input
+        id="sort"
+        type="text"
+        readonly
+        class="select"
+        [value]="sorting.activeSorting"
+        (click)="toggleSorting(true)"
+        />
+      <ul class="options" [hidden]="!sorting.showSorting">
+        @for (option of sortOptions; track option) {
+          <li
+            [ngClass]="{ selected: option.name === sorting.activeSorting }"
+            class="option"
+            >
+            <button class="functionality-only-button" (click)="sortBy(option)">
+              {{ option.name }}
+            </button>
+          </li>
+        }
+      </ul>
+      <button
+        class="select-wrapper-overlay"
+        (click)="toggleSorting(false)"
+        [hidden]="!sorting.showSorting"
+        >
+        &nbsp;
+      </button>
+    </div>
+  }
   <ng-container
     *rxLet="infiniteScrollRecommendations$; let ctx; strategy: 'immediate'"
     >
