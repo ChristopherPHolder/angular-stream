@@ -81,12 +81,8 @@ async function renderMovieCardFragmentDocument(
     await appRef.whenStable();
     await renderInternal(platformRef, appRef);
 
-    const renderedHostElement = document.querySelector('exp-fragment-movie-card');
-
-    assert(
-      renderedHostElement,
-      'Angular fragment render completed, but the rendered host element was not found.'
-    );
+    const renderedHostElement = componentRef.location.nativeElement as Element | null;
+    assert(renderedHostElement, 'Angular fragment render completed, but the rendered host element was not found.');
 
     const fragmentHtml = renderedHostElement.outerHTML.trim();
 
