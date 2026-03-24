@@ -8,11 +8,11 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { PersonDetailAdapter } from './person-detail-page.adapter';
 import { SORT_VALUES } from '../../data-access/api/sort/sort.data';
-import { merge } from 'rxjs';
+import { map, merge } from 'rxjs';
 import { DetailGridComponent } from '../../ui/component/detail-grid/detail-grid.component';
 import { MovieListComponent } from '../../ui/pattern/movie-list/movie-list.component';
-import { RxLet } from '@rx-angular/template/let';
 import { FastSvgComponent } from '@push-based/ngx-fast-svg';
+import { Movie } from '../../state/movie.state';
 
 @Component({
   standalone: true,
@@ -21,7 +21,6 @@ import { FastSvgComponent } from '@push-based/ngx-fast-svg';
     NgOptimizedImage,
     DetailGridComponent,
     MovieListComponent,
-    RxLet,
     FastSvgComponent
 ],
   selector: 'ct-person',
@@ -46,9 +45,19 @@ export default class PersonDetailPageComponent {
 
   readonly sortBy = this.adapter.sortBy;
   readonly toggleSorting = this.adapter.toggleSorting;
-  readonly infiniteScrollRecommendations$ = merge(
-    this.adapter.movieRecommendationsById$,
-    this.adapter.sortingEvent$
+  readonly infiniteScrollRecommendations = toSignal(
+    merge(this.adapter.movieRecommendationsById$, this.adapter.sortingEvent$).pipe(
+      map((ctx) => ({
+        results: ctx.results ?? [],
+        loading: ctx.loading,
+      }))
+    ),
+    {
+      initialValue: {
+        results: [] as Movie[],
+        loading: true,
+      },
+    }
   );
 
   constructor() {

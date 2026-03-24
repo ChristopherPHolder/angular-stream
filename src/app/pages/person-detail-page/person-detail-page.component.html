@@ -131,13 +131,12 @@
       </button>
     </div>
   }
-  <ng-container
-    *rxLet="infiniteScrollRecommendations$; let ctx; strategy: 'immediate'"
-    >
-    <ui-movie-list (paginate)="paginate()" [movies]="ctx.results">
+  <ui-movie-list
+    (paginate)="paginate()"
+    [movies]="infiniteScrollRecommendations().results"
+  >
     </ui-movie-list>
-    @if (ctx.loading) {
-      <div class="loader"></div>
-    }
-  </ng-container>
+  @if (infiniteScrollRecommendations().loading) {
+    <div class="loader"></div>
+  }
 </article>

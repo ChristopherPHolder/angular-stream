@@ -27,13 +27,12 @@ import { getIdentifierOfTypeAndLayoutUtil } from '../shared/router/get-identifie
 import { GenreResource } from '../data-access/api/resources/genre.resource';
 import { rxEffects } from '@rx-angular/state/effects';
 import { HamburgerButtonComponent } from '../ui/component/hamburger-button/hamburger-button.component';
-import { RxLet } from '@rx-angular/template/let';
 import { SideDrawerComponent } from '../ui/component/side-drawer/side-drawer.component';
 import { SearchBarComponent } from '../ui/component/search-bar/search-bar.component';
 import { DarkModeToggleComponent } from '../ui/component/dark-mode-toggle/dark-mode-toggle.component';
-import { RxFor } from '@rx-angular/template/for';
 import { LazyDirective } from '../shared/cdk/lazy/lazy.directive';
 import { FastSvgComponent } from '@push-based/ngx-fast-svg';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 type Actions = {
   sideDrawerOpenToggle: boolean;
@@ -44,8 +43,6 @@ type Actions = {
   standalone: true,
   imports: [
     RouterLink,
-    RxLet,
-    RxFor,
     FastSvgComponent,
     HamburgerButtonComponent,
     SideDrawerComponent,
@@ -82,6 +79,7 @@ export class AppShellComponent {
     ),
     shareReplay(1)
   );
+  readonly accountMenuComponent = toSignal(this.accountMenuComponent$);
 
   constructor() {
     rxEffects(({ register }) => {
@@ -96,7 +94,9 @@ export class AppShellComponent {
     });
   }
 
-  readonly genres$ = this.genreResource.getGenresCached();
+  readonly genres = toSignal(this.genreResource.getGenresCached(), {
+    initialValue: [] as TMDBMovieGenreModel[],
+  });
 
   protected readonly sideDrawerOpen = this.state.signal('sideDrawerOpen');
 

@@ -48,18 +48,19 @@
       </div>
     </a>
     <h3 class="navigation--headline">Genres</h3>
-    <a
-      [attr.data-uf]="'menu-gen-' + genre.id"
-      *rxFor="let genre of genres$; trackBy: trackByGenre; strategy: 'idle'"
-      class="navigation--link"
-      [routerLink]="['/list', 'genre', genre.id]"
-      routerLinkActive="active"
-    >
-      <div class="navigation--menu-item">
-        <fast-svg class="navigation--menu-item-icon" name="genre"></fast-svg>
-        {{ genre.name }}
-      </div>
-    </a>
+    @for (genre of genres(); track trackByGenre($index, genre)) {
+      <a
+        [attr.data-uf]="'menu-gen-' + genre.id"
+        class="navigation--link"
+        [routerLink]="['/list', 'genre', genre.id]"
+        routerLinkActive="active"
+      >
+        <div class="navigation--menu-item">
+          <fast-svg class="navigation--menu-item-icon" name="genre"></fast-svg>
+          {{ genre.name }}
+        </div>
+      </a>
+    }
   </nav>
   <div class="menu-footer">
     <a
@@ -99,12 +100,11 @@
           <fast-svg name="account" />
         </button>
         <div class="profile-menu-content" data-uf="profile-menu-content">
-          <ng-container
-            *rxLet="accountMenuComponent$; suspense: loading"
-            [lazy]="accountMenuComponent$"
-          >
-          </ng-container>
-          <ng-template #loading> Loading...</ng-template>
+          @if (accountMenuComponent(); as accountMenuComponent) {
+            <ng-container [lazy]="accountMenuComponent"></ng-container>
+          } @else {
+            Loading...
+          }
         </div>
       </div>
     </div>

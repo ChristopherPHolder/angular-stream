@@ -1,4 +1,4 @@
-import { select, selectSlice } from '@rx-angular/state/selections';
+import { selectSlice } from '@rx-angular/state/selections';
 import { Location, NgOptimizedImage } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -19,11 +19,20 @@ import { rxEffects } from '@rx-angular/state/effects';
 import { DetailGridComponent } from '../../ui/component/detail-grid/detail-grid.component';
 import { StarRatingComponent } from '../../ui/pattern/star-rating/star-rating.component';
 import { MovieListComponent } from '../../ui/pattern/movie-list/movie-list.component';
-import { RxLet } from '@rx-angular/template/let';
 import { BypassSrcDirective } from '../../shared/cdk/bypass-src.directive';
-import { RxFor } from '@rx-angular/template/for';
 import { FastSvgComponent } from '@push-based/ngx-fast-svg';
 import { RouterLink } from '@angular/router';
+import { Movie } from '../../state/movie.state';
+
+type CastListContext = {
+  value: MovieCast[];
+  loading: boolean;
+};
+
+type RecommendationContext = {
+  results: Movie[];
+  loading: boolean;
+};
 
 @Component({
   standalone: true,
@@ -33,8 +42,6 @@ import { RouterLink } from '@angular/router';
     DetailGridComponent,
     StarRatingComponent,
     MovieListComponent,
-    RxFor,
-    RxLet,
     BypassSrcDirective,
     FastSvgComponent,
   ],
@@ -72,12 +79,34 @@ export default class MovieDetailPageComponent {
       filter((movie) => !!movie)
     )
   );
-  readonly castList$ = this.adapter.movieCastById$;
-  readonly castListLoading$ = this.adapter.movieCastById$.pipe(
-    select('loading')
+  readonly castList = toSignal(
+    this.adapter.movieCastById$.pipe(
+      map((ctx) => ({
+        value: ctx.value ?? [],
+        loading: ctx.loading,
+      }))
+    ),
+    {
+      initialValue: {
+        value: [] as MovieCast[],
+        loading: true,
+      } satisfies CastListContext,
+    }
   );
-  readonly infiniteScrollRecommendations$ =
-    this.adapter.infiniteScrollRecommendations$;
+  readonly recommendations = toSignal(
+    this.adapter.infiniteScrollRecommendations$.pipe(
+      map((ctx) => ({
+        results: ctx.results ?? [],
+        loading: ctx.loading,
+      }))
+    ),
+    {
+      initialValue: {
+        results: [] as Movie[],
+        loading: true,
+      } satisfies RecommendationContext,
+    }
+  );
 
   @ViewChild('trailerDialog')
   trailerDialog: ElementRef | undefined = undefined;

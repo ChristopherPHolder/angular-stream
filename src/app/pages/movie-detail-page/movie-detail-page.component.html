@@ -62,29 +62,29 @@
             <div
               #castListWrapper
               class="cast-list"
-              *rxLet="castList$; let ctx; strategy: 'immediate'"
               >
-              <a
-                *rxFor="let c of ctx.value; trackBy: trackByCast; index as idx"
-                [routerLink]="['/detail/person/', c.id]"
-                (click)="$event.preventDefault()"
-                [attr.data-uf]="'cast-' + idx"
-                class="movie-detail--cast-actor"
-                [attr.aria-label]="c.name"
+              @for (c of castList().value; track trackByCast($index, c); let idx = $index) {
+                <a
+                  [routerLink]="['/detail/person/', c.id]"
+                  (click)="$event.preventDefault()"
+                  [attr.data-uf]="'cast-' + idx"
+                  class="movie-detail--cast-actor"
+                  [attr.aria-label]="c.name"
                 >
-                <picture>
-                  <img
-                    [ngSrc]="c.imgSrc"
-                    [ngSrcset]="c.imgSrcset"
-                    [sizes]="c.imgSizes"
-                    [width]="c.imgWidth"
-                    [height]="c.imgHeight"
-                    [alt]="c.name"
-                    [title]="c.name"
+                  <picture>
+                    <img
+                      [ngSrc]="c.imgSrc"
+                      [ngSrcset]="c.imgSrcset"
+                      [sizes]="c.imgSizes"
+                      [width]="c.imgWidth"
+                      [height]="c.imgHeight"
+                      [alt]="c.name"
+                      [title]="c.name"
                     />
-                </picture>
-              </a>
-              @if (ctx.loading) {
+                  </picture>
+                </a>
+              }
+              @if (castList().loading) {
                 <div class="loader"></div>
               }
             </div>
@@ -147,7 +147,7 @@
             </button>
             <!--
             **🚀 Perf Tip for less resource usage:**
-            only render iframe if the user needs it (e.g. `*rxIf` or `*ngIf`)
+            only render iframe if the user needs it (e.g. `@if` or `*ngIf`)
             *ngIf="initIframe$ | async;"
             -->
             <!--
@@ -186,17 +186,12 @@
       <h1>Recommended</h1>
       <h2>Movies</h2>
     </header>
-    <ng-container
-      *rxLet="infiniteScrollRecommendations$; let ctx; strategy: 'immediate'"
-      >
-      <ui-movie-list
-        (paginate)="paginateRecommendations()"
-        [movies]="ctx.results"
-        [withImgPriority]="0"
-        >
-      </ui-movie-list>
-      @if (ctx.loading) {
-        <div class="loader"></div>
-      }
-    </ng-container>
+    <ui-movie-list
+      (paginate)="paginateRecommendations()"
+      [movies]="recommendations().results"
+      [withImgPriority]="0" />
+    >
+    @if (recommendations().loading) {
+      <div class="loader"></div>
+    }
   </article>
