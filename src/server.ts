@@ -38,7 +38,6 @@ function getServerApp() {
 if (isMainModule(import.meta.url)) {
   const port = process.env['PORT'] || 4000;
   await getServerApp().listen({ port: Number(port), host: '0.0.0.0' });
-  console.log(`Listening on port ${port}`);
 }
 
 /**
