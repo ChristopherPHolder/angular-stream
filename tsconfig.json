@@ -4,7 +4,10 @@
     "emitDecoratorMetadata": false,
     "target": "es2022",
     "module": "preserve",
-    "lib": ["dom", "es2022"],
+    "lib": [
+      "dom",
+      "es2022"
+    ],
     "paths": {},
     "isolatedModules": true
   },
@@ -26,5 +29,9 @@
     }
   ],
   "compileOnSave": false,
-  "exclude": ["node_modules", "tmp"]
+  "exclude": [
+    "node_modules",
+    "tmp",
+    "opensrc"
+  ]
 }
