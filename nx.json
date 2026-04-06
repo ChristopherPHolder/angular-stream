@@ -15,7 +15,7 @@
   "nxCloudId": "68be586827dbf06f48d0d66f",
   "targetDefaults": {
     "@angular/build:application": {
-      "cache": true,
+      "cache": false,
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
     },

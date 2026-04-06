@@ -1,30 +1,10 @@
 import {
-  ApplicationConfig,
   Injectable,
-  provideZoneChangeDetection,
   Renderer2,
   RendererType2,
   ViewEncapsulation,
 } from '@angular/core';
-import { provideFastSVG } from '@push-based/ngx-fast-svg';
-import {
-  provideHttpClient,
-  withFetch,
-  withInterceptors,
-} from '@angular/common/http';
-import { tmdbContentTypeInterceptor } from './data-access/api/tmdbContentTypeInterceptor';
-import { tmdbReadAccessInterceptor } from './auth/tmdb-http-interceptor.feature';
-import { provideTmdbImageLoader } from './data-access/images/image-loader';
-import { provideRouter } from '@angular/router';
-import { ROUTES } from './routes';
-import {
-  provideClientHydration,
-  withEventReplay,
-  withIncrementalHydration,
-  ɵDomRendererFactory2,
-} from '@angular/platform-browser';
-import { providedPatchedSharedStylesHost } from './renderer/shared-styles-host';
-import { patchedDomRendererFactory } from './renderer/dom-renderer-factory';
+import { ɵDomRendererFactory2 } from '@angular/platform-browser';
 
 declare const ngServerMode: boolean | undefined;
 
@@ -34,7 +14,9 @@ const rendererDebugState = {
 };
 
 function currentRuntime() {
-  return typeof ngServerMode !== 'undefined' && ngServerMode ? 'server' : 'browser';
+  return typeof ngServerMode !== 'undefined' && ngServerMode
+    ? 'server'
+    : 'browser';
 }
 
 function describeNode(node: any): string {
@@ -54,7 +36,10 @@ function describeNode(node: any): string {
     return '#document';
   }
 
-  const tagName = node.tagName?.toLowerCase?.() ?? node.nodeName?.toLowerCase?.() ?? typeof node;
+  const tagName =
+    node.tagName?.toLowerCase?.() ??
+    node.nodeName?.toLowerCase?.() ??
+    typeof node;
   const id = node.id ? `#${node.id}` : '';
   const className =
     typeof node.className === 'string' && node.className.trim().length > 0
@@ -64,7 +49,9 @@ function describeNode(node: any): string {
   return `${tagName}${id}${className}`;
 }
 
-function describeEncapsulation(encapsulation: RendererType2['encapsulation'] | null | undefined) {
+function describeEncapsulation(
+  encapsulation: RendererType2['encapsulation'] | null | undefined
+) {
   switch (encapsulation) {
     case ViewEncapsulation.Emulated:
       return 'Emulated';
@@ -103,7 +90,10 @@ function getRendererReason(
     : 'reused-renderer-for-component-instance';
 }
 
-function logRendererOperation(operation: string, details: Record<string, unknown>) {
+function logRendererOperation(
+  operation: string,
+  details: Record<string, unknown>
+) {
   console.log(`[renderer:${currentRuntime()}] ${operation}`, details);
 }
 
@@ -115,7 +105,10 @@ function patchRenderer(renderer: Renderer2): void {
   rendererDebugState.patchedRenderers.add(renderer);
 
   const originalSelectRootElement = renderer.selectRootElement.bind(renderer);
-  renderer.selectRootElement = (selectorOrNode: string | any, preserveContent?: boolean) => {
+  renderer.selectRootElement = (
+    selectorOrNode: string | any,
+    preserveContent?: boolean
+  ) => {
     logRendererOperation('selectRootElement', {
       preserveContent: preserveContent ?? false,
       selectorOrNode:
@@ -150,7 +143,12 @@ function patchRenderer(renderer: Renderer2): void {
   };
 
   const originalInsertBefore = renderer.insertBefore.bind(renderer);
-  renderer.insertBefore = (parent: any, newChild: any, refChild: any, isMove?: boolean) => {
+  renderer.insertBefore = (
+    parent: any,
+    newChild: any,
+    refChild: any,
+    isMove?: boolean
+  ) => {
     logRendererOperation('insertBefore', {
       child: describeNode(newChild),
       isMove: isMove ?? false,
@@ -162,7 +160,11 @@ function patchRenderer(renderer: Renderer2): void {
   };
 
   const originalRemoveChild = renderer.removeChild.bind(renderer);
-  renderer.removeChild = (parent: any, oldChild: any, isHostElement?: boolean) => {
+  renderer.removeChild = (
+    parent: any,
+    oldChild: any,
+    isHostElement?: boolean
+  ) => {
     logRendererOperation('removeChild', {
       child: describeNode(oldChild),
       isHostElement: isHostElement ?? false,
@@ -191,10 +193,11 @@ function patchRenderer(renderer: Renderer2): void {
 }
 
 @Injectable()
-class InternalRendererFactory extends ɵDomRendererFactory2 {
+class PatchedDomRendererFactory extends ɵDomRendererFactory2 {
   override createRenderer(element: any, type: RendererType2 | null): Renderer2 {
     const renderer = super.createRenderer(element, type);
-    const isNewRendererInstance = !rendererDebugState.seenRenderers.has(renderer);
+    const isNewRendererInstance =
+      !rendererDebugState.seenRenderers.has(renderer);
 
     rendererDebugState.seenRenderers.add(renderer);
     patchRenderer(renderer);
@@ -225,18 +228,6 @@ class InternalRendererFactory extends ɵDomRendererFactory2 {
   }
 }
 
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }),
-    provideHttpClient(
-      withFetch(),
-      withInterceptors([tmdbContentTypeInterceptor, tmdbReadAccessInterceptor])
-    ),
-    provideTmdbImageLoader(),
-    provideFastSVG({ url: (name: string) => `assets/svg-icons/${name}.svg` }),
-    provideRouter(ROUTES),
-    provideClientHydration(withEventReplay(), withIncrementalHydration()),
-    providedPatchedSharedStylesHost(),
-    patchedDomRendererFactory(),
-  ],
-};
+export function patchedDomRendererFactory() {
+  return { provide: ɵDomRendererFactory2, useClass: PatchedDomRendererFactory }
+}

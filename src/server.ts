@@ -4,20 +4,31 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fastifyStatic from '@fastify/static';
 import angularSsr, { createFastifyRequestHandler } from './server/ssr.plugin';
+import exp1Ssr from './server/exp-1/exp-1.plugin';
 
 function buildServer() {
-  const app = Fastify({ logger: false });
+  const app = Fastify({ logger: true });
 
   app.register(fastifyStatic, {
     root: resolve(dirname(fileURLToPath(import.meta.url)), '../browser'),
     wildcard: false,
+    logLevel: 'warn'
   });
 
-  app.get('/health', (req, reply) => {
+  app.get('/health', (_, reply) => {
     return reply.code(200).send('OK');
   });
 
-  app.register(angularSsr);
+  app.get(
+    '/.well-known/appspecific/com.chrome.devtools.json',
+    (_, reply) => {
+      return reply.code(200).send('OK');
+    },
+  );
+
+  app.register(exp1Ssr);
+
+  // app.register(angularSsr);
 
   return app;
 }

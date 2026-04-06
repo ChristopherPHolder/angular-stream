@@ -3,11 +3,10 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "nx serve",
-    "start:gc": "node --expose-gc dist/angular-stream/server/server.mjs",
-    "build": "nx build",
-    "test": "nx test",
-    "fetch": "node fetch-script.mjs"
+    "start": "node dist/angular-stream/server/server.mjs",
+    "build:dev": "nx build --configuration development",
+    "dev": "nx build --configuration development && node dist/angular-stream/server/server.mjs",
+    "test": "nx test"
   },
   "private": true,
   "dependencies": {
