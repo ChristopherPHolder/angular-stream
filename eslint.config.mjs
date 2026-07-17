@@ -30,6 +30,8 @@ export default [
   {
     files: ['**/*.ts'],
     rules: {
+      // Newly enabled by the Nx 23/typescript-eslint preset; it was not enforced before this migration.
+      '@typescript-eslint/no-unused-expressions': 'off',
       '@angular-eslint/directive-selector': [
         'error',
         {
