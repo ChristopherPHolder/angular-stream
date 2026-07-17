@@ -4,7 +4,6 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fastifyStatic from '@fastify/static';
 import angularSsr, { createFastifyRequestHandler } from './server/ssr.plugin';
-import exp1Ssr from './server/exp-1/exp-1.plugin';
 
 function buildServer() {
   const app = Fastify({ logger: true });
@@ -26,9 +25,7 @@ function buildServer() {
     },
   );
 
-  app.register(exp1Ssr);
-
-  // app.register(angularSsr);
+  app.register(angularSsr);
 
   return app;
 }
