@@ -3,7 +3,10 @@ import Fastify from 'fastify';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fastifyStatic from '@fastify/static';
-import angularSsr, { createFastifyRequestHandler } from './server/ssr.plugin';
+import angularSsr from './server/ssr.plugin';
+
+// Legacy Angular Node adapter import retained for reference:
+// import angularSsr, { createFastifyRequestHandler } from './server/ssr.plugin';
 
 function buildServer() {
   const app = Fastify({ logger: true });
@@ -11,19 +14,16 @@ function buildServer() {
   app.register(fastifyStatic, {
     root: resolve(dirname(fileURLToPath(import.meta.url)), '../browser'),
     wildcard: false,
-    logLevel: 'warn'
+    logLevel: 'warn',
   });
 
   app.get('/health', (_, reply) => {
     return reply.code(200).send('OK');
   });
 
-  app.get(
-    '/.well-known/appspecific/com.chrome.devtools.json',
-    (_, reply) => {
-      return reply.code(200).send('OK');
-    },
-  );
+  app.get('/.well-known/appspecific/com.chrome.devtools.json', (_, reply) => {
+    return reply.code(200).send('OK');
+  });
 
   app.register(angularSsr);
 
@@ -43,7 +43,5 @@ if (isMainModule(import.meta.url)) {
   serverApp.log.info('Build dev server');
 }
 
-/**
- * Expose request handler for angular dev server
- */
-export const reqHandler = createFastifyRequestHandler(serverApp);
+// Legacy Angular CLI development-server bridge retained for reference.
+// export const reqHandler = createFastifyRequestHandler(serverApp);
