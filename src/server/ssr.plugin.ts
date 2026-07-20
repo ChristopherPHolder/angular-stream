@@ -3,7 +3,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { FastifyPluginAsync } from 'fastify';
 import { fastifyPlugin } from 'fastify-plugin';
-import { renderBufferedAngular } from './streaming/buffered-angular-renderer';
+import { renderStreamingAngular } from './streaming/streaming-angular-renderer';
 
 const angularSsrPlugin: FastifyPluginAsync = async (instance) => {
   const documentPath = resolve(
@@ -15,7 +15,7 @@ const angularSsrPlugin: FastifyPluginAsync = async (instance) => {
   instance.get('/*', async (request, reply) => {
     try {
       const url = new URL(request.url, `${request.protocol}://${request.host}`);
-      const response = await renderBufferedAngular({
+      const response = await renderStreamingAngular({
         document,
         url: url.href,
         requestId: request.id,
