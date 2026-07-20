@@ -17,7 +17,10 @@ export function frameFinalDocument(document: string): string {
 export const STREAM_BOUNDARY_PREVIEW_RUNTIME = `<script>(()=>{
   const markerPrefix='stream-boundary-commit:';
   const finalMarker='stream-final-document-commit';
+  const eventContractScriptId='ng-event-dispatch-contract';
   const idPattern=/^[A-Za-z][A-Za-z0-9_-]*$/;
+  const executableScriptTypes=new Set(['','module','text/javascript','application/javascript','text/ecmascript','application/ecmascript']);
+  const preservedEventApps=new Set();
   let finalDocumentInstalled=false;
   const reportInvalid=(comment,template,id)=>{
     if(template)template.remove();
@@ -39,6 +42,53 @@ export const STREAM_BOUNDARY_PREVIEW_RUNTIME = `<script>(()=>{
     }
     for(const comment of protocolComments)comment.remove();
   };
+  const rebindEarlyEventContracts=(body)=>{
+    const apps=window._ejsas;
+    const bootstrap=window.__jsaction_bootstrap;
+    if(!apps||typeof bootstrap!=='function')return;
+    for(const [appId,state] of Object.entries(apps)){
+      if(!state||!Array.isArray(state.q)||!Array.isArray(state.et)||!Array.isArray(state.etc))continue;
+      const queuedEvents=state.q.slice();
+      if(state.c&&state.h){
+        for(const eventType of state.et)state.c.removeEventListener(eventType,state.h);
+        for(const eventType of state.etc)state.c.removeEventListener(eventType,state.h,true);
+      }
+      bootstrap(body,appId,state.et,state.etc);
+      const reboundState=apps[appId];
+      if(!reboundState)continue;
+      reboundState.q.unshift(...queuedEvents);
+      Object.assign(state,reboundState);
+      apps[appId]=state;
+      preservedEventApps.add(appId);
+    }
+  };
+  const eventBootstrapAppId=(script)=>{
+    const match=script.textContent.trim().match(/^window\\.__jsaction_bootstrap\\(document\\.body,\\s*"([^"]+)"/);
+    return match?match[1]:null;
+  };
+  const activateScript=(script)=>{
+    if(script.id===eventContractScriptId)return Promise.resolve();
+    const appId=eventBootstrapAppId(script);
+    if(appId!==null&&preservedEventApps.has(appId))return Promise.resolve();
+    const type=(script.getAttribute('type')??'').trim().toLowerCase();
+    if(!executableScriptTypes.has(type))return Promise.resolve();
+    const activeScript=document.createElement('script');
+    for(const attribute of script.attributes)activeScript.setAttribute(attribute.name,attribute.value);
+    activeScript.async=false;
+    activeScript.textContent=script.textContent;
+    if(activeScript.hasAttribute('src')||type==='module'){
+      return new Promise((resolve,reject)=>{
+        activeScript.addEventListener('load',resolve,{once:true});
+        activeScript.addEventListener('error',()=>reject(new Error('[stream-boundary] Failed to activate script')),{once:true});
+        script.replaceWith(activeScript);
+      });
+    }
+    script.replaceWith(activeScript);
+    return Promise.resolve();
+  };
+  const activateScripts=async(scripts)=>{
+    for(const script of scripts)await activateScript(script);
+  };
   const processFinalCommit=(comment)=>{
     const template=adjacentTemplate(comment);
     if(finalDocumentInstalled){
@@ -57,8 +107,12 @@ export const STREAM_BOUNDARY_PREVIEW_RUNTIME = `<script>(()=>{
       const authoritativeDocument=new DOMParser().parseFromString(html,'text/html');
       if(!/^\\s*<!doctype\\s+html[\\s>]/i.test(html)||authoritativeDocument.head===null||authoritativeDocument.body===null)throw new Error('invalid document');
       removeProtocolArtifacts(authoritativeDocument);
+      observer.disconnect();
       document.head.replaceWith(authoritativeDocument.head);
       document.body.replaceWith(authoritativeDocument.body);
+      rebindEarlyEventContracts(document.body);
+      const scripts=Array.from(document.scripts);
+      void activateScripts(scripts).catch(error=>console.error(error));
     }catch{
       if(template)template.remove();
       comment.remove();
