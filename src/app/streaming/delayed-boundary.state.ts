@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 
-export const DELAYED_BOUNDARY_MS = 2_000;
+export const DELAYED_BOUNDARY_MS = 5_000;
 
 @Injectable({ providedIn: 'root' })
 export class DelayedBoundaryState {

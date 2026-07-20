@@ -4,10 +4,12 @@ import {
   INITIAL_CONFIG,
   PlatformState,
   ɵSERVER_CONTEXT,
+  ɵrenderInternal,
 } from '@angular/platform-server';
 import bootstrap from '../../main.server';
 import { STREAM_BOUNDARY_SINK } from '../../app/streaming/stream-boundary.directive';
 import {
+  frameFinalDocument,
   frameStreamBoundary,
   STREAM_BOUNDARY_PREVIEW_RUNTIME,
 } from './stream-boundary-protocol';
@@ -122,7 +124,18 @@ export async function renderStreamingAngular({
 
         boundarySink.assertComplete();
         console.log(`[ssr:${requestId}] stable`);
-        controller.enqueue(encoder.encode(tail));
+        const finalDocument = await ɵrenderInternal(
+          platformRef,
+          applicationRef
+        );
+        if (terminated) {
+          return;
+        }
+
+        controller.enqueue(
+          encoder.encode(`${frameFinalDocument(finalDocument)}${tail}`)
+        );
+        console.log(`[ssr:${requestId}] final`);
         controller.close();
         terminated = true;
         console.log(`[ssr:${requestId}] closed`);
