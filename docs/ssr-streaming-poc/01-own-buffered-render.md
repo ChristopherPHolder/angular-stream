@@ -102,23 +102,23 @@ Remove or disconnect the existing per-renderer and per-style tracing.
 
 ## TODO
 
-- [ ] Replace the active application root with the server-rendered marker and signal-based counter.
-- [ ] Replace the active browser and server configuration with the agreed minimal providers.
-- [ ] Disconnect routing, application initializers, feature services, SVG providers, and custom
+- [x] Replace the active application root with the server-rendered marker and signal-based counter.
+- [x] Replace the active browser and server configuration with the agreed minimal providers.
+- [x] Disconnect routing, application initializers, feature services, SVG providers, and custom
       renderer/style providers from bootstrap.
-- [ ] Add `src/server/streaming/buffered-angular-renderer.ts` with the agreed renderer contract.
-- [ ] Create a request platform with `INITIAL_CONFIG` and `ɵSERVER_CONTEXT: "ssr"`.
-- [ ] Bootstrap through the existing server bootstrap function.
-- [ ] Wait for `ApplicationRef.whenStable()`.
-- [ ] Call `ɵrenderInternal()` directly and create the buffered Web `Response`.
-- [ ] Set the agreed success status and response headers.
-- [ ] Add request-scoped bootstrap, stability, serialization, and destruction logs.
-- [ ] Destroy the platform once, in the agreed macrotask cleanup path, on success and failure.
-- [ ] Load and cache the built `index.server.html` when the Fastify SSR plugin starts.
-- [ ] Replace the engine call with the custom renderer and native `reply.send(response)`.
-- [ ] Remove Angular's Node handler/writer imports and delete the exported `reqHandler` bridge.
-- [ ] Keep Fastify static asset handling and non-SSR utility routes unchanged.
-- [ ] Log render failures and return a plain Fastify `500` response.
+- [x] Add `src/server/streaming/buffered-angular-renderer.ts` with the agreed renderer contract.
+- [x] Create a request platform with `INITIAL_CONFIG` and `ɵSERVER_CONTEXT: "ssr"`.
+- [x] Bootstrap through the existing server bootstrap function.
+- [x] Wait for `ApplicationRef.whenStable()`.
+- [x] Call `ɵrenderInternal()` directly and create the buffered Web `Response`.
+- [x] Set the agreed success status and response headers.
+- [x] Add request-scoped bootstrap, stability, serialization, and destruction logs.
+- [x] Destroy the platform once, in the agreed macrotask cleanup path, on success and failure.
+- [x] Load and cache the built `index.server.html` when the Fastify SSR plugin starts.
+- [x] Replace the engine call with the custom renderer and native `reply.send(response)`.
+- [x] Remove Angular's Node handler/writer imports and delete the exported `reqHandler` bridge.
+- [x] Keep Fastify static asset handling and non-SSR utility routes unchanged.
+- [x] Log render failures and return a plain Fastify `500` response.
 
 ## Manual checkpoint
 
