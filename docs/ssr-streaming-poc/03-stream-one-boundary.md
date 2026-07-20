@@ -10,7 +10,7 @@ Hydration remains disabled. The streamed boundary is preview HTML only.
 
 ## TODO
 
-- [ ] Add one deterministic delayed value to the demo and keep Angular unstable until it resolves.
+- [ ] Reuse Slice 2's `DelayedBoundaryState.ready`; do not introduce another delay.
 - [ ] Render a stable placeholder host with a unique `data-stream-boundary` ID in the initial shell.
 - [ ] Define the request-scoped boundary sink and its Angular injection token.
 - [ ] Provide one sink instance on each server platform.
