@@ -6,12 +6,6 @@ import {
   ɵSERVER_CONTEXT,
 } from '@angular/platform-server';
 import bootstrap from '../../main.server';
-import { STREAM_BOUNDARY_SINK } from '../../app/streaming/stream-boundary.directive';
-import {
-  frameStreamBoundary,
-  STREAM_BOUNDARY_PREVIEW_RUNTIME,
-} from './stream-boundary-protocol';
-import { RequestStreamBoundarySink } from './stream-boundary-sink';
 
 export interface StreamingAngularRenderOptions {
   document: string;
@@ -29,11 +23,9 @@ export async function renderStreamingAngular({
   url,
   requestId,
 }: StreamingAngularRenderOptions): Promise<Response> {
-  const boundarySink = new RequestStreamBoundarySink();
   const platformRef = platformServer([
     { provide: INITIAL_CONFIG, useValue: { document, url } },
     { provide: ɵSERVER_CONTEXT, useValue: 'streamed-ssr' },
-    { provide: STREAM_BOUNDARY_SINK, useValue: boundarySink },
   ]);
   let destroyPromise: Promise<void> | undefined;
   let terminated = false;
@@ -79,39 +71,8 @@ export async function renderStreamingAngular({
       },
     });
 
-    controller.enqueue(
-      encoder.encode(`${shell}${STREAM_BOUNDARY_PREVIEW_RUNTIME}`)
-    );
+    controller.enqueue(encoder.encode(shell));
     console.log(`[ssr:${requestId}] shell`);
-
-    const terminateAfterCommit = (error: unknown): Promise<void> => {
-      if (terminated) {
-        return destroyPromise ?? Promise.resolve();
-      }
-
-      terminated = true;
-      console.error(`[ssr:${requestId}] failed`, error);
-      try {
-        controller.error(error);
-      } catch {
-        // The response stream may already have reached a terminal state.
-      }
-      return destroyOnce();
-    };
-
-    boundarySink.subscribe((payload) => {
-      if (terminated) {
-        return;
-      }
-
-      try {
-        const frame = frameStreamBoundary(payload);
-        controller.enqueue(encoder.encode(frame));
-        console.log(`[ssr:${requestId}] boundary ${payload.id}`);
-      } catch (error) {
-        void terminateAfterCommit(error);
-      }
-    });
 
     void (async () => {
       try {
@@ -120,7 +81,6 @@ export async function renderStreamingAngular({
           return;
         }
 
-        boundarySink.assertComplete();
         console.log(`[ssr:${requestId}] stable`);
         controller.enqueue(encoder.encode(tail));
         controller.close();
@@ -132,7 +92,10 @@ export async function renderStreamingAngular({
           return;
         }
 
-        await terminateAfterCommit(error);
+        terminated = true;
+        console.error(`[ssr:${requestId}] failed`, error);
+        controller.error(error);
+        await destroyOnce();
       }
     })();
 

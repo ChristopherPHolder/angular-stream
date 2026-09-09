@@ -5,11 +5,9 @@ import {
   signal,
 } from '@angular/core';
 import { DelayedBoundaryState } from './streaming/delayed-boundary.state';
-import { StreamBoundaryDirective } from './streaming/stream-boundary.directive';
 
 @Component({
   selector: 'app-root',
-  imports: [StreamBoundaryDirective],
   template: `
     <main>
       <p data-testid="ssr-marker">Rendered by the streamed Angular SSR POC</p>
@@ -17,20 +15,6 @@ import { StreamBoundaryDirective } from './streaming/stream-boundary.directive';
         Counter: <strong>{{ count() }}</strong>
       </p>
       <button type="button" (click)="increment()">Increment counter</button>
-      <section
-        streamBoundary="delayed-content"
-        [streamBoundaryReady]="delayedBoundaryState.ready()"
-      >
-        @if (delayedBoundaryState.ready()) {
-        <p data-testid="stream-boundary-ready">
-          Delayed server content is ready.
-        </p>
-        } @else {
-        <p data-testid="stream-boundary-placeholder">
-          Waiting for delayed server content…
-        </p>
-        }
-      </section>
     </main>
   `,
   styles: `
@@ -55,7 +39,7 @@ import { StreamBoundaryDirective } from './streaming/stream-boundary.directive';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
-  protected readonly delayedBoundaryState = inject(DelayedBoundaryState);
+  private readonly delayedBoundaryState = inject(DelayedBoundaryState);
   protected readonly count = signal(0);
 
   protected increment(): void {
