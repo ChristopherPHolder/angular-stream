@@ -1,16 +1,10 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  signal,
-} from '@angular/core';
-import { DelayedBoundaryState } from './streaming/delayed-boundary.state';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 
 @Component({
   selector: 'app-root',
   template: `
     <main>
-      <p data-testid="ssr-marker">Rendered by the streamed Angular SSR POC</p>
+      <p data-testid="ssr-marker">Rendered by the buffered Angular SSR POC</p>
       <p>
         Counter: <strong>{{ count() }}</strong>
       </p>
@@ -39,7 +33,6 @@ import { DelayedBoundaryState } from './streaming/delayed-boundary.state';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
-  private readonly delayedBoundaryState = inject(DelayedBoundaryState);
   protected readonly count = signal(0);
 
   protected increment(): void {
