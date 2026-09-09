@@ -1,4 +1,3 @@
-import { Buffer } from 'node:buffer';
 import type { StreamBoundaryPayload } from '../../app/streaming/stream-boundary.directive';
 
 export function frameStreamBoundary({
@@ -6,12 +5,6 @@ export function frameStreamBoundary({
   html,
 }: StreamBoundaryPayload): string {
   return `<template data-stream-boundary-payload="${id}">${html}</template><!--stream-boundary-commit:${id}-->`;
-}
-
-export function frameFinalDocument(document: string): string {
-  const encodedDocument = Buffer.from(document, 'utf8').toString('base64');
-
-  return `<template data-stream-final-document="base64">${encodedDocument}</template><!--stream-final-document-commit-->`;
 }
 
 export const STREAM_BOUNDARY_PREVIEW_RUNTIME = `<script>(()=>{

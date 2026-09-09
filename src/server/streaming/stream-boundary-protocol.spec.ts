@@ -1,7 +1,5 @@
-import { Buffer } from 'node:buffer';
 import { describe, expect, it, vi } from 'vitest';
 import {
-  frameFinalDocument,
   frameStreamBoundary,
   STREAM_BOUNDARY_PREVIEW_RUNTIME,
 } from './stream-boundary-protocol';
@@ -16,27 +14,6 @@ describe('stream boundary protocol', () => {
     ).toBe(
       '<template data-stream-boundary-payload="delayed-content"><section data-stream-boundary="delayed-content">ready</section></template><!--stream-boundary-commit:delayed-content-->'
     );
-  });
-
-  it('frames the final document as an inert, safely encoded payload', () => {
-    const document =
-      '<!doctype html><html><body>Gr\u00fc\u00dfe</template><!-- unsafe --><script>throw new Error()</script></body></html>';
-    const frame = frameFinalDocument(document);
-    const parsedFrame = new DOMParser().parseFromString(
-      `<body>${frame}</body>`,
-      'text/html'
-    );
-    const payload = parsedFrame.querySelector(
-      'template[data-stream-final-document="base64"]'
-    );
-
-    expect(payload).toBeInstanceOf(HTMLTemplateElement);
-    const encodedDocument = (payload as HTMLTemplateElement).content.textContent;
-    expect(
-      Buffer.from(encodedDocument ?? '', 'base64').toString('utf8')
-    ).toBe(document);
-    expect(frame).not.toContain(document);
-    expect(frame.endsWith('<!--stream-final-document-commit-->')).toBe(true);
   });
 
   it('replaces a matching live host and removes its transport artifacts', async () => {
