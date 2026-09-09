@@ -90,7 +90,7 @@ describe('stream boundary protocol', () => {
     consoleError.mockRestore();
   });
 
-  it('installs the decoded authoritative head and body before activating scripts', async () => {
+  it('installs the decoded authoritative head and body without executing scripts', async () => {
     document.head.innerHTML = '<title>preview</title>';
     document.body.innerHTML =
       '<main data-preview>preview</main><section data-stream-boundary="delayed-content">ready preview</section>';
@@ -128,133 +128,7 @@ describe('stream boundary protocol', () => {
     expect(
       (window as typeof window & { __authoritativeScriptExecuted?: boolean })
         .__authoritativeScriptExecuted
-    ).toBe(true);
-    delete (
-      window as typeof window & { __authoritativeScriptExecuted?: boolean }
-    ).__authoritativeScriptExecuted;
-  });
-
-  it('preserves early events while rebinding listeners and activates remaining scripts in order', async () => {
-    document.documentElement.innerHTML =
-      '<head><title>preview</title></head><body><button>preview</button></body>';
-    type EarlyEventState = {
-      c: HTMLElement;
-      q: Array<{ eventType: string; targetElement: EventTarget | null }>;
-      et: string[];
-      etc: string[];
-      d: (event: {
-        eventType: string;
-        targetElement: EventTarget | null;
-      }) => void;
-      h: (event: Event) => void;
-    };
-    const browserWindow = window as typeof window & {
-      _ejsas?: Record<string, EarlyEventState>;
-      __jsaction_bootstrap?: (
-        container: HTMLElement,
-        appId: string,
-        eventTypes: string[],
-        captureEventTypes: string[]
-      ) => void;
-    };
-    browserWindow._ejsas = {};
-    browserWindow.__jsaction_bootstrap = (
-      container,
-      appId,
-      eventTypes,
-      captureEventTypes
-    ) => {
-      const queue: EarlyEventState['q'] = [];
-      const state: EarlyEventState = {
-        c: container,
-        q: queue,
-        et: [...eventTypes],
-        etc: [...captureEventTypes],
-        d: (event) => queue.push(event),
-        h: (event) =>
-          state.d({ eventType: event.type, targetElement: event.target }),
-      };
-      browserWindow._ejsas![appId] = state;
-      for (const eventType of eventTypes) {
-        container.addEventListener(eventType, state.h);
-      }
-      for (const eventType of captureEventTypes) {
-        container.addEventListener(eventType, state.h, true);
-      }
-    };
-    browserWindow.__jsaction_bootstrap(document.body, 'ng', ['click'], []);
-    const earlyState = browserWindow._ejsas.ng;
-    const queuedEvent = {
-      eventType: 'click',
-      targetElement: document.querySelector('button'),
-    };
-    earlyState.q.push(queuedEvent);
-
-    const activatedScripts: string[] = [];
-    const replaceWith = Element.prototype.replaceWith;
-    const replaceWithSpy = vi
-      .spyOn(Element.prototype, 'replaceWith')
-      .mockImplementation(function (
-        this: Element,
-        ...nodes: (Node | string)[]
-      ) {
-        const replacement = nodes[0];
-        if (
-          this instanceof HTMLScriptElement &&
-          replacement instanceof HTMLScriptElement
-        ) {
-          activatedScripts.push(
-            replacement.getAttribute('src') ?? replacement.dataset['name'] ?? ''
-          );
-          replaceWith.apply(this, nodes);
-          if (
-            replacement.hasAttribute('src') ||
-            replacement.type === 'module'
-          ) {
-            queueMicrotask(() => replacement.dispatchEvent(new Event('load')));
-          }
-          return;
-        }
-        replaceWith.apply(this, nodes);
-      });
-    const runtime = STREAM_BOUNDARY_PREVIEW_RUNTIME.slice(
-      '<script>'.length,
-      -'</script>'.length
-    );
-    Function(runtime)();
-    const authoritativeDocument = `<!doctype html><html><head><title>authoritative</title></head><body><button jsaction="click:">Increment counter</button><script id="ng-event-dispatch-contract">window.contractReset=true</script><script>window.__jsaction_bootstrap(document.body,"ng",["click"],[]);</script><script src="polyfills.js" type="module"></script><script src="main.js" type="module"></script><script type="application/json">{"state":true}</script><script data-name="after-main">window.afterMain=true</script></body></html>`;
-
-    document.body.insertAdjacentHTML(
-      'beforeend',
-      frameFinalDocument(authoritativeDocument)
-    );
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
-    expect(browserWindow._ejsas.ng).toBe(earlyState);
-    expect(earlyState.c).toBe(document.body);
-    expect(earlyState.q[0]).toBe(queuedEvent);
-    document.querySelector('button')?.click();
-    expect(earlyState.q).toHaveLength(2);
-    expect(earlyState.q[1].targetElement).toBe(
-      document.querySelector('button')
-    );
-    expect(activatedScripts).toStrictEqual([
-      'polyfills.js',
-      'main.js',
-      'after-main',
-    ]);
-    expect(
-      document.querySelector('#ng-event-dispatch-contract')
-    ).not.toBeNull();
-    expect(
-      Array.from(document.scripts).some((script) =>
-        script.textContent.includes('__jsaction_bootstrap(document.body')
-      )
-    ).toBe(true);
-
-    replaceWithSpy.mockRestore();
-    delete browserWindow._ejsas;
-    delete browserWindow.__jsaction_bootstrap;
+    ).toBeUndefined();
   });
 
   it('attempts final-document reconciliation only once', async () => {
