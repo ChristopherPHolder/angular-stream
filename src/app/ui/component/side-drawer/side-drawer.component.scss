@@ -1,5 +1,5 @@
-@import '../../token/mixins/media';
-@import '../../token/mixins/flex';
+@use '../../token/mixins/media';
+@use '../../token/mixins/flex';
 
 :host {
   display: contents;
@@ -8,7 +8,7 @@
   contain: strict;
   content-visibility: auto;
   position: fixed;
-  @include d-flex;
+  @include flex.d-flex;
   flex-direction: column;
   justify-content: space-between;
   width: 250px;
@@ -32,7 +32,7 @@
     transform: translateX(-100%);
   }
 
-  @include isDesktop {
+  @include media.isDesktop {
     box-shadow: unset;
     background-color: transparent;
   }

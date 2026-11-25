@@ -1,15 +1,14 @@
-import {ChangeDetectionStrategy, Component, HostBinding, Input, ViewEncapsulation,} from '@angular/core';
+import { Component, ViewEncapsulation, input } from '@angular/core';
 
 @Component({
-  standalone: true,
   selector: 'ui-backdrop',
   template: ``,
   styleUrls: ['./backdrop.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
+  host: {
+    '[class.opened]': 'opened()',
+  },
 })
 export class BackdropComponent {
-  @HostBinding('class.opened')
-  @Input({required: true})
-  opened = false;
+  readonly opened = input.required<boolean>();
 }

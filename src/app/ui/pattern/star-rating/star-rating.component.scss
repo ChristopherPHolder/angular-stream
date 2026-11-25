@@ -1,8 +1,8 @@
-@import '../../token/mixins/flex';
+@use '../../token/mixins/flex';
 
 :host {
   position: relative;
-  @include d-flex-vh;
+  @include flex.d-flex-vh;
 
   &:hover .tooltip {
     visibility: visible;

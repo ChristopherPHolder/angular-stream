@@ -1,9 +1,9 @@
-@import '../../../ui/token/mixins/flex';
-@import '../../../ui/component/aspect-ratio/aspect-ratio';
+@use '../../../ui/token/mixins/flex';
+@use '../../../ui/component/aspect-ratio/aspect-ratio';
 
 .account-list {
   &--details {
-    @include d-flex-v;
+    @include flex.d-flex-v;
     flex-direction: column;
     justify-content: space-between;
     padding: 1.5rem 3rem;

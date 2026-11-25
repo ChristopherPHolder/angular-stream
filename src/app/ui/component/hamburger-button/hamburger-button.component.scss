@@ -1,7 +1,7 @@
-@import '../../token/mixins/flex';
+@use '../../token/mixins/flex';
 
 :host {
-  @include d-flex;
+  @include flex.d-flex;
   flex-direction: column;
   align-self: center;
   justify-content: space-around;

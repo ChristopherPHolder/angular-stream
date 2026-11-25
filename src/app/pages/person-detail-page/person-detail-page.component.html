@@ -13,7 +13,7 @@
           alt="poster movie"
           [title]="person?.name"
           data-uf="hero-img"
-          />
+        />
       </div>
       <div detailGridDescription>
         <header>
@@ -31,7 +31,7 @@
               target="_blank"
               rel="noopener noreferrer"
               [href]="'https://www.imdb.com/person/' + person.imdb_id"
-              >
+            >
               IMDB
               <fast-svg class="btn__icon" name="imdb"></fast-svg>
             </a>
@@ -59,7 +59,7 @@
           alt="poster movie"
           [title]="person?.name"
           data-uf="hero-img"
-          />
+        />
       </div>
       <div detailGridDescription>
         <header>
@@ -77,7 +77,7 @@
               target="_blank"
               rel="noopener noreferrer"
               [href]="'https://www.imdb.com/person/' + person.imdb_id"
-              >
+            >
               IMDB
               <fast-svg class="btn__icon" name="imdb"></fast-svg>
             </a>
@@ -109,13 +109,10 @@
         class="select"
         [value]="sorting.activeSorting"
         (click)="toggleSorting(true)"
-        />
+      />
       <ul class="options" [hidden]="!sorting.showSorting">
         @for (option of sortOptions; track option) {
-          <li
-            [ngClass]="{ selected: option.name === sorting.activeSorting }"
-            class="option"
-            >
+          <li [class.selected]="option.name === sorting.activeSorting" class="option">
             <button class="functionality-only-button" (click)="sortBy(option)">
               {{ option.name }}
             </button>
@@ -126,16 +123,13 @@
         class="select-wrapper-overlay"
         (click)="toggleSorting(false)"
         [hidden]="!sorting.showSorting"
-        >
+      >
         &nbsp;
       </button>
     </div>
   }
-  <ui-movie-list
-    (paginate)="paginate()"
-    [movies]="infiniteScrollRecommendations().results"
-  >
-    </ui-movie-list>
+  <ui-movie-list (paginate)="paginate()" [movies]="infiniteScrollRecommendations().results">
+  </ui-movie-list>
   @if (infiniteScrollRecommendations().loading) {
     <div class="loader"></div>
   }

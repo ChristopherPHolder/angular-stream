@@ -1,7 +1,7 @@
-@import '../../token/mixins/flex';
+@use '../../token/mixins/flex';
 .btn {
-  @include d-flex-vh;
-  @include d-inline-flex;
+  @include flex.d-flex-vh;
+  @include flex.d-inline-flex;
   outline: none;
   padding: 6px 16px;
   min-width: 96px;

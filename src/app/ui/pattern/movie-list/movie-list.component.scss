@@ -1,10 +1,10 @@
-@import '../../token/mixins/flex';
-@import '../../component/aspect-ratio/aspect-ratio';
+@use '../../token/mixins/flex';
+@use '../../component/aspect-ratio/aspect-ratio';
 
 .movies-list {
   contain: content;
   &--details {
-    @include d-flex-v;
+    @include flex.d-flex-v;
     flex-direction: column;
     justify-content: space-between;
     padding: 1.5rem 3rem;

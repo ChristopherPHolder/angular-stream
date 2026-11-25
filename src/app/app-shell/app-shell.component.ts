@@ -1,8 +1,7 @@
-import { rxState } from '@rx-angular/state';
 import {
-  ChangeDetectionStrategy,
   Component,
   inject,
+  signal,
   TrackByFunction,
   ViewEncapsulation,
 } from '@angular/core';
@@ -35,12 +34,10 @@ import { FastSvgComponent } from '@push-based/ngx-fast-svg';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 type Actions = {
-  sideDrawerOpenToggle: boolean;
   loadAccountMenu: void;
 };
 
 @Component({
-  standalone: true,
   imports: [
     RouterLink,
     FastSvgComponent,
@@ -54,7 +51,6 @@ type Actions = {
   selector: 'app-shell',
   templateUrl: './app-shell.component.html',
   styleUrls: ['./app-shell.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
 })
 export class AppShellComponent {
@@ -62,16 +58,13 @@ export class AppShellComponent {
   public readonly routerState = inject(RouterState);
   public genreResource = inject(GenreResource);
   readonly ui = rxActions<Actions>();
-  private readonly state = rxState<{ sideDrawerOpen: boolean }>(
-    ({ connect, set }) => {
-      set({ sideDrawerOpen: false });
-      connect('sideDrawerOpen', this.ui.sideDrawerOpenToggle$);
-    }
-  );
+
+  protected readonly sideDrawerOpen = signal(false);
 
   search$ = this.routerState.select(
     getIdentifierOfTypeAndLayoutUtil('search', 'list')
   );
+  protected readonly search = toSignal(this.search$, { initialValue: '' });
 
   accountMenuComponent$ = this.ui.loadAccountMenu$.pipe(
     switchMap(() =>
@@ -98,8 +91,6 @@ export class AppShellComponent {
     initialValue: [] as TMDBMovieGenreModel[],
   });
 
-  protected readonly sideDrawerOpen = this.state.signal('sideDrawerOpen');
-
   readonly trackByGenre: TrackByFunction<TMDBMovieGenreModel> =
     trackByProp<TMDBMovieGenreModel>('name');
 
@@ -110,6 +101,6 @@ export class AppShellComponent {
   }
 
   closeSidenav = () => {
-    this.ui.sideDrawerOpenToggle(false);
+    this.sideDrawerOpen.set(false);
   };
 }

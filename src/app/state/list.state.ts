@@ -1,12 +1,9 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { RxState } from '@rx-angular/state';
 import { AppInitializer } from '../shared/cdk/app-initializer';
 import { concatMap, filter, merge, tap } from 'rxjs';
 import { ListResource } from '../data-access/api/resources/list.resource';
-import {
-  TMDBListCreateUpdateParams,
-  TMDBListModel,
-} from '../data-access/api/model/list.model';
+import { TMDBListCreateUpdateParams, TMDBListModel } from '../data-access/api/model/list.model';
 import { Router } from '@angular/router';
 import { MovieResponse } from '../data-access/api/resources/movie.resource';
 import { TMDBMovieDetailsModel } from '../data-access/api/model/movie-details.model';
@@ -26,9 +23,7 @@ interface Actions {
   fetchList: string;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class ListState extends RxState<ListModel> implements AppInitializer {
   private readonly router = inject(Router);
   private readonly listResource = inject(ListResource);
@@ -48,28 +43,26 @@ export class ListState extends RxState<ListModel> implements AppInitializer {
         this.listResource.addMovieToList({
           id,
           items: [{ media_id: movie.id, media_type: 'movie' }],
-        })
-      )
+        }),
+      ),
     ),
     this.actions.deleteMovieFromList$.pipe(
       concatMap(([movie, id]) =>
         this.listResource.deleteMovieFromList({
           id,
           items: [{ media_id: movie.id || 0, media_type: 'movie' }],
-        })
-      )
+        }),
+      ),
     ),
-    this.actions.updateList$.pipe(
-      concatMap((params) => this.listResource.updateList(params))
-    ),
+    this.actions.updateList$.pipe(concatMap((params) => this.listResource.updateList(params))),
     this.actions.createList$.pipe(
       concatMap((params) => this.listResource.createList(params)),
-      tap((id) => id && this.router.navigate(['account/my-lists']))
+      tap((id) => id && this.router.navigate(['account/my-lists'])),
     ),
     this.actions.deleteList$.pipe(
       tap((id) => id && this.router.navigate(['account/my-lists'])),
-      concatMap((id) => this.listResource.deleteList(id))
-    )
+      concatMap((id) => this.listResource.deleteList(id)),
+    ),
   );
 
   constructor() {
@@ -79,9 +72,9 @@ export class ListState extends RxState<ListModel> implements AppInitializer {
       'lists',
       this.actions.fetchList$.pipe(
         filter((id) => !isNaN(Number(id))),
-        concatMap((id) => this.listResource.fetchList(id))
+        concatMap((id) => this.listResource.fetchList(id)),
       ),
-      (state, list) => patch(state?.lists || {}, list)
+      (state, list) => patch(state?.lists || {}, list),
     );
 
     this.connect('lists', this.actions.updateList$, (state, update) => {
@@ -94,21 +87,17 @@ export class ListState extends RxState<ListModel> implements AppInitializer {
       return state.lists;
     });
 
-    this.connect(
-      'lists',
-      this.actions.addMovieToList$,
-      (state, [movie, id]) => {
-        if (state && id) {
-          return patch(state.lists, {
-            [id]: patch(state.lists[id], {
-              results: [...(state.lists[id].results || []), movie],
-            }),
-          });
-        }
-
-        return state.lists;
+    this.connect('lists', this.actions.addMovieToList$, (state, [movie, id]) => {
+      if (state && id) {
+        return patch(state.lists, {
+          [id]: patch(state.lists[id], {
+            results: [...(state.lists[id].results || []), movie],
+          }),
+        });
       }
-    );
+
+      return state.lists;
+    });
 
     this.connect('lists', this.actions.deleteList$, (state, id) => {
       if (state && id) {
@@ -118,23 +107,17 @@ export class ListState extends RxState<ListModel> implements AppInitializer {
       return state.lists;
     });
 
-    this.connect(
-      'lists',
-      this.actions.deleteMovieFromList$,
-      (state, [movie, id]) => {
-        if (state && id) {
-          return patch(state.lists, {
-            [id]: patch(state.lists[id], {
-              results: (state.lists[id].results || []).filter(
-                (m) => m.id !== movie.id
-              ),
-            }),
-          });
-        }
-
-        return state.lists;
+    this.connect('lists', this.actions.deleteMovieFromList$, (state, [movie, id]) => {
+      if (state && id) {
+        return patch(state.lists, {
+          [id]: patch(state.lists[id], {
+            results: (state.lists[id].results || []).filter((m) => m.id !== movie.id),
+          }),
+        });
       }
-    );
+
+      return state.lists;
+    });
 
     this.hold(this.sideEffects$);
   }

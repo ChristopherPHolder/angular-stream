@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   inject,
   ViewEncapsulation,
@@ -12,12 +11,10 @@ import { AccountState } from '../../state/account.state';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
-  standalone: true,
   imports: [RouterLink],
   selector: 'ct-account-menu',
   templateUrl: './account-menu.component.html',
   styleUrls: ['./account-menu.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
 })
 export default class AccountMenuComponent {

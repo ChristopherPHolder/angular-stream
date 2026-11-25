@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   inject,
   OnDestroy,
@@ -8,7 +7,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ListCreatePageAdapter } from './list-create-page.adapter';
 
 @Component({
-  standalone: true,
   imports: [],
   template: `
     <article>
@@ -70,7 +68,6 @@ import { ListCreatePageAdapter } from './list-create-page.adapter';
     './list-create-page.component.scss',
     '../../../ui/component/button/_button.scss',
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ListCreateEditPageComponent implements OnDestroy {
   public readonly adapter = inject(ListCreatePageAdapter);

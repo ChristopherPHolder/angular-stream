@@ -1,14 +1,7 @@
 import { RxState } from '@rx-angular/state';
 import { selectSlice } from '@rx-angular/state/selections';
-import { inject, Injectable } from '@angular/core';
-import {
-  distinctUntilKeyChanged,
-  EMPTY,
-  map,
-  Observable,
-  switchMap,
-  withLatestFrom,
-} from 'rxjs';
+import { inject, Service } from '@angular/core';
+import { distinctUntilKeyChanged, EMPTY, map, Observable, switchMap, withLatestFrom } from 'rxjs';
 import { TMDBMovieModel } from '../../data-access/api/model/movie.model';
 import {
   TMDBPaginateOptions,
@@ -36,9 +29,7 @@ type MovieListRouterParams = Pick<RouterParams, 'type' | 'identifier'>;
 export type MovieListPageModel = InfiniteScrollState<TMDBMovieModel> &
   MovieListRouterParams & { genres: Record<string, TMDBMovieGenreModel> };
 
-const emptyResult$ = EMPTY as unknown as Observable<
-  TMDBPaginateResult<TMDBMovieModel>
->;
+const emptyResult$ = EMPTY as unknown as Observable<TMDBPaginateResult<TMDBMovieModel>>;
 
 type Actions = { paginate: void };
 function transformToMovieModel(_res: TMDBMovieModel): Movie {
@@ -50,9 +41,7 @@ function transformToMovieModel(_res: TMDBMovieModel): Movie {
   });
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class MovieListPageAdapter extends RxState<MovieListPageModel> {
   private readonly movieState = inject(MovieState);
   private readonly discoverState = inject(DiscoverState);
@@ -62,16 +51,12 @@ export class MovieListPageAdapter extends RxState<MovieListPageModel> {
   private readonly searchResource = inject(SearchResource);
   private readonly genreResource = inject(GenreResource);
   private readonly actions = rxActions<Actions>();
-  readonly movies$ = this.select(
-    map(({ results }) => results?.map(transformToMovieModel))
-  );
+  readonly movies$ = this.select(map(({ results }) => results?.map(transformToMovieModel)));
 
   getInitialFetchByType({
     type,
     identifier,
-  }: Omit<RouterParams, 'layout'>): Observable<
-    TMDBPaginateResult<TMDBMovieModel>
-  > {
+  }: Omit<RouterParams, 'layout'>): Observable<TMDBPaginateResult<TMDBMovieModel>> {
     if (type === 'category') {
       return this.movieState
         .categoryMoviesByIdCtx(identifier)
@@ -93,14 +78,12 @@ export class MovieListPageAdapter extends RxState<MovieListPageModel> {
 
     const routerParamsFromPaginationTrigger$ = this.actions.paginate$.pipe(
       withLatestFrom(this.routerState.routerParams$),
-      map(([, routerParams]) => routerParams)
+      map(([, routerParams]) => routerParams),
     );
 
     this.connect('genres', this.genreResource.getGenresDictionaryCached());
 
-    this.connect(
-      this.routerState.routerParams$.pipe(selectSlice(['identifier', 'type']))
-    );
+    this.connect(this.routerState.routerParams$.pipe(selectSlice(['identifier', 'type'])));
 
     this.connect(
       // paginated results as container state
@@ -115,23 +98,19 @@ export class MovieListPageAdapter extends RxState<MovieListPageModel> {
                 type,
                 this.movieResource,
                 this.discoverResource,
-                this.searchResource
+                this.searchResource,
               )(identifier, options),
             routerParamsFromPaginationTrigger$,
-            this.getInitialFetchByType({ type, identifier })
-          )
-        )
-      )
+            this.getInitialFetchByType({ type, identifier }),
+          ),
+        ),
+      ),
     );
 
     this.hold(this.routerState.routerParams$, this.routerFetchEffect);
   }
 
-  private routerFetchEffect = ({
-    layout,
-    type,
-    identifier,
-  }: RouterParams): void => {
+  private routerFetchEffect = ({ layout, type, identifier }: RouterParams): void => {
     if (layout === 'list' && type === 'category') {
       this.movieState.fetchCategoryMovies(identifier);
     } else if (layout === 'list' && type === 'genre') {
@@ -144,11 +123,8 @@ function getFetchByType(
   type: RouterParams['type'],
   movieResource: MovieResource,
   discoverResource: DiscoverResource,
-  searchResource: SearchResource
-): (
-  s: string,
-  options: TMDBPaginateOptions
-) => Observable<TMDBPaginateResult<TMDBMovieModel>> {
+  searchResource: SearchResource,
+): (s: string, options: TMDBPaginateOptions) => Observable<TMDBPaginateResult<TMDBMovieModel>> {
   if (type === 'category') {
     return movieResource.getMovieCategory;
   } else if (type === 'search') {

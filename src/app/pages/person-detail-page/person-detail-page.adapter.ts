@@ -1,7 +1,7 @@
 import { RxState } from '@rx-angular/state';
 import { selectSlice } from '@rx-angular/state/selections';
 import { TMDBMovieModel } from '../../data-access/api/model/movie.model';
-import { inject, Injectable } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { infiniteScroll } from '../../shared/cdk/infinite-scroll/infiniteScroll';
 import { rxActions } from '@rx-angular/state/actions';
 import { RouterState } from '../../shared/router/router.state';
@@ -51,9 +51,7 @@ function transformToMovieModel(_res: TMDBMovieModel): Movie {
   });
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class PersonDetailAdapter extends RxState<PersonDetailPageAdapterState> {
   private readonly routerState = inject(RouterState);
   private readonly personState = inject(PersonState);
@@ -63,20 +61,16 @@ export class PersonDetailAdapter extends RxState<PersonDetailPageAdapterState> {
   readonly toggleSorting = this.actions.toggleSorting;
   readonly sortBy = this.actions.sortBy;
   readonly routerPersonId$ = this.routerState.select(
-    getIdentifierOfTypeAndLayoutUtil('person', 'detail')
+    getIdentifierOfTypeAndLayoutUtil('person', 'detail'),
   );
-  readonly sortingModel$ = this.select(
-    selectSlice(['showSorting', 'activeSorting'])
-  );
+  readonly sortingModel$ = this.select(selectSlice(['showSorting', 'activeSorting']));
   readonly routedPersonCtx$ = this.routerPersonId$.pipe(
     switchMap(this.personState.personByIdCtx),
     map((ctx: WithContext<TMDBPersonModel>): WithContext<MoviePerson> => {
       ctx.value &&
-      ((ctx as unknown as { value: unknown }).value = transformToPersonDetail(
-        ctx.value
-      ));
+        ((ctx as unknown as { value: unknown }).value = transformToPersonDetail(ctx.value));
       return ctx as unknown as WithContext<MoviePerson>;
-    })
+    }),
   );
 
   readonly movieRecommendationsById$ = this.routerPersonId$.pipe(
@@ -90,10 +84,10 @@ export class PersonDetailAdapter extends RxState<PersonDetailPageAdapterState> {
             sort_by,
           }),
         this.actions.paginate$,
-        this.discoverResource.getDiscoverMovies({ with_cast, page: 1, sort_by })
+        this.discoverResource.getDiscoverMovies({ with_cast, page: 1, sort_by }),
       );
     }),
-    map((v) => ({ ...v, results: v.results?.map(transformToMovieModel) }))
+    map((v) => ({ ...v, results: v.results?.map(transformToMovieModel) })),
   );
 
   readonly sortingEvent$ = this.actions.sortBy$.pipe(
@@ -111,10 +105,10 @@ export class PersonDetailAdapter extends RxState<PersonDetailPageAdapterState> {
           with_cast,
           page: 1,
           sort_by: value,
-        })
+        }),
       );
     }),
-    map((v) => ({ ...v, results: v.results?.map(transformToMovieModel) }))
+    map((v) => ({ ...v, results: v.results?.map(transformToMovieModel) })),
   );
 
   constructor() {

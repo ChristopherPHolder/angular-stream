@@ -1,9 +1,8 @@
-import {ChangeDetectionStrategy, Component, ViewEncapsulation,} from '@angular/core';
+import {Component, ViewEncapsulation,} from '@angular/core';
 import {FastSvgComponent} from '@push-based/ngx-fast-svg';
 import { RouterLink } from '@angular/router';
 
 @Component({
-  standalone: true,
   imports: [FastSvgComponent, RouterLink],
   selector: 'ct-not-found',
   template: ` <div class="not-found-container">
@@ -12,7 +11,6 @@ import { RouterLink } from '@angular/router';
     <a class="btn" routerLink="/list/category/popular">See popular</a>
   </div>`,
   styleUrls: ['./not-found-page.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
 })
 export default class NotFoundPageComponent {}

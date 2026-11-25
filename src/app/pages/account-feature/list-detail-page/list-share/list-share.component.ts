@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   inject,
   OnDestroy,
@@ -10,11 +9,9 @@ import { ListDetailAdapter } from '../list-detail-page.adapter';
 import { DOCUMENT } from '@angular/common';
 // TODO
 @Component({
-  standalone: true,
   selector: 'ct-list-share',
   templateUrl: './list-share.component.html',
   styleUrls: ['./list-share.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListShareComponent implements OnInit, OnDestroy {
   public readonly body = inject(DOCUMENT).body;

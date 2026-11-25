@@ -26,7 +26,6 @@ import { distinctUntilChanged } from 'rxjs';
  * import('./any-component.lazy.ts').then(c => c.component)
  */
 @Directive({
-  standalone: true,
   // eslint-disable-next-line @angular-eslint/directive-selector
   selector: '[lazy]',
 })

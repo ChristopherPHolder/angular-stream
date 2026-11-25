@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AppShellComponent } from './app-shell/app-shell.component';
 
@@ -9,9 +9,7 @@ import { AppShellComponent } from './app-shell/app-shell.component';
       <router-outlet />
     </app-shell>
   `,
-  standalone: true,
   imports: [RouterOutlet, AppShellComponent],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {}
 

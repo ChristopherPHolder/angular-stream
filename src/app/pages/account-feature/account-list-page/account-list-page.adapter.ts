@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { RxState } from '@rx-angular/state';
 import { map } from 'rxjs';
 import { W500H282 } from '../../../data-access/images/image-sizes';
@@ -16,7 +16,7 @@ export interface AccountListPageAdapterState {
   lists: ListWithPoster[];
 }
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class AccountListPageAdapter extends RxState<AccountListPageAdapterState> {
   private readonly list = inject(ListState);
 
@@ -32,14 +32,14 @@ export class AccountListPageAdapter extends RxState<AccountListPageAdapterState>
               pathProp: 'backdrop_path',
               dims: W500H282,
               fallback: MY_LIST_FALLBACK,
-            })
-          )
-        )
-      )
+            }),
+          ),
+        ),
+      ),
     );
 
     this.connect('lists', this.list.deleteListSignal$, (state, id) =>
-      state.lists?.filter((l) => l.id !== +id)
+      state.lists?.filter((l) => l.id !== +id),
     );
   }
 }

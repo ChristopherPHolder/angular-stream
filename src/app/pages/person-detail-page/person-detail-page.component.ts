@@ -1,10 +1,5 @@
-import { Location, NgClass, NgOptimizedImage } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  ViewEncapsulation,
-} from '@angular/core';
+import { Location, NgOptimizedImage } from '@angular/common';
+import { Component, inject, ViewEncapsulation } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { PersonDetailAdapter } from './person-detail-page.adapter';
 import { SORT_VALUES } from '../../data-access/api/sort/sort.data';
@@ -15,18 +10,10 @@ import { FastSvgComponent } from '@push-based/ngx-fast-svg';
 import { Movie } from '../../state/movie.state';
 
 @Component({
-  standalone: true,
-  imports: [
-    NgClass,
-    NgOptimizedImage,
-    DetailGridComponent,
-    MovieListComponent,
-    FastSvgComponent
-],
+  imports: [NgOptimizedImage, DetailGridComponent, MovieListComponent, FastSvgComponent],
   selector: 'ct-person',
   templateUrl: './person-detail-page.component.html',
   styleUrls: ['./person-detail-page.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
 })
 export default class PersonDetailPageComponent {
@@ -50,14 +37,14 @@ export default class PersonDetailPageComponent {
       map((ctx) => ({
         results: ctx.results ?? [],
         loading: ctx.loading,
-      }))
+      })),
     ),
     {
       initialValue: {
         results: [] as Movie[],
         loading: true,
       },
-    }
+    },
   );
 
   constructor() {
