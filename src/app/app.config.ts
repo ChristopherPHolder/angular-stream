@@ -9,6 +9,7 @@ import { tmdbReadAccessInterceptor } from './auth/tmdb-http-interceptor.feature'
 import { provideTmdbImageLoader } from './data-access/images/image-loader';
 import { provideRouter } from '@angular/router';
 import { ROUTES } from './routes';
+import { trackServerRequests } from './streaming/server-request-tracker';
 import {
   provideClientHydration,
   withEventReplay,
@@ -18,7 +19,7 @@ import {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideHttpClient(
-      withInterceptors([tmdbContentTypeInterceptor, tmdbReadAccessInterceptor])
+      withInterceptors([trackServerRequests, tmdbContentTypeInterceptor, tmdbReadAccessInterceptor])
     ),
     provideTmdbImageLoader(),
     provideFastSVG({ url: (name: string) => `assets/svg-icons/${name}.svg` }),

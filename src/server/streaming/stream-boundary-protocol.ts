@@ -103,6 +103,87 @@ export const STREAM_BOUNDARY_PREVIEW_RUNTIME = `<script>(()=>{
       preservedEventApps.add(appId);
     }
   };
+  const identifyingAttributes=['id','name','type','href','aria-label','data-uf'];
+  const identity=(element)=>identifyingAttributes.map(name=>element.getAttribute(name)).join('|');
+  const elementPath=(root,element)=>{
+    const path=[];
+    let node=element;
+    for(;node&&node!==root;node=node.parentElement){
+      let index=0;
+      for(let sibling=node.previousElementSibling;sibling;sibling=sibling.previousElementSibling){
+        if(sibling.tagName===node.tagName)index++;
+      }
+      path.push([node.tagName,index]);
+    }
+    return node===root?path.reverse():null;
+  };
+  const resolvePath=(root,path)=>{
+    let node=root;
+    for(const [tagName,index] of path){
+      let seen=0;
+      let match=null;
+      for(const child of node.children){
+        if(child.tagName===tagName&&seen++===index){match=child;break;}
+      }
+      if(match===null)return null;
+      node=match;
+    }
+    return node;
+  };
+  const counterpart=(element,nextBody)=>{
+    if(element.id){
+      const byId=nextBody.querySelector('#'+CSS.escape(element.id));
+      if(byId&&byId.tagName===element.tagName)return byId;
+    }
+    const path=elementPath(document.body,element);
+    const candidate=path&&resolvePath(nextBody,path);
+    return candidate&&identity(candidate)===identity(element)?candidate:null;
+  };
+  const isEdited=(control)=>{
+    if(control instanceof HTMLSelectElement)return Array.from(control.options).some(option=>option.selected!==option.defaultSelected);
+    if(control.type==='checkbox'||control.type==='radio')return control.checked!==control.defaultChecked;
+    return control.type!=='file'&&control.value!==control.defaultValue;
+  };
+  const copyControlState=(from,to)=>{
+    if(from.tagName!==to.tagName)return;
+    if(from instanceof HTMLSelectElement){
+      Array.from(from.options).forEach((option,index)=>{if(to.options[index])to.options[index].selected=option.selected;});
+    }else if(from.type==='checkbox'||from.type==='radio'){
+      to.checked=from.checked;
+    }else{
+      to.value=from.value;
+    }
+  };
+  /*
+   * Swapping in the authoritative body throws away every preview node, and
+   * with them whatever the user was doing: focus falls back to <body> and
+   * typed text is lost. Pair the focused element and every edited control
+   * with its counterpart in the incoming body before the swap, then carry
+   * their state across.
+   */
+  const captureInteraction=(nextBody)=>{
+    const controls=[];
+    for(const control of document.body.querySelectorAll('input,textarea,select')){
+      if(!isEdited(control))continue;
+      const target=counterpart(control,nextBody);
+      if(target)controls.push([control,target]);
+    }
+    const active=document.activeElement;
+    const focused=active&&active!==document.body&&document.body.contains(active)?active:null;
+    let selection=null;
+    try{
+      if(focused&&typeof focused.selectionStart==='number')selection=[focused.selectionStart,focused.selectionEnd,focused.selectionDirection];
+    }catch{}
+    return {controls,focusTarget:focused&&counterpart(focused,nextBody),selection};
+  };
+  const restoreInteraction=({controls,focusTarget,selection})=>{
+    for(const [from,to] of controls)copyControlState(from,to);
+    if(!focusTarget||typeof focusTarget.focus!=='function')return;
+    focusTarget.focus({preventScroll:true});
+    if(selection&&document.activeElement===focusTarget){
+      try{focusTarget.setSelectionRange(selection[0],selection[1],selection[2]??undefined);}catch{}
+    }
+  };
   const eventBootstrapAppId=(script)=>{
     const match=script.textContent.trim().match(/^window\\.__jsaction_bootstrap\\(document\\.body,\\s*"([^"]+)"/);
     return match?match[1]:null;
@@ -149,8 +230,10 @@ export const STREAM_BOUNDARY_PREVIEW_RUNTIME = `<script>(()=>{
       if(!/^\\s*<!doctype\\s+html[\\s>]/i.test(html)||authoritativeDocument.head===null||authoritativeDocument.body===null)throw new Error('invalid document');
       removeProtocolArtifacts(authoritativeDocument);
       observer.disconnect();
+      const interaction=captureInteraction(authoritativeDocument.body);
       document.head.replaceWith(authoritativeDocument.head);
       document.body.replaceWith(authoritativeDocument.body);
+      restoreInteraction(interaction);
       rebindEarlyEventContracts(document.body);
       const scripts=Array.from(document.scripts);
       void activateScripts(scripts).catch(error=>console.error(error));

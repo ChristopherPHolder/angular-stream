@@ -1,3 +1,5 @@
+import { ɵREQUESTS_CONTRIBUTE_TO_STABILITY } from '@angular/common/http';
+import { type ApplicationRef, mergeApplicationConfig } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import {
   INITIAL_CONFIG,
@@ -8,7 +10,9 @@ import {
 } from '@angular/platform-server';
 import { App } from '../../app/app';
 import { config } from '../../app/app.config.server';
+import { SERVER_REQUEST_TRACKER } from '../../app/streaming/server-request-tracker';
 import { STREAM_BOUNDARY_SINK } from '../../app/streaming/stream-boundary.directive';
+import { RequestTracker } from './request-tracker';
 import {
   STREAM_BOUNDARY_PREVIEW_RUNTIME,
   frameFinalDocument,
@@ -31,15 +35,18 @@ export interface OpenBodyDocument {
  *
  * The sequence, which is the whole point:
  *
- *  1. Bootstrap. In a zoneless application this resolves after the first
- *     change detection pass but *before* pending HTTP settles, so there is a
- *     real shell to send while TMDB is still in flight.
+ *  1. Bootstrap, then wait until the structure is stable: the initial
+ *     navigation has finished, lazy routes are loaded and `@defer` blocks
+ *     have rendered. HTTP requests don't count towards this (see
+ *     `SERVER_REQUEST_TRACKER`), so it doesn't wait for TMDB. Without this
+ *     wait the shell can be taken before a lazy route or a deferred boundary
+ *     exists, and that boundary's frame then has no placeholder to land in.
  *  2. Serialize that shell with the module scripts detached, and send
  *     everything up to `</body>` plus the client runtime. The response is now
  *     open and the browser can paint.
  *  3. Frame each boundary into the open response as it becomes ready.
- *  4. Once the application is stable, ask Angular for the authoritative,
- *     hydration-annotated document, send it, and close.
+ *  4. Once the application is stable and no request is in flight, ask Angular
+ *     for the authoritative, hydration-annotated document, send it, and close.
  *
  * Only step 4 is a hydration source. Steps 2 and 3 are preview markup that the
  * client runtime throws away when the authoritative document lands, which is
@@ -54,6 +61,7 @@ export async function renderStreamingAngular({
   url,
 }: StreamingAngularRenderOptions): Promise<Response> {
   const boundarySink = new RequestStreamBoundarySink();
+  const requestTracker = new RequestTracker();
   const platformRef = platformServer([
     { provide: INITIAL_CONFIG, useValue: { document, url } },
     { provide: ɵSERVER_CONTEXT, useValue: 'streamed-ssr' },
@@ -69,7 +77,18 @@ export async function renderStreamingAngular({
   };
 
   try {
-    const applicationRef = await bootstrapApplication(App, config, { platformRef });
+    const applicationRef = await bootstrapApplication(
+      App,
+      mergeApplicationConfig(config, {
+        providers: [
+          // HTTP leaves `whenStable()` to the tracker; see step 1 above.
+          { provide: ɵREQUESTS_CONTRIBUTE_TO_STABILITY, useValue: false },
+          { provide: SERVER_REQUEST_TRACKER, useValue: requestTracker },
+        ],
+      }),
+      { platformRef },
+    );
+    await applicationRef.whenStable();
     const platformState = platformRef.injector.get(PlatformState);
 
     const previewDocument = renderWithoutModuleScripts(
@@ -135,7 +154,7 @@ export async function renderStreamingAngular({
 
     void (async () => {
       try {
-        await applicationRef.whenStable();
+        await whenSettled(applicationRef, requestTracker);
         if (terminated) {
           return;
         }
@@ -272,6 +291,22 @@ export function renderWithoutModuleScripts(
   }
 
   return renderedDocument;
+}
+
+/**
+ * Stable *and* no request in flight: what `whenStable()` alone means when
+ * HTTP contributes to stability. A response can render more of the app,
+ * which can start more requests, so check both until both hold at once.
+ */
+async function whenSettled(applicationRef: ApplicationRef, tracker: RequestTracker): Promise<void> {
+  for (;;) {
+    await applicationRef.whenStable();
+    if (tracker.idle) {
+      return;
+    }
+
+    await tracker.whenIdle();
+  }
 }
 
 /**
