@@ -1,11 +1,11 @@
-@import '../../token/mixins/flex';
+@use '../../token/mixins/flex';
 
 :host {
-  @include d-flex;
+  @include flex.d-flex;
 }
 
 .dark-mode-toggle {
-  @include d-flex;
+  @include flex.d-flex;
 }
 
 .dark-mode-toggle > button {
@@ -44,7 +44,7 @@ button.dark {
 .toggle {
   position: relative;
   padding: 0 6px;
-  @include d-flex-v;
+  @include flex.d-flex-v;
   width: 45px;
 }
 

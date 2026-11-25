@@ -1,13 +1,8 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { RxState } from '@rx-angular/state';
 import { select, selectSlice } from '@rx-angular/state/selections';
 import { map, Observable, startWith, switchMap, withLatestFrom } from 'rxjs';
-import {
-  W154H205,
-  W300H450,
-  W500H282,
-  W92H138,
-} from '../../../data-access/images/image-sizes';
+import { W154H205, W300H450, W500H282, W92H138 } from '../../../data-access/images/image-sizes';
 import { TMDBListCreateUpdateParams } from '../../../data-access/api/model/list.model';
 import { TMDBMovieModel } from '../../../data-access/api/model/movie.model';
 import { rxActions } from '@rx-angular/state/actions';
@@ -39,9 +34,7 @@ export type MovieDetail = TMDBMovieDetailsModel &
 
 export type MovieCast = TMDBMovieCastModel & ImageTag;
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class ListDetailAdapter extends RxState<{
   id: string;
 }> {
@@ -54,45 +47,39 @@ export class ListDetailAdapter extends RxState<{
   readonly routerListId$ = this.routerState.select(map((state) => state?.type));
 
   private readonly listInfoUpdateEvent$ = this.ui.listInfoUpdate$.pipe(
-    withLatestFrom(this.select('id'))
+    withLatestFrom(this.select('id')),
   );
 
   private readonly listPosterUpdateEvent$ = this.ui.listPosterUpdate$.pipe(
-    withLatestFrom(this.select('id'))
+    withLatestFrom(this.select('id')),
   );
 
-  private readonly listDeleteEvent$ = this.ui.deleteList$.pipe(
-    withLatestFrom(this.select('id'))
-  );
+  private readonly listDeleteEvent$ = this.ui.deleteList$.pipe(withLatestFrom(this.select('id')));
 
   readonly listDetails$ = this.select('id').pipe(
-    switchMap((id) => this.listState.select('lists', id))
+    switchMap((id) => this.listState.select('lists', id)),
   );
 
   readonly movies$ = this.listDetails$.pipe(
     select('results'),
-    map((r) => (r !== undefined ? r.map(transformToMovieModel) : []))
+    map((r) => (r !== undefined ? r.map(transformToMovieModel) : [])),
   );
 
-  readonly posters$: Observable<ListPoster[] | undefined> =
-    this.listDetails$.pipe(
-      selectSlice(['results', 'backdrop_path']),
-      map(({ results, backdrop_path }) =>
-        results?.map((m) => ({
-          ...addImageTag(m, {
-            pathProp: 'backdrop_path',
-            dims: W500H282,
-            fallback: MY_LIST_FALLBACK,
-          }),
-          selected: m.backdrop_path === backdrop_path,
-        }))
-      )
-    );
-
-  readonly listName$ = this.listDetails$.pipe(
-    select('name'),
-    startWith('Loading...')
+  readonly posters$: Observable<ListPoster[] | undefined> = this.listDetails$.pipe(
+    selectSlice(['results', 'backdrop_path']),
+    map(({ results, backdrop_path }) =>
+      results?.map((m) => ({
+        ...addImageTag(m, {
+          pathProp: 'backdrop_path',
+          dims: W500H282,
+          fallback: MY_LIST_FALLBACK,
+        }),
+        selected: m.backdrop_path === backdrop_path,
+      })),
+    ),
   );
+
+  readonly listName$ = this.listDetails$.pipe(select('name'), startWith('Loading...'));
 
   constructor() {
     super();
@@ -101,11 +88,11 @@ export class ListDetailAdapter extends RxState<{
 
     this.hold(this.routerListId$, this.listState.fetchList);
     this.hold(this.listInfoUpdateEvent$, ([info, id]) =>
-      this.listState.updateList({ ...info, id: +id })
+      this.listState.updateList({ ...info, id: +id }),
     );
 
     this.hold(this.listPosterUpdateEvent$, ([backdrop_path, id]) =>
-      this.listState.updateList({ backdrop_path, id: +id })
+      this.listState.updateList({ backdrop_path, id: +id }),
     );
 
     this.hold(this.listDeleteEvent$, ([, id]) => this.listState.deleteList(id));
@@ -115,10 +102,7 @@ export class ListDetailAdapter extends RxState<{
 export function transformToMovieDetail(_res: TMDBMovieModel): MovieDetail {
   const res = _res as unknown as MovieDetail;
   let language: string | boolean = false;
-  if (
-    Array.isArray(res?.spoken_languages) &&
-    res?.spoken_languages.length !== 0
-  ) {
+  if (Array.isArray(res?.spoken_languages) && res?.spoken_languages.length !== 0) {
     language = res.spoken_languages[0].english_name;
   }
   res.languages_runtime_release = `${language + ' / ' || ''} ${
@@ -126,8 +110,7 @@ export function transformToMovieDetail(_res: TMDBMovieModel): MovieDetail {
   } MIN. / ${new Date(res.release_date).getFullYear()}`;
 
   addVideoTag(res, {
-    pathPropFn: (r) =>
-      (r?.videos?.results && r?.videos?.results[0]?.key + '') || '',
+    pathPropFn: (r) => (r?.videos?.results && r?.videos?.results[0]?.key + '') || '',
   });
   addImageTag(res, {
     pathProp: 'poster_path',

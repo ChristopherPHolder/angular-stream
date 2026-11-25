@@ -1,14 +1,11 @@
 import { RxState } from '@rx-angular/state';
 import { patch, toDictionary } from '@rx-angular/cdk/transformations';
-import { inject, Injectable } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { map } from 'rxjs';
 import { optimizedFetch } from '../shared/cdk/optimized-fetch';
 import { rxActions } from '@rx-angular/state/actions';
 import { withLoadingEmission } from '../shared/cdk/loading/withLoadingEmissions';
-import {
-  PersonResource,
-  PersonResponse,
-} from '../data-access/api/resources/person.resource';
+import { PersonResource, PersonResponse } from '../data-access/api/resources/person.resource';
 import { AppInitializer } from '../shared/cdk/app-initializer';
 import { WithContext } from '../shared/cdk/loading/context.interface';
 import { pluck } from '../shared/cdk/get';
@@ -23,9 +20,7 @@ interface Actions {
   sortMovies: TMDBSortOptions;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class PersonState extends RxState<State> implements AppInitializer {
   private readonly actions = rxActions<Actions>();
 
@@ -37,7 +32,7 @@ export class PersonState extends RxState<State> implements AppInitializer {
       map(({ person: { value, loading } }) => ({
         loading,
         value: pluck(value, id),
-      }))
+      })),
     );
 
   constructor() {
@@ -50,16 +45,16 @@ export class PersonState extends RxState<State> implements AppInitializer {
           (id) => {
             return this.personResource.getPerson(id).pipe(
               map((result) => ({ value: toDictionary([result], 'id') })),
-              withLoadingEmission()
+              withLoadingEmission(),
             );
-          }
-        )
+          },
+        ),
       ),
       (oldState, newPartial) => {
         const resultState = patch(oldState?.person, newPartial);
         resultState.value = patch(oldState?.person?.value, resultState.value);
         return resultState;
-      }
+      },
     );
   }
 

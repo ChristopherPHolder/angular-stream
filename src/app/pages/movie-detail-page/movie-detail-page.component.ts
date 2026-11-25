@@ -1,18 +1,14 @@
 import { selectSlice } from '@rx-angular/state/selections';
 import { Location, NgOptimizedImage } from '@angular/common';
 import {
-  ChangeDetectionStrategy,
   Component,
   ElementRef,
   inject,
-  TrackByFunction,
-  ViewChild,
   ViewEncapsulation,
+  viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { filter, map, mergeWith, tap } from 'rxjs';
-import { TMDBMovieGenreModel } from '../../data-access/api/model/movie-genre.model';
-
+import { map, mergeWith } from 'rxjs';
 import { MovieCast, MovieDetailAdapter } from './movie-detail-page.adapter';
 import { rxActions } from '@rx-angular/state/actions';
 import { rxEffects } from '@rx-angular/state/effects';
@@ -35,7 +31,6 @@ type RecommendationContext = {
 };
 
 @Component({
-  standalone: true,
   imports: [
     RouterLink,
     NgOptimizedImage,
@@ -48,7 +43,6 @@ type RecommendationContext = {
   selector: 'ct-movie',
   templateUrl: './movie-detail-page.component.html',
   styleUrls: ['./movie-detail-page.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
 })
 export default class MovieDetailPageComponent {
@@ -66,78 +60,72 @@ export default class MovieDetailPageComponent {
       mergeWith(
         this.movieCtx$.pipe(
           // select changes of video nested property
-          selectSlice(['value'], { value: ({ video }) => video })
-        )
+          selectSlice(['value'], { value: ({ video }) => video }),
+        ),
       ),
-      map((e) => e === 'load')
+      map((e) => e === 'load'),
     ),
-    { initialValue: false }
+    { initialValue: false },
   );
   readonly movie = toSignal(
-    this.movieCtx$.pipe(
-      map((ctx) => ctx?.value || null),
-      filter((movie) => !!movie)
-    )
+    // Do not filter out empty emissions: when navigating between movies the
+    // selector emits `null` while the next movie loads. Letting that through
+    // clears the previously shown movie instead of leaving it on screen until
+    // the new one arrives.
+    this.movieCtx$.pipe(map((ctx) => ctx?.value || null)),
   );
   readonly castList = toSignal(
     this.adapter.movieCastById$.pipe(
       map((ctx) => ({
         value: ctx.value ?? [],
         loading: ctx.loading,
-      }))
+      })),
     ),
     {
       initialValue: {
         value: [] as MovieCast[],
         loading: true,
       } satisfies CastListContext,
-    }
+    },
   );
   readonly recommendations = toSignal(
     this.adapter.infiniteScrollRecommendations$.pipe(
       map((ctx) => ({
         results: ctx.results ?? [],
         loading: ctx.loading,
-      }))
+      })),
     ),
     {
       initialValue: {
         results: [] as Movie[],
         loading: true,
       } satisfies RecommendationContext,
-    }
+    },
   );
 
-  @ViewChild('trailerDialog')
-  trailerDialog: ElementRef | undefined = undefined;
+  readonly trailerDialog = viewChild<ElementRef>('trailerDialog');
 
-  @ViewChild('castListWrapper')
-  castListWrapper: ElementRef<HTMLElement> | undefined = undefined;
+  readonly castListWrapper = viewChild<ElementRef<HTMLElement>>('castListWrapper');
 
   constructor() {
     this.effects.register(
-      this.ui.dialog$.pipe(
-        map((v) => v === 'show'),
-        tap(console.log)
-      ),
+      this.ui.dialog$.pipe(map((v) => v === 'show')),
       (openDialog) =>
         openDialog
-          ? this.trailerDialog?.nativeElement?.showModal()
-          : this.trailerDialog?.nativeElement.close()
+          ? this.trailerDialog()?.nativeElement?.showModal()
+          : this.trailerDialog()?.nativeElement.close(),
     );
   }
 
   move(increment: number) {
-    if (this.castListWrapper) {
-      const scrollLeft = this.castListWrapper.nativeElement.scrollLeft;
+    const castListWrapper = this.castListWrapper();
+    if (castListWrapper) {
+      const scrollLeft = castListWrapper.nativeElement.scrollLeft;
       const newScrollLetf = scrollLeft - increment;
-      this.castListWrapper.nativeElement.scrollLeft =
+      castListWrapper.nativeElement.scrollLeft =
         newScrollLetf > 0
           ? Math.max(0, newScrollLetf)
-          : Math.min(
-              newScrollLetf,
-              this.castListWrapper.nativeElement.children.length * increment
-            );
+          : Math.min(newScrollLetf, castListWrapper.nativeElement.children.length * increment);
     }
   }
 
@@ -148,7 +136,4 @@ export default class MovieDetailPageComponent {
   paginateRecommendations() {
     this.adapter.paginateRecommendations();
   }
-
-  trackByGenre: TrackByFunction<TMDBMovieGenreModel> = (_, genre) => genre.name;
-  trackByCast: TrackByFunction<MovieCast> = (_, cast) => cast.cast_id;
 }

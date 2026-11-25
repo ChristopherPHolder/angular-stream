@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { patch } from '@rx-angular/cdk/transformations';
 import { RxState } from '@rx-angular/state';
 import { map, startWith, withLatestFrom } from 'rxjs';
@@ -24,28 +24,22 @@ const enum FormMode {
   Edit = 'edit',
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class ListCreatePageAdapter extends RxState<{
   mode: FormMode;
   request: TMDBListCreateUpdateParams;
 }> {
   private readonly state = inject(ListState);
   private readonly detailsAdapter = inject(ListDetailAdapter);
-  readonly ui = rxActions<Actions>()
+  readonly ui = rxActions<Actions>();
 
-  readonly showHeader$ = this.select(
-    map((state) => state.mode === FormMode.Create)
-  );
+  readonly showHeader$ = this.select(map((state) => state.mode === FormMode.Create));
   readonly name$ = this.select('request', 'name');
   readonly description$ = this.select('request', 'description');
   readonly valid$ = this.select(map((state) => !!state?.request?.name?.length));
   readonly private$ = this.select('request', 'private');
 
-  private readonly submitEvent$ = this.ui.submit$.pipe(
-    withLatestFrom(this.select())
-  );
+  private readonly submitEvent$ = this.ui.submit$.pipe(withLatestFrom(this.select()));
 
   constructor() {
     super();
@@ -77,8 +71,8 @@ export class ListCreatePageAdapter extends RxState<{
             private: true,
           },
           mode: FormMode.Create,
-        })
-      )
+        }),
+      ),
     );
 
     this.hold(this.submitEvent$, ([, state]) => {

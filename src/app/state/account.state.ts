@@ -1,4 +1,4 @@
-import { inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { inject, PLATFORM_ID, Service } from '@angular/core';
 import { RxState } from '@rx-angular/state';
 import { filter, map, switchMap } from 'rxjs';
 import { TMDBAccountList } from '../data-access/api/model/list.model';
@@ -10,9 +10,7 @@ export interface AccountStateModel {
   lists: TMDBAccountList[];
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class AccountState extends RxState<AccountStateModel> {
   private readonly platformId = inject(PLATFORM_ID);
 
@@ -33,10 +31,8 @@ export class AccountState extends RxState<AccountStateModel> {
       'lists',
       this.accountId$.pipe(
         filter((accountId): accountId is string => accountId !== null),
-        switchMap((id) =>
-          authResource.getAccountList(id).pipe(map(({ results }) => results))
-        )
-      )
+        switchMap((id) => authResource.getAccountList(id).pipe(map(({ results }) => results))),
+      ),
     );
   }
 }

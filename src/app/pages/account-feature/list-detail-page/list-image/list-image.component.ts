@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   inject,
 } from '@angular/core';
@@ -10,12 +9,10 @@ import {GridListComponent} from '../../../../ui/component/grid-list/grid-list.co
 import {NgOptimizedImage} from '@angular/common';
 
 @Component({
-  standalone: true,
   imports: [GridListComponent, NgOptimizedImage],
   selector: 'ct-list-image',
   templateUrl: './list-image.component.html',
   styleUrls: ['./list-image.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ListImageComponent {
   public adapter = inject(ListDetailAdapter);

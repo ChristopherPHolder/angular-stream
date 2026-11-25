@@ -1,6 +1,5 @@
 import {DOCUMENT} from '@angular/common';
 import {
-  ChangeDetectionStrategy,
   Component,
   inject,
   ViewEncapsulation,
@@ -9,7 +8,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import {RxState} from '@rx-angular/state';
 
 @Component({
-  standalone: true,
   selector: 'ui-dark-mode-toggle',
   template: `
     <div class="dark-mode-toggle">
@@ -46,7 +44,6 @@ import {RxState} from '@rx-angular/state';
     </div>
   `,
   styleUrls: ['dark-mode-toggle.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
 })
 export class DarkModeToggleComponent extends RxState<{

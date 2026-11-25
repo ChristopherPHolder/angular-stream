@@ -2,40 +2,50 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
 
 permissions:
-  actions: read
   contents: read
 
+# One run per branch. Superseded pull request runs are dropped; pushes to main
+# are not, so two deploys can never race for the same Worker.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
-  main:
+  build:
+    # ngp's native engine needs macOS or glibc Linux on x64/arm64, which this is.
+    # On anything else it would need `engine: 'wasm'` in the ngp() options.
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-        with:
-          filter: tree:0
-          fetch-depth: 0
 
-      # This enables task distribution via Nx Cloud
-      # Run this command as early as possible, before dependencies are installed
-      # Learn more at https://nx.dev/ci/reference/nx-cloud-cli#npx-nxcloud-startcirun
-      # Uncomment this line to enable task distribution
-      # - run: npx nx start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="build"
-
-      # Cache node_modules
+      # ngp requires Node 26.
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: 26
+          cache: npm
 
-      - run: npm ci --legacy-peer-deps
+      # `.npmrc` sets legacy-peer-deps, because Angular is pinned to the
+      # prerelease ngp was built against and npm never matches a prerelease
+      # against a plain peer range. `allowScripts` in package.json covers the
+      # native postinstalls npm 11 blocks by default (esbuild, workerd,
+      # @parcel/watcher, fsevents) — without them workerd has no binary.
+      - run: npm ci
 
-      # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
-      # - run: npx nx-cloud record -- echo Hello World
-      - run: npx nx run-many -t lint test build
-      # Nx Cloud recommends fixes for failures to help you get CI green faster. Learn more: https://nx.dev/ci/features/self-healing-ci
-      - run: npx nx fix-ci
-        if: always()
+      # Also runs ngp's template and TypeScript type check, and the bundle
+      # budgets, so a type error or an oversized bundle fails the build.
+      - run: npm run build
+
+      # `vite build` writes dist/ssr/wrangler.json and points wrangler at it
+      # through .wrangler/deploy/config.json, so this deploys the built Worker
+      # rather than the root wrangler.jsonc, whose `main` is TypeScript source.
+      - name: Deploy to Cloudflare Workers
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -1,36 +1,20 @@
 import { isPlatformBrowser } from '@angular/common';
-import {
-  Directive,
-  ElementRef,
-  inject,
-  Output,
-  PLATFORM_ID,
-} from '@angular/core';
-import { rxActions } from '@rx-angular/state/actions';
+import { Directive, ElementRef, inject, output, PLATFORM_ID } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { observeElementVisibility } from './observe-element-visibility';
-import { takeUntil } from 'rxjs';
-
-type Actions = { visible: boolean; onDestroy: void };
 
 @Directive({
-  standalone: true,
   // eslint-disable-next-line @angular-eslint/directive-selector
   selector: '[elementVisibility]',
 })
 export class ElementVisibilityDirective {
-  private readonly platformId = inject(PLATFORM_ID);
-
-  signals = rxActions<Actions>();
-
-  @Output()
-  elementVisibility = this.signals.visible$;
+  readonly elementVisibility = output<boolean>();
 
   constructor() {
-    const elRef = inject(ElementRef);
-    if (isPlatformBrowser(this.platformId)) {
-      observeElementVisibility(elRef.nativeElement)
-        .pipe(takeUntil(this.signals.onDestroy$))
-        .subscribe(this.signals.visible);
+    if (isPlatformBrowser(inject(PLATFORM_ID))) {
+      observeElementVisibility(inject(ElementRef).nativeElement)
+        .pipe(takeUntilDestroyed())
+        .subscribe((visible) => this.elementVisibility.emit(visible));
     }
   }
 }

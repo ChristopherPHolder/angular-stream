@@ -1,26 +1,14 @@
-import { inject, Injectable } from '@angular/core';
-import {
-  dictionaryToArray,
-  toDictionary,
-} from '@rx-angular/cdk/transformations';
+import { inject, Service } from '@angular/core';
+import { dictionaryToArray, toDictionary } from '@rx-angular/cdk/transformations';
 import { RxState } from '@rx-angular/state';
 import { selectSlice } from '@rx-angular/state/selections';
 import { W92H138 } from '../../../../data-access/images/image-sizes';
 import { ImageTag } from '../../../../shared/cdk/image/image-tag.interface';
 import { addImageTag } from '../../../../shared/cdk/image/image-tag.transform';
-import {
-  distinctUntilChanged,
-  exhaustMap,
-  filter,
-  map,
-  withLatestFrom,
-} from 'rxjs';
+import { distinctUntilChanged, exhaustMap, filter, map, withLatestFrom } from 'rxjs';
 import { TMDBMovieDetailsModel } from '../../../../data-access/api/model/movie-details.model';
 import { TMDBMovieModel } from '../../../../data-access/api/model/movie.model';
-import {
-  MovieResource,
-  MovieResponse,
-} from '../../../../data-access/api/resources/movie.resource';
+import { MovieResource, MovieResponse } from '../../../../data-access/api/resources/movie.resource';
 import { ListDetailAdapter } from '../list-detail-page.adapter';
 import { rxActions } from '@rx-angular/state/actions';
 import { ListState } from '../../../../state/list.state';
@@ -34,9 +22,7 @@ interface Actions {
 
 export type MovieSearchResult = TMDBMovieModel & ImageTag;
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class ListItemsEditAdapter extends RxState<{
   id: number;
   items: Record<number, Partial<TMDBMovieDetailsModel>>;
@@ -59,16 +45,12 @@ export class ListItemsEditAdapter extends RxState<{
       searchResults: searchResults.filter((r) => !items[r.id]),
       showResults,
       searchValue,
-    }))
+    })),
   );
 
-  readonly addMovieEvent$ = this.ui.addMovie$.pipe(
-    withLatestFrom(this.select('id'))
-  );
+  readonly addMovieEvent$ = this.ui.addMovie$.pipe(withLatestFrom(this.select('id')));
 
-  readonly deleteMovieEvent$ = this.ui.deleteMovie$.pipe(
-    withLatestFrom(this.select('id'))
-  );
+  readonly deleteMovieEvent$ = this.ui.deleteMovie$.pipe(withLatestFrom(this.select('id')));
 
   readonly searchResponse$ = this.ui.search$.pipe(
     distinctUntilChanged(),
@@ -76,12 +58,9 @@ export class ListItemsEditAdapter extends RxState<{
     exhaustMap((request) => this.moviesResource.queryMovie(request)),
     map((movies) =>
       movies.map((m) =>
-        addImageTag(
-          { ...m, inList: false },
-          { pathProp: 'poster_path', dims: W92H138 }
-        )
-      )
-    )
+        addImageTag({ ...m, inList: false }, { pathProp: 'poster_path', dims: W92H138 }),
+      ),
+    ),
   );
 
   constructor() {

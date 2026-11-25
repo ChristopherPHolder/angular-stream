@@ -1,4 +1,4 @@
-@import '../../../ui/token/mixins/flex';
+@use '../../../ui/token/mixins/flex';
 
 :host {
   display: grid;
@@ -23,7 +23,7 @@
 
   &::ng-deep {
     .ui-grid-list-item {
-      @include d-flex;
+      @include flex.d-flex;
       align-items: stretch;
       flex-direction: column;
       transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0s;

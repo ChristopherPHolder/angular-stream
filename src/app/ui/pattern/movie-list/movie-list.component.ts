@@ -1,16 +1,8 @@
 import { NgOptimizedImage } from '@angular/common';
 import { RxState } from '@rx-angular/state';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  Input,
-  Output,
-  ViewEncapsulation,
-} from '@angular/core';
+import { Component, inject, Input, output, ViewEncapsulation } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { filter, map, Observable } from 'rxjs';
-import { rxActions } from '@rx-angular/state/actions';
+import { map, Observable } from 'rxjs';
 import { coerceObservable } from '../../../shared/cdk/coerceObservable';
 import { RxInputType } from '../../../shared/cdk/input-type.typing';
 import { RouterLink } from '@angular/router';
@@ -20,10 +12,7 @@ import { FastSvgComponent } from '@push-based/ngx-fast-svg';
 import { GridListComponent } from '../../component/grid-list/grid-list.component';
 import { Movie } from '../../../state/movie.state';
 
-type UiActions = { paginate: boolean };
-
 @Component({
-  standalone: true,
   imports: [
     RouterLink,
     StarRatingComponent,
@@ -41,7 +30,7 @@ type UiActions = { paginate: boolean };
             Use \`@for\` to keep rendering non-blocking instead of relying on \`ngFor\` or \`rxFor\`.
             Angular's new render loops work with signals as long as the input stays pure.
         -->
-        @for (movie of movieItems(); track trackByMovieId($index, movie); let idx = $index) {
+        @for (movie of movieItems(); track movie.id; let idx = $index) {
           <a
             class="ui-grid-list-item"
             [routerLink]="['/detail/movie', movie.id]"
@@ -72,7 +61,7 @@ type UiActions = { paginate: boolean };
           </a>
         }
         <!-- If this element is visible in the viewport the paginate event fires -->
-        <div (elementVisibility)="ui.paginate($event)"></div>
+        <div (elementVisibility)="onVisible($event)"></div>
       </ui-grid-list>
     }
     @else {
@@ -84,13 +73,11 @@ type UiActions = { paginate: boolean };
   `,
   styleUrls: ['./movie-list.component.scss'],
   providers: [RxState],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
 })
 export class MovieListComponent {
   private readonly state =
     inject<RxState<{ movies?: Movie[]; numPriority: number }>>(RxState);
-  ui = rxActions<UiActions>();
 
   numPriority() {
     return this.state.get('numPriority');
@@ -119,16 +106,16 @@ export class MovieListComponent {
     this.state.connect('movies', coerceObservable(movies$));
   }
 
-  // emit paginate event only if element is visible (true)
-  @Output() readonly paginate: Observable<true> = this.ui.paginate$.pipe(
-    filter(Boolean)
-  );
+  readonly paginate = output<void>();
 
   constructor() {
     this.state.set({ numPriority: 2 });
   }
 
-  trackByMovieId(_: number, movie: Movie) {
-    return movie.id;
+  // emit paginate event only if the trigger element became visible
+  protected onVisible(visible: boolean) {
+    if (visible) {
+      this.paginate.emit();
+    }
   }
 }

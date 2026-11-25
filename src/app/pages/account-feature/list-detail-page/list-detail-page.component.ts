@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   inject,
 } from '@angular/core';
@@ -9,7 +8,6 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ListDetailAdapter } from './list-detail-page.adapter';
 
 @Component({
-  standalone: true,
   imports: [
     RouterLink,
     RouterOutlet,
@@ -19,7 +17,6 @@ import { ListDetailAdapter } from './list-detail-page.adapter';
   selector: 'ct-list-detail-page',
   templateUrl: './list-detail-page.component.html',
   styleUrls: ['./list-detail-page.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ListDetailPageComponent {
   public readonly adapter = inject(ListDetailAdapter);

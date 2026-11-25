@@ -1,6 +1,6 @@
 import { RxState } from '@rx-angular/state';
 import { patch, toDictionary } from '@rx-angular/cdk/transformations';
-import { inject, Injectable } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { filter, map } from 'rxjs';
 import { optimizedFetch } from '../shared/cdk/optimized-fetch';
 import { AppInitializer } from '../shared/cdk/app-initializer';
@@ -28,9 +28,7 @@ interface Actions {
   fetchCategoryMovies: string;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class MovieState extends RxState<MovieModel> implements AppInitializer {
   private readonly movieResource = inject(MovieResource);
   private readonly actions = rxActions<Actions>();
@@ -44,15 +42,16 @@ export class MovieState extends RxState<MovieModel> implements AppInitializer {
       map(({ categoryMovies: { value, loading } }) => ({
         loading,
         value: pluck(value, id),
-      }))
+      })),
     );
 
   movieByIdCtx = (id: string) =>
     this.select(
+      filter(({ movies }) => !!movies),
       map(({ movies: { value, loading } }) => ({
         loading,
         value: pluck(value, id),
-      }))
+      })),
     );
 
   constructor() {
@@ -66,21 +65,18 @@ export class MovieState extends RxState<MovieModel> implements AppInitializer {
           (id) => {
             return this.movieResource.getMovie(id).pipe(
               map((result) => ({ value: toDictionary([result], 'id') })),
-              withLoadingEmission()
+              withLoadingEmission(),
             );
-          }
-        )
+          },
+        ),
       ),
       (oldState, newPartial) => {
         const resultState = patch(oldState?.movies || { value: {}, loading: false }, newPartial);
         if (resultState.value && oldState?.movies?.value) {
-          resultState.value = patch(
-            oldState.movies.value,
-            resultState.value
-          );
+          resultState.value = patch(oldState.movies.value, resultState.value);
         }
         return resultState;
-      }
+      },
     );
 
     this.connect(
@@ -96,18 +92,15 @@ export class MovieState extends RxState<MovieModel> implements AppInitializer {
               map((paginatedResult) => ({
                 value: { [category]: paginatedResult },
               })),
-              withLoadingEmission()
-            )
-        )
+              withLoadingEmission(),
+            ),
+        ),
       ),
       (oldState, newPartial) => {
         const resultState = patch(oldState?.categoryMovies, newPartial);
-        resultState.value = patch(
-          oldState?.categoryMovies?.value,
-          resultState?.value
-        );
+        resultState.value = patch(oldState?.categoryMovies?.value, resultState?.value);
         return resultState;
-      }
+      },
     );
   }
 

@@ -1,5 +1,5 @@
-@import '../ui/token/mixins/media';
-@import '../ui/token/mixins/flex';
+@use '../ui/token/mixins/media';
+@use '../ui/token/mixins/flex';
 
 .profile-button {
   outline: none;
@@ -63,18 +63,18 @@
 
 .ui-toolbar {
   height: 72px;
-  @include d-flex-v;
+  @include flex.d-flex-v;
   justify-content: space-between;
   width: 100%;
   padding: 0 24px;
 
-  @include isDesktop {
+  @include media.isDesktop {
     &--action {
       display: none;
     }
   }
 
-  @include isMobile {
+  @include media.isMobile {
     position: fixed;
     top: 0;
     left: auto;
@@ -86,12 +86,12 @@
     height: 64px;
   }
 
-  @include isSmall {
+  @include media.isSmall {
     height: 56px;
     padding: 0 16px;
   }
 
-  @include isXSmall {
+  @include media.isXSmall {
     height: 56px;
     padding: 0 16px;
     background-color: hsl(0deg 0% 0% / 0%);
@@ -102,7 +102,7 @@
   }
 
   &--widget-container {
-    @include d-flex-vh;
+    @include flex.d-flex-vh;
     padding: 2rem;
     margin-left: auto;
 
@@ -112,11 +112,11 @@
     }
 
     a {
-      @include d-flex-v;
+      @include flex.d-flex-v;
       color: var(--palette-secondary-main);
     }
 
-    @include isMobile {
+    @include media.isMobile {
       padding: 0;
       > :not(:first-child) {
         margin: 0 0 0 8px;
@@ -137,7 +137,7 @@ ui-side-drawer {
   grid-area: content;
 }
 
-@include isMobile {
+@include media.isMobile {
   .content-wrapper {
     padding-top: 72px;
   }
@@ -152,7 +152,7 @@ ui-side-drawer {
 :host {
   min-height: 100vh;
   background: var(--palette-background-default);
-  @include isDesktop {
+  @include media.isDesktop {
     display: grid;
     grid:
       'sidenav  content' 100vh /
@@ -161,7 +161,7 @@ ui-side-drawer {
 }
 
 .tmdb-mark {
-  @include d-flex-h;
+  @include flex.d-flex-h;
   margin: 16px 8px;
 
   > img {
@@ -171,7 +171,7 @@ ui-side-drawer {
 
 .navigation,
 .navigation-header {
-  @include isDesktop {
+  @include media.isDesktop {
     border-right: 1px solid var(--palette-action-disabled-background);
   }
 }
@@ -187,13 +187,13 @@ ui-side-drawer {
     max-width: 75%;
   }
 
-  @include isDesktop {
+  @include media.isDesktop {
     display: grid;
   }
 }
 
 .navigation {
-  @include d-flex;
+  @include flex.d-flex;
   flex-direction: column;
   flex: 1;
   overflow: auto;

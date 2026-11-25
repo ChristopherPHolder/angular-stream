@@ -7,7 +7,7 @@ import { baseUrlApiV3 } from './internal/base-urls.constant';
 import { TMDBAppendOptions } from './model/append-options';
 import { TMDBDiscoverOptions } from './discover.resource';
 import { getTMDBSortOptions } from '../sort/utils';
-import { inject, Injectable } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 const base = [baseUrlApiV3, 'movie'].join('/');
@@ -15,10 +15,8 @@ const base = [baseUrlApiV3, 'movie'].join('/');
 const URL_MOVIE_CATEGORY = (category: string) => [base, category].join('/');
 const URL_MOVIE = (id: string) => `${[base, id].join('/')}`;
 const URL_MOVIE_CREDITS = (id: string) => [URL_MOVIE(id), 'credits'].join('/');
-const URL_MOVIE_RECOMMENDATIONS = (id: string) =>
-  [URL_MOVIE(id), 'recommendations'].join('/');
-const URL_MOVIE_QUERY = (query: string) =>
-  `${baseUrlApiV3}/search/movie?query=${query}`;
+const URL_MOVIE_RECOMMENDATIONS = (id: string) => [URL_MOVIE(id), 'recommendations'].join('/');
+const URL_MOVIE_QUERY = (query: string) => `${baseUrlApiV3}/search/movie?query=${query}`;
 
 export type MovieResponse = TMDBMovieModel;
 export type RecommendationsResponse = TMDBPaginateResult<TMDBMovieModel>;
@@ -26,9 +24,7 @@ export type RecommendationsResponse = TMDBPaginateResult<TMDBMovieModel>;
 export type CreditsResponse = TMDBMovieCreditsModel;
 export type CategoryResponse = TMDBPaginateResult<TMDBMovieModel>;
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class MovieResource {
   private readonly http: HttpClient = inject(HttpClient);
 
@@ -37,18 +33,14 @@ export class MovieResource {
     params: TMDBPaginateOptions = {} as TMDBPaginateOptions,
   ): Observable<RecommendationsResponse> => {
     params = getTMDBMovieOptions(params);
-    return this.http.get<RecommendationsResponse>(
-      URL_MOVIE_RECOMMENDATIONS(id),
-      {
-        params: params as unknown as HttpParams,
-      },
-    ) as unknown as Observable<RecommendationsResponse>;
+    return this.http.get<RecommendationsResponse>(URL_MOVIE_RECOMMENDATIONS(id), {
+      params: params as unknown as HttpParams,
+    }) as unknown as Observable<RecommendationsResponse>;
   };
   getMovie = (
     id: string,
     params: TMDBAppendOptions = { append_to_response: 'videos' },
-  ): Observable<MovieResponse> =>
-    this.http.get<MovieResponse>(URL_MOVIE(id), { params });
+  ): Observable<MovieResponse> => this.http.get<MovieResponse>(URL_MOVIE(id), { params });
 
   getCredits = (id: string): Observable<CreditsResponse> =>
     this.http.get<CreditsResponse>(URL_MOVIE_CREDITS(id));
@@ -69,10 +61,7 @@ export class MovieResource {
       .pipe(map((res) => res.results));
 }
 
-function getTMDBMovieOptions(
-  options: TMDBPaginateOptions,
-): TMDBDiscoverOptions {
-
+function getTMDBMovieOptions(options: TMDBPaginateOptions): TMDBDiscoverOptions {
   return {
     ...getTMDBPaginateOptions(options),
     ...getTMDBSortOptions(options),

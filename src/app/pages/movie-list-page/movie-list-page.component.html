@@ -3,9 +3,16 @@
     <h1 data-uf="header-main">{{ headings().main }}</h1>
     <h2 data-uf="header-sub">{{ headings().sub }}</h2>
   </header>
-  <ui-movie-list (paginate)="paginate()" [movies]="movies$">
-  </ui-movie-list>
-  @if (loading()) {
-    <div class="loader"></div>
+  @defer (on immediate; hydrate on idle) {
+    <ui-movie-list
+      streamBoundary="movie-list"
+      [streamBoundaryReady]="listReady()"
+      (paginate)="paginate()"
+      [movies]="movies$"
+    >
+    </ui-movie-list>
+    @if (loading()) {
+      <div class="loader"></div>
+    }
   }
 </article>

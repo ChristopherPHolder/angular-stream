@@ -1,6 +1,5 @@
 import { selectSlice } from '@rx-angular/state/selections';
 import {
-  ChangeDetectionStrategy,
   Component,
   inject,
   ViewEncapsulation,
@@ -12,17 +11,16 @@ import {
   MovieListPageModel,
 } from './movie-list-page.adapter';
 import { MovieListComponent } from '../../ui/pattern/movie-list/movie-list.component';
+import { StreamBoundaryDirective } from '../../streaming/stream-boundary.directive';
 
 type Heading = { main: string; sub: string };
 
 @Component({
-  standalone: true,
-  imports: [MovieListComponent],
+  imports: [MovieListComponent, StreamBoundaryDirective],
   selector: 'ct-movies-list',
   templateUrl: './movie-list-page.component.html',
   styleUrls: ['./movie-list-page.component.scss'],
   encapsulation: ViewEncapsulation.Emulated,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MovieListPageComponent {
   private readonly adapter = inject(MovieListPageAdapter);
@@ -35,6 +33,16 @@ export default class MovieListPageComponent {
   );
   readonly headings = toSignal(this.headings$, { initialValue: { main: '', sub: '' } });
   readonly loading = toSignal(this.loading$, { initialValue: false });
+
+  /**
+   * Readiness for the SSR stream boundary: true once the first page of movies
+   * has actually rendered. Until then the server holds the boundary back and
+   * the shell goes out without it.
+   */
+  readonly listReady = toSignal(
+    this.movies$.pipe(map((movies) => (movies?.length ?? 0) > 0)),
+    { initialValue: false },
+  );
 
   constructor() {
     this.adapter.set({ loading: true });

@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   inject,
   ViewEncapsulation,
@@ -15,12 +14,10 @@ import { RouterLink } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
 
 @Component({
-  standalone: true,
   imports: [RouterLink, GridListComponent, NgOptimizedImage],
   selector: 'ct-person',
   templateUrl: './account-list-page.component.html',
   styleUrls: ['./account-list-page.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
 })
 export default class AccountListPageComponent {

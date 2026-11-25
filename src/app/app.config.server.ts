@@ -1,39 +1,54 @@
-import {
-  ApplicationConfig,
-  Injectable,
-  mergeApplicationConfig,
-} from '@angular/core';
-import { provideServerRendering, withRoutes } from '@angular/ssr';
-import { appConfig } from './app.config';
-import { serverRoutes } from './app.routes.server';
+import { ApplicationConfig, mergeApplicationConfig, Service } from '@angular/core';
+import { provideServerRendering } from '@angular/platform-server';
 import { provideFastSVG, SvgLoadStrategy } from '@push-based/ngx-fast-svg';
-import { join, resolve } from 'node:path';
-import { cwd } from 'node:process';
-import { map, Observable, of } from 'rxjs';
-import { readFileSync } from 'node:fs';
+import { provideRxRenderStrategies } from '@rx-angular/cdk/render-strategies';
+import { concatMap, EMPTY, Observable, of } from 'rxjs';
+import { appConfig } from './app.config';
+import { SVG_ICONS } from './renderer/svg-icons';
+import { RxServerRenderStrategy } from './rx-server-render-strategy';
 
-@Injectable()
-export class IconLoadStrategySsr implements SvgLoadStrategy {
-  config(url: string): Observable<string> {
-    return of(url);
+/**
+ * Server-side SVG load strategy for the Cloudflare Workers runtime.
+ *
+ * The default `SvgLoadStrategyImpl` reads `window` in its constructor (throws
+ * under SSR) and fetches icons over HTTP, and the original Node app read them
+ * from disk with `node:fs` — neither works on Workers (`ssr.platform:
+ * "neutral"`, no `window`, no filesystem).
+ *
+ * Instead icons are inlined into the server bundle at build time (see
+ * `renderer/svg-icons.ts`). The strategy resolves each icon name to its markup
+ * synchronously, so the real `<svg>` is rendered into the SSR HTML and
+ * ngx-fast-svg hydrates it from the DOM on the client — no network request and
+ * no loader-fallback flash. Unknown names complete without emitting so the
+ * library keeps its placeholder rather than crashing on empty markup.
+ */
+@Service({ autoProvided: false })
+export class ServerSvgLoadStrategy implements SvgLoadStrategy {
+  config(name: string): Observable<string> {
+    return of(name);
   }
-  load(url$: Observable<string>): Observable<string> {
-    return url$.pipe(
-      map((url) => readFileSync(resolve(url), { encoding: 'utf8' }))
+  load(name$: Observable<string>): Observable<string> {
+    return name$.pipe(
+      concatMap((name) => {
+        const svg = SVG_ICONS[name];
+        return svg ? of(svg) : EMPTY;
+      }),
     );
   }
 }
 
 const serverConfig: ApplicationConfig = {
   providers: [
-    provideServerRendering(
-      withRoutes(serverRoutes),
-    ),
-    // TODO fix this shit
+    provideServerRendering(),
+    // Force synchronous (native) rendering during SSR so rx-angular's
+    // concurrent strategies don't cause a hydration flicker. See
+    // ./rx-server-render-strategy.
+    provideRxRenderStrategies(RxServerRenderStrategy),
     provideFastSVG({
-      url: (name: string) =>
-        join(cwd(), 'src', 'assets', 'svg-icons', `${name}.svg`),
-      svgLoadStrategy: IconLoadStrategySsr,
+      // Pass the icon name straight through; the strategy resolves it against
+      // the inlined icon map rather than fetching a URL.
+      url: (name: string) => name,
+      svgLoadStrategy: ServerSvgLoadStrategy,
     }),
   ],
 };

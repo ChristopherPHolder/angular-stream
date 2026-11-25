@@ -1,6 +1,6 @@
 import { RxState } from '@rx-angular/state';
 import { patch } from '@rx-angular/cdk/transformations';
-import { inject, Injectable } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { map } from 'rxjs';
 import { optimizedFetch } from '../shared/cdk/optimized-fetch';
 import { rxActions } from '@rx-angular/state/actions';
@@ -23,15 +23,15 @@ interface Actions {
   fetchDiscoverCastMovies: string;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class DiscoverState extends RxState<State> implements AppInitializer {
   private readonly discoverResource = inject(DiscoverResource);
-  private actions = rxActions<Actions>(({ transforms }) => transforms({
-    fetchDiscoverGenreMovies: String,
-    fetchDiscoverCastMovies: String,
-  }));
+  private actions = rxActions<Actions>(({ transforms }) =>
+    transforms({
+      fetchDiscoverGenreMovies: String,
+      fetchDiscoverCastMovies: String,
+    }),
+  );
   readonly fetchDiscoverGenreMovies = this.actions.fetchDiscoverGenreMovies;
 
   readonly genreMoviesByIdSlice = (id: string) =>
@@ -39,7 +39,7 @@ export class DiscoverState extends RxState<State> implements AppInitializer {
       map(({ genreMovies: { value, loading } }) => ({
         loading,
         value: pluck(value, id),
-      }))
+      })),
     );
 
   constructor() {
@@ -50,22 +50,17 @@ export class DiscoverState extends RxState<State> implements AppInitializer {
         optimizedFetch(
           (genre: string) => genre,
           (with_genres: string) =>
-            this.discoverResource
-              .getDiscoverMovies({ with_genres, page: 1 })
-              .pipe(
-                map((resp) => ({ value: { [with_genres]: resp } })),
-                withLoadingEmission()
-              )
-        )
+            this.discoverResource.getDiscoverMovies({ with_genres, page: 1 }).pipe(
+              map((resp) => ({ value: { [with_genres]: resp } })),
+              withLoadingEmission(),
+            ),
+        ),
       ),
       (oldState, newPartial) => {
         const resultState = patch(oldState?.genreMovies, newPartial);
-        resultState.value = patch(
-          oldState?.genreMovies?.value,
-          resultState.value
-        );
+        resultState.value = patch(oldState?.genreMovies?.value, resultState.value);
         return resultState;
-      }
+      },
     );
 
     this.connect(
@@ -74,22 +69,17 @@ export class DiscoverState extends RxState<State> implements AppInitializer {
         optimizedFetch(
           (person) => person,
           (with_cast: string) =>
-            this.discoverResource
-              .getDiscoverMovies({ with_cast, page: 1 })
-              .pipe(
-                map((resp) => ({ value: { [with_cast]: resp } })),
-                withLoadingEmission()
-              )
-        )
+            this.discoverResource.getDiscoverMovies({ with_cast, page: 1 }).pipe(
+              map((resp) => ({ value: { [with_cast]: resp } })),
+              withLoadingEmission(),
+            ),
+        ),
       ),
       (oldState, newPartial) => {
         const resultState = patch(oldState?.personMovies, newPartial);
-        resultState.value = patch(
-          oldState?.personMovies?.value,
-          resultState.value
-        );
+        resultState.value = patch(oldState?.personMovies?.value, resultState.value);
         return resultState;
-      }
+      },
     );
   }
 

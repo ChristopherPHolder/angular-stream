@@ -6,14 +6,11 @@ import { baseUrlApiV4 } from './internal/base-urls.constant';
 import { getTMDBSortOptions } from '../sort/utils';
 import { TMDBDiscoverOptions } from './discover.resource';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Service } from '@angular/core';
 
-const URL_ACCOUNT_LIST = (uid: string) =>
-  [baseUrlApiV4, 'account', uid, 'lists'].join('/');
+const URL_ACCOUNT_LIST = (uid: string) => [baseUrlApiV4, 'account', uid, 'lists'].join('/');
 
-function getTMDBAccountListOptions(
-  options: TMDBPaginateOptions,
-): TMDBDiscoverOptions {
+function getTMDBAccountListOptions(options: TMDBPaginateOptions): TMDBDiscoverOptions {
   return {
     ...getTMDBPaginateOptions(options),
     ...getTMDBSortOptions(options),
@@ -22,9 +19,7 @@ function getTMDBAccountListOptions(
 
 export type TMDBAccountListResponse = TMDBPaginateResult<TMDBAccountList>;
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class AccountResource {
   private readonly http: HttpClient = inject(HttpClient);
   getAccountList = (
