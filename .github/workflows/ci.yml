@@ -36,15 +36,29 @@ jobs:
       # @parcel/watcher, fsevents) — without them workerd has no binary.
       - run: npm ci
 
-      # Also runs ngp's template and TypeScript type check, and the bundle
-      # budgets, so a type error or an oversized bundle fails the build.
-      - run: npm run build
+      # Formatting (Oxfmt) and lint (Oxlint, type-aware) for the whole workspace.
+      - run: npx vp check
 
-      # `vite build` writes dist/ssr/wrangler.json and points wrangler at it
-      # through .wrangler/deploy/config.json, so this deploys the built Worker
-      # rather than the root wrangler.jsonc, whose `main` is TypeScript source.
-      - name: Deploy to Cloudflare Workers
+      # Builds every app through Vite+'s task runner. Each build also runs
+      # ngp's template and TypeScript type check and the bundle budgets, so a
+      # type error or an oversized bundle fails CI.
+      - run: npx vp run -r build
+
+      # `vp build` writes each app's dist/ssr/wrangler.json and points wrangler
+      # at it through the app's .wrangler/deploy/config.json, so this deploys
+      # the built Worker rather than the app's wrangler.jsonc, whose `main` is
+      # TypeScript source.
+      - name: Deploy movies to Cloudflare Workers
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        working-directory: apps/movies
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Deploy demo to Cloudflare Workers
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        working-directory: apps/demo
         run: npx wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "vite dev",
+      "name": "movies: vp dev",
       "type": "chrome",
       "request": "launch",
       "preLaunchTask": "npm: dev",

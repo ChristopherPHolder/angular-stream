@@ -5,6 +5,10 @@ piece while the rest is still on its way. The [README](../README.md#streamed-hyd
 has the short version and the rules for templates; this is the long one, with
 a real response taken apart flush by flush.
 
+To watch each of these steps happen in a browser, run the demo app
+(`npm run dev:demo`). It has one labelled box per behaviour described here, a
+live event log, and a response inspector that shows each flush as it arrives.
+
 - [The request at a glance](#the-request-at-a-glance)
 - [Walkthrough: `/detail/movie/550`](#walkthrough-detailmovie550)
 - [The wire format](#the-wire-format)
@@ -47,12 +51,12 @@ leaves `<body>` open.
 
 The movie page has four `@defer` blocks with a `hydrate` trigger:
 
-| Block | What | Trigger | Where |
-| --- | --- | --- | --- |
-| `d0` | Genre links in the side drawer | `hydrate when genres().length > 0` | `app-shell.component.html` |
-| `d1` | Movie details | `hydrate when movie()` | `movie-detail-page.component.html` |
-| `d3` | Cast list, nested inside `d1` | `hydrate when castList().value.length > 0` | same |
-| `d2` | Recommended movies | `hydrate when !recommendations().loading` | same |
+| Block | What                           | Trigger                                    | Where                              |
+| ----- | ------------------------------ | ------------------------------------------ | ---------------------------------- |
+| `d0`  | Genre links in the side drawer | `hydrate when genres().length > 0`         | `app-shell.component.html`         |
+| `d1`  | Movie details                  | `hydrate when movie()`                     | `movie-detail-page.component.html` |
+| `d3`  | Cast list, nested inside `d1`  | `hydrate when castList().value.length > 0` | same                               |
+| `d2`  | Recommended movies             | `hydrate when !recommendations().loading`  | same                               |
 
 Block ids are handed out in the order the server first meets the blocks, which
 is why the nested cast block is `d3` and not `d2`. It only exists once `d1`
@@ -65,14 +69,14 @@ these captures the server's TMDB requests were delayed on purpose (genres
 400 ms, movie 700 ms, credits 1300 ms, recommendations 1800 ms) to pull the
 steps apart. The sizes are raw, uncompressed bytes.
 
-| Time | Flush | Size | What changes | Hydrated |
-| ---: | --- | ---: | --- | ---: |
-| 40 ms | Shell | 32.1 KB | Everything outside the blocks, plus placeholders | 65–84 ms |
-| 473 ms | Chunk `d0` | 11.2 KB | 19 genre links | 479 ms |
-| 779 ms | Chunk `d1` | 9.7 KB | Movie details, with an empty cast block inside | 785 ms |
-| 1450 ms | Chunk `d3` | 123.2 KB | 75 cast members | 1458 ms |
-| 1884 ms | Chunk `d2`, `done` | 43.8 KB | 20 recommended movies | 1890 ms |
-| 1888 ms | Tail | 14 B | `</body></html>`, `DOMContentLoaded` fires | |
+|    Time | Flush              |     Size | What changes                                     | Hydrated |
+| ------: | ------------------ | -------: | ------------------------------------------------ | -------: |
+|   40 ms | Shell              |  32.1 KB | Everything outside the blocks, plus placeholders | 65–84 ms |
+|  473 ms | Chunk `d0`         |  11.2 KB | 19 genre links                                   |   479 ms |
+|  779 ms | Chunk `d1`         |   9.7 KB | Movie details, with an empty cast block inside   |   785 ms |
+| 1450 ms | Chunk `d3`         | 123.2 KB | 75 cast members                                  |  1458 ms |
+| 1884 ms | Chunk `d2`, `done` |  43.8 KB | 20 recommended movies                            |  1890 ms |
+| 1888 ms | Tail               |     14 B | `</body></html>`, `DOMContentLoaded` fires       |          |
 
 Without the added delay, the same page goes: shell parsed at 34 ms, Angular
 attached at 57 ms, shell hydrated at 76 ms, first contentful paint at 79 ms,
@@ -106,7 +110,7 @@ In the mockups below, each region is labelled with its state:
 
 The server bootstrapped the app and waited for `whenStable()` with HTTP left
 out of it, then rendered the `@defer` blocks (see
-[`defer-blocks.ts`](../src/server/streaming/defer-blocks.ts)). No TMDB request
+[`defer-blocks.ts`](../packages/streaming/src/server/defer-blocks.ts)). No TMDB request
 has answered yet, so every block holds its loading state.
 
 ```html
@@ -205,12 +209,15 @@ No new bytes. `main.ts` has loaded and runs while the response is still open:
 ```html
 <template data-ngs="d0">
   <a class="navigation--link" data-uf="menu-gen-28" href="/list/genre/28" ngb="d0">
-    <fast-svg name="genre" ngh="0"><svg>…</svg></fast-svg> Action </a>
+    <fast-svg name="genre" ngh="0"><svg>…</svg></fast-svg> Action
+  </a>
   … 19 genre links …
 </template>
-<script>__ngs.push({"b":[{"id":"d0","o":1,"n":[…],"v":{…},"d":{"d0":…}}],
-  "s":{"f24df949…":{ /genre/movie/list response }},
-  "p":[ 3 requests still in flight ]})</script>
+<script>
+  __ngs.push({"b":[{"id":"d0","o":1,"n":[…],"v":{…},"d":{"d0":…}}],
+    "s":{"f24df949…":{ /genre/movie/list response }},
+    "p":[ 3 requests still in flight ]})
+</script>
 ```
 
 The script runs the moment the parser reaches it. It removes the block's
@@ -247,16 +254,21 @@ arrived.
 ```html
 <template data-ngs="d1">
   <ui-detail-grid style="opacity: 1;" ngh="0">
-    <img alt="poster movie" title="Fight Club" fetchpriority="high" …>
-    <h1 data-uf="header-main">Fight Club</h1> …
+    <img alt="poster movie" title="Fight Club" fetchpriority="high" … />
+    <h1 data-uf="header-main">Fight Club</h1>
+    …
     <div class="cast-list">
-      <div class="loader"></div><!--ngh=d3-->
-    </div> …
+      <div class="loader"></div>
+      <!--ngh=d3-->
+    </div>
+    …
   </ui-detail-grid>
 </template>
-<script>__ngs.push({"b":[{"id":"d1","o":3,"n":[…2 views],"v":{…},
-  "d":{"d1":{"r":3,"s":2},"d3":{"r":3,"s":2,"p":"d1"}}}],
-  "s":{"6f68cf69…":{ /movie/550 response }},"p":[ credits, recommendations ]})</script>
+<script>
+  __ngs.push({"b":[{"id":"d1","o":3,"n":[…2 views],"v":{…},
+    "d":{"d1":{"r":3,"s":2},"d3":{"r":3,"s":2,"p":"d1"}}}],
+    "s":{"6f68cf69…":{ /movie/550 response }},"p":[ credits, recommendations ]})
+</script>
 ```
 
 The block brings a new block with it: `d3`, the cast list, still showing its
@@ -288,12 +300,20 @@ loader. Its defer info (`"p":"d1"`) names `d1` as its parent.
 
 ```html
 <template data-ngs="d3">
-  <a class="movie-detail--cast-actor" data-uf="cast-0" aria-label="Edward Norton"
-     href="/detail/person/819" ngb="d3"><picture><img alt="Edward Norton" …></picture></a>
+  <a
+    class="movie-detail--cast-actor"
+    data-uf="cast-0"
+    aria-label="Edward Norton"
+    href="/detail/person/819"
+    ngb="d3"
+    ><picture><img alt="Edward Norton" … /></picture
+  ></a>
   … 75 cast members …
 </template>
-<script>__ngs.push({"b":[{"id":"d3","o":3,"n":[],"v":{…},"d":{"d3":…}}],
-  "s":{"78edcd5a…":{ /movie/550/credits response }},"p":[ recommendations ]})</script>
+<script>
+  __ngs.push({"b":[{"id":"d3","o":3,"n":[],"v":{…},"d":{"d3":…}}],
+    "s":{"78edcd5a…":{ /movie/550/credits response }},"p":[ recommendations ]})
+</script>
 ```
 
 `d1` belongs to Angular by now, but `d3` inside it is still dehydrated, so it
@@ -346,42 +366,44 @@ hydration errors.
 
 ## The wire format
 
-Defined in [`stream-protocol.ts`](../src/app/streaming/stream-protocol.ts).
+Defined in [`stream-protocol.ts`](../packages/streaming/src/client/stream-protocol.ts).
 Field names are short because every chunk repeats them.
 
 A chunk is one `<template data-ngs="id">` per block, followed by one script:
 
 ```html
 <template data-ngs="d1">…the block's new root nodes…</template>
-<script>__ngs.push({ "b": [...], "s": {...}, "p": [...], "done": true })</script>
+<script>
+  __ngs.push({ "b": [...], "s": {...}, "p": [...], "done": true })
+</script>
 ```
 
 The script comes last so every template ahead of it has been fully parsed when
 it runs.
 
-| Field | Meaning |
-| --- | --- |
-| `b` | Blocks to replace, in the order their templates appear |
-| `b[].id` | The block's id as the client knows it, which is its `<!--ngh=id-->` anchor |
-| `b[].o` | How many root nodes the server thinks are in front of the anchor. Only used before Angular attaches; after that the app counts. |
-| `b[].v` | The block's serialized view, replacing what the client holds |
-| `b[].n` | Hydration views for components inside the block. The markup's `ngh` attributes index into this list, and the runtime rebases them onto the end of the client's list. |
-| `b[].d` | Defer info for this block and every block nested in it |
-| `s` | Transfer state entries added since the previous flush (TMDB responses) |
-| `p` | Requests still in flight on the server, as `METHOD url` |
-| `done` | The server render is complete; nothing follows |
-| `aborted` | Never sent. The runtime adds it when the document ends without a `done` chunk. |
+| Field     | Meaning                                                                                                                                                              |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `b`       | Blocks to replace, in the order their templates appear                                                                                                               |
+| `b[].id`  | The block's id as the client knows it, which is its `<!--ngh=id-->` anchor                                                                                           |
+| `b[].o`   | How many root nodes the server thinks are in front of the anchor. Only used before Angular attaches; after that the app counts.                                      |
+| `b[].v`   | The block's serialized view, replacing what the client holds                                                                                                         |
+| `b[].n`   | Hydration views for components inside the block. The markup's `ngh` attributes index into this list, and the runtime rebases them onto the end of the client's list. |
+| `b[].d`   | Defer info for this block and every block nested in it                                                                                                               |
+| `s`       | Transfer state entries added since the previous flush (TMDB responses)                                                                                               |
+| `p`       | Requests still in flight on the server, as `METHOD url`                                                                                                              |
+| `done`    | The server render is complete; nothing follows                                                                                                                       |
+| `aborted` | Never sent. The runtime adds it when the document ends without a `done` chunk.                                                                                       |
 
 The shell carries `StreamInit` (`n`, `p`) inline in the runtime script.
 
 ## What the server does on each flush
 
-[`streaming-angular-renderer.ts`](../src/server/streaming/streaming-angular-renderer.ts)
+[`streaming-angular-renderer.ts`](../packages/streaming/src/server/streaming-angular-renderer.ts)
 loops: wait for the next tracked request to finish, wait for the app to
 settle (stable, a task, stable again, so near-simultaneous responses share a
 flush), render any new `@defer` blocks, then flush.
 
-[`hydration-stream.ts`](../src/server/streaming/hydration-stream.ts) builds
+[`hydration-stream.ts`](../packages/streaming/src/server/hydration-stream.ts) builds
 the flush. Angular's hydration annotation only works on a whole app, so every
 flush:
 
@@ -401,7 +423,7 @@ pending list, and not done.
 ## What the browser does with a chunk
 
 **The inline runtime**
-([`stream-runtime.ts`](../src/server/streaming/stream-runtime.ts)) is a
+([`stream-runtime.ts`](../packages/streaming/src/server/stream-runtime.ts)) is a
 classic script, so it exists before Angular does, and each chunk's script
 calls it while the parser is still running. For each block it:
 
@@ -416,7 +438,7 @@ Before Angular attaches, chunks are queued in `__ngs.log`. After that they go
 straight to the app.
 
 **`StreamHydrationClient`**
-([`stream-hydration.ts`](../src/app/streaming/stream-hydration.ts)) keeps
+([`stream-hydration.ts`](../packages/streaming/src/client/stream-hydration.ts)) keeps
 Angular in step:
 
 - **Hydration data.** It rewrites the view Angular holds for a replaced block
@@ -462,7 +484,8 @@ consequences that are easy to miss:
 
 - **Before the first flush:** the Worker catches the error, logs
   `[ssr] streaming render failed before commit, falling back`, and renders the
-  page with the buffered `render()` from `main.server.ts`. That render has
+  page with a buffered `renderApplication` instead (`createStreamingWorker()`
+  in [`worker.ts`](../packages/streaming/src/server/worker.ts)). That render has
   incremental hydration switched off, so `@defer` blocks are left for the
   client. A page with no `window.__ngs` came from this path.
 - **After the first flush:** the status is already sent. The server logs

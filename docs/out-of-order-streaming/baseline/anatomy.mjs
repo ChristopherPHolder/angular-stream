@@ -36,9 +36,7 @@ for (const [label, needle, add] of needles) {
     continue;
   }
   const off = i + add;
-  console.log(
-    `${String(off).padStart(7)}  ${String(br(h.slice(0, off))).padStart(13)}  ${label}`,
-  );
+  console.log(`${String(off).padStart(7)}  ${String(br(h.slice(0, off))).padStart(13)}  ${label}`);
 }
 
 // block sizes
@@ -49,16 +47,8 @@ const blocks = [
     h.indexOf('<ui-side-drawer'),
     h.indexOf('</ui-side-drawer>') + 17,
   ],
-  [
-    'inline <style ng-app-id>',
-    h.indexOf('<style ng-app-id'),
-    h.lastIndexOf('</style>') + 8,
-  ],
-  [
-    'ng-state script',
-    h.indexOf('<script id="ng-state"'),
-    h.indexOf('</script></body>') + 9,
-  ],
+  ['inline <style ng-app-id>', h.indexOf('<style ng-app-id'), h.lastIndexOf('</style>') + 8],
+  ['ng-state script', h.indexOf('<script id="ng-state"'), h.indexOf('</script></body>') + 9],
 ];
 console.log('');
 console.log('   bytes  raw-%  block');

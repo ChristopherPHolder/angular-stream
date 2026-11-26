@@ -23,24 +23,24 @@ would do on the wire.
 
 ## Sizes
 
-| route | raw | brotli -q11 | fits one 14.6 KB flight? |
-|---|---|---|---|
-| `/list/category/popular` | 81,866 | **11,667** | yes, whole document |
-| `/detail/movie/550` | 135,935 | **17,155** | no — spills into a 2nd RTT |
+| route                    | raw     | brotli -q11 | fits one 14.6 KB flight?   |
+| ------------------------ | ------- | ----------- | -------------------------- |
+| `/list/category/popular` | 81,866  | **11,667**  | yes, whole document        |
+| `/detail/movie/550`      | 135,935 | **17,155**  | no — spills into a 2nd RTT |
 
 ## Anatomy of `/list/category/popular`
 
 Byte offsets, and the brotli size of the prefix up to that point:
 
-| raw offset | brotli prefix | landmark |
-|---|---|---|
-| 17,971 | 3,282 | `</head>` |
-| 18,126 | 3,351 | `<ui-side-drawer>` begins |
-| 30,946 | 4,077 | `</ui-side-drawer>` ends |
-| 33,654 | 4,463 | `<div class="content">` — first visible page content |
-| 33,976 | 4,569 | `<ui-movie-list>` |
-| 61,524 | 6,561 | ngx-fast-svg sprite container begins |
-| 81,025 | 11,455 | `<script id="ng-state">` |
+| raw offset | brotli prefix | landmark                                             |
+| ---------- | ------------- | ---------------------------------------------------- |
+| 17,971     | 3,282         | `</head>`                                            |
+| 18,126     | 3,351         | `<ui-side-drawer>` begins                            |
+| 30,946     | 4,077         | `</ui-side-drawer>` ends                             |
+| 33,654     | 4,463         | `<div class="content">` — first visible page content |
+| 33,976     | 4,569         | `<ui-movie-list>`                                    |
+| 61,524     | 6,561         | ngx-fast-svg sprite container begins                 |
+| 81,025     | 11,455        | `<script id="ng-state">`                             |
 
 Block costs:
 
