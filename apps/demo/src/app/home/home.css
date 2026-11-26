@@ -3,6 +3,13 @@
   gap: var(--space-12);
 }
 
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
 /* The history: a year, then who did what and why. */
 .history {
   display: grid;

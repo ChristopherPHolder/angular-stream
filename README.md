@@ -5,6 +5,14 @@ Vite+. The browser starts hydrating the page while the response is still
 arriving. The repo holds two apps that use it: a real TMDB-backed movie browser,
 and a demo that shows each step of streamed hydration as it happens.
 
+- **[The demo](https://angular-stream-demo.chris-holder.workers.dev/)** is the
+  place to start: why a page should not wait for its slowest part, how one
+  response delivers it in pieces, and a live example with the code for it.
+- **[The movie browser](https://angular-stream.chris-holder.workers.dev/)** is
+  the same technique on a real app.
+- **[`docs/streamed-hydration.md`](docs/streamed-hydration.md)** is the long
+  version, with a real response taken apart flush by flush.
+
 Most Angular SSR guides target a Node server and the Angular CLI. This repo
 takes the other path: Angular compiled by [ngp][ngp] through Vite, with the
 server bundle running directly in workerd, static assets served by Cloudflare's

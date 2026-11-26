@@ -5,8 +5,9 @@ piece while the rest is still on its way. The [README](../README.md#streamed-hyd
 has the short version and the rules for templates; this is the long one, with
 a real response taken apart flush by flush.
 
-To watch these steps happen in a browser, run the demo app
-(`npm run dev:demo`):
+To watch these steps happen in a browser, open
+[the demo](https://angular-stream-demo.chris-holder.workers.dev/), or run it
+locally with `npm run dev:demo`:
 
 - `/` is the place to start. It explains why, with the same page sent three
   ways on one clock, and how, with one response stepped through piece by piece.
