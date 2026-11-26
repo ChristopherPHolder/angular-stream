@@ -109,6 +109,7 @@ export async function renderStreamingAngular({
     );
     const stream = new HydrationStream(applicationRef, serverDocument);
     const init = stream.begin(requestTracker.pending());
+    const styles = new ComponentStyles(serverDocument, shell);
 
     const encoder = new TextEncoder();
     let controller!: ReadableStreamDefaultController<Uint8Array>;
@@ -169,8 +170,13 @@ export async function renderStreamingAngular({
 
           const done = requestTracker.idle;
           const flush = stream.flush(requestTracker.pending(), done);
+          // Taken after the flush: rendering the blocks it carries is what
+          // adds the styles of components that are new to the page.
+          const newStyles = styles.takeNew();
           if (flush !== null) {
-            controller.enqueue(encoder.encode(frameChunk(flush.chunk, flush.markup)));
+            controller.enqueue(encoder.encode(frameChunk(flush.chunk, flush.markup, newStyles)));
+          } else if (newStyles !== '') {
+            controller.enqueue(encoder.encode(newStyles));
           }
           if (done) {
             break;
@@ -197,6 +203,48 @@ export async function renderStreamingAngular({
     terminated = true;
     await destroyOnce();
     throw error;
+  }
+}
+
+/**
+ * The stylesheets Angular adds to `<head>` for components: a `<style>` for
+ * inline styles, or a `<link>` for external ones in dev. A component that
+ * first renders inside a streamed block does so after the shell has gone out,
+ * so each flush has to carry the stylesheets the shell did not, or the block
+ * arrives unstyled and stays that way until the browser renders the component
+ * itself.
+ *
+ * What was sent is read from the serialized shell, not from `<head>`: the
+ * stylesheet of a component a `@defer` block depends on can already be in
+ * `<head>` while the component has not rendered, and serialization leaves it
+ * out.
+ */
+export class ComponentStyles {
+  private readonly sent: Set<Element>;
+
+  constructor(
+    private readonly doc: Document,
+    shell: string,
+  ) {
+    this.sent = new Set(this.current().filter((element) => shell.includes(element.outerHTML)));
+  }
+
+  /** Markup for every component stylesheet the client does not have yet. */
+  takeNew(): string {
+    let markup = '';
+    for (const element of this.current()) {
+      if (!this.sent.has(element)) {
+        this.sent.add(element);
+        markup += element.outerHTML;
+      }
+    }
+    return markup;
+  }
+
+  private current(): Element[] {
+    return Array.from(
+      this.doc.head.querySelectorAll('style[ng-app-id], link[rel="stylesheet"][ng-app-id]'),
+    );
   }
 }
 
