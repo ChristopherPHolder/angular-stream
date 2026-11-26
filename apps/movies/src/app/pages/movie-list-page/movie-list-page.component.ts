@@ -1,7 +1,7 @@
 import { selectSlice } from '@rx-angular/state/selections';
-import { Component, inject, ViewEncapsulation } from '@angular/core';
+import { Component, computed, inject, ViewEncapsulation } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map, Observable } from 'rxjs';
+import { map } from 'rxjs';
 import { MovieListPageAdapter, MovieListPageModel } from './movie-list-page.adapter';
 import { MovieListComponent } from '../../ui/pattern/movie-list/movie-list.component';
 
@@ -19,11 +19,14 @@ export default class MovieListPageComponent {
 
   readonly movies$ = this.adapter.movies$;
   readonly loading$ = this.adapter.select('loading');
-  readonly headings$: Observable<Heading> = this.adapter.select(
-    selectSlice(['identifier', 'type', 'genres']),
-    map(toHeading),
-  );
-  readonly headings = toSignal(this.headings$, { initialValue: { main: '', sub: '' } });
+  private readonly route = toSignal(this.adapter.select(selectSlice(['identifier', 'type'])));
+  private readonly genres = toSignal(this.adapter.select('genres'));
+  /**
+   * Categories and searches take their heading from the URL, so it is in the
+   * shell. A genre needs its name from TMDB, so its heading streams in with
+   * the genre list.
+   */
+  readonly headings = computed(() => toHeading(this.route(), this.genres()));
   readonly loading = toSignal(this.loading$, { initialValue: false });
 
   /**
@@ -42,19 +45,15 @@ export default class MovieListPageComponent {
 }
 
 function toHeading(
-  routerParams: Pick<MovieListPageModel, 'type' | 'identifier' | 'genres'>,
+  route: Pick<MovieListPageModel, 'type' | 'identifier'> | undefined,
+  genres: MovieListPageModel['genres'] | undefined,
 ): Heading {
-  const { identifier, type, genres } = routerParams;
-  // default
-  let main: string = identifier;
-  const sub: string = type;
-
-  // genre identifier needs to get mapped to a real title
-  if (type === 'genre') {
-    main = genres[parseInt(identifier)].name;
+  if (!route) {
+    return { main: '', sub: '' };
   }
+  const { identifier, type } = route;
+  // a genre identifier is an id, mapped to its name once the genres are there
+  const main = type === 'genre' ? (genres?.[identifier]?.name ?? '') : identifier;
 
-  main = main.replace(/[-_]/, ' ');
-
-  return { main, sub };
+  return { main: main.replace(/[-_]/, ' '), sub: type };
 }

@@ -1,7 +1,9 @@
 <article>
   <header>
-    <h1 data-uf="header-main">{{ headings().main }}</h1>
-    <h2 data-uf="header-sub">{{ headings().sub }}</h2>
+    @defer (on immediate; hydrate when headings().main) {
+      <h1 data-uf="header-main">{{ headings().main }}</h1>
+      <h2 data-uf="header-sub">{{ headings().sub }}</h2>
+    }
   </header>
   @defer (on immediate; hydrate when listReady()) {
     <ui-movie-list (paginate)="paginate()" [movies]="movies$"> </ui-movie-list>
