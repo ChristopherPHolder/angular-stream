@@ -1,6 +1,12 @@
 # Baseline SSR documents
 
-Captured from a production build of the current Worker setup:
+> **Historical.** Captured from the buffered renderer, before streamed hydration
+> landed. Each route was then one document sent in one piece. Responses are now a
+> shell followed by chunks (see [`docs/streamed-hydration.md`](../../streamed-hydration.md)),
+> so the offsets and sizes below no longer describe what the Worker sends. They
+> stay here as the "before".
+
+Captured from a production build of the Worker setup at the time:
 
 ```bash
 npm run build

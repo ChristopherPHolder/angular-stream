@@ -135,6 +135,11 @@ arrives instead of waiting for the last one:
    trigger fires. Nothing is fetched twice: a request the server is already
    making is held back in the browser until its response arrives on the stream.
 
+[`docs/streamed-hydration.md`](docs/streamed-hydration.md) takes a real
+response apart flush by flush. It shows the HTML each flush carries, what the
+page looks like after it, and when each part hydrates. It also covers the wire
+format and how to verify a change.
+
 ### Making something stream
 
 Put it in a `@defer` block with a `hydrate` trigger, directly inside an element:
@@ -149,8 +154,10 @@ Put it in a `@defer` block with a `hydrate` trigger, directly inside an element:
 
 Angular leaves such a block's markup alone until the trigger fires, which is
 what lets the server replace it underneath a running application. Everything
-outside a block is the shell: if it changes after the shell was sent, the client
-renders the change itself from the streamed data.
+outside a block is the shell, and the shell is sent once: if it changes after
+that, the client renders the change itself from the streamed data, and the
+change never appears in the server HTML. Text that depends on data belongs
+inside a block.
 
 - **`hydrate when <data is there>`** hydrates the block as soon as its own data
   has arrived, while other blocks are still streaming. Prefer it.
@@ -163,6 +170,23 @@ renders the change itself from the streamed data.
   counting, and a block at the root of an `@if`, in an `<ng-container>` or in
   projected content is part of its parent's count. The server logs a warning for
   such a block and leaves it to the client.
+- **What a block renders with no data is what paints first.** It is in the
+  shell, so make it a proper loading state.
+- **Chunks follow the network, not the document.** They go out in the order
+  requests finish, and a request that finishes before the shell is taken lands
+  in the shell instead of a chunk.
+
+### Debugging
+
+- `window.__ngs` is the inline runtime. If it is missing, the Worker fell back
+  to the buffered render; the server logs
+  `[ssr] streaming render failed before commit`.
+- Check hydration under `npm run dev`. Angular only checks node matches in
+  dev mode.
+- Request each page at least twice on the same server process. NG0600 from
+  `hydrate when` only shows from the second request on.
+
+More in [Verifying a change](docs/streamed-hydration.md#verifying-a-change).
 
 ### Where things live
 
@@ -191,6 +215,7 @@ renders the change itself from the streamed data.
 - **`hydrate on hover | interaction`** need Angular's event-dispatch contract
   script, which this build does not inline.
 - **No CSP nonce** on the inline scripts yet.
+- **Not cacheable.** Streamed responses are sent with `Cache-Control: no-store`.
 - **If the response breaks off**, the browser keeps what it has and the client
   fetches the rest itself.
 
