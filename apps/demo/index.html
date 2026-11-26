@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Streamed hydration demo</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <!--
+      Demo instrumentation, not part of streamed hydration.
+
+      Records what happens to the page and when, for the event log. It is a
+      classic script in <head>, so it runs before the shell's inline runtime
+      and sees every chunk, including those that land before Angular starts.
+      It watches the runtime from outside: `window.__ngs` being installed,
+      each `__ngs.push(...)`, and `__ngs.sink` being set when the app attaches.
+    -->
+    <script>
+      (() => {
+        const demo = (window.__demo = { events: [] });
+        demo.log = (kind, text) => {
+          demo.events.push({ at: Math.round(performance.now()), kind, text });
+          window.dispatchEvent(new Event('demo-event'));
+        };
+        const boxOf = (blockId) => {
+          const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_COMMENT);
+          for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+            if (node.data.trim() === 'ngh=' + blockId) {
+              return node.parentElement?.closest('[data-box]')?.dataset.box ?? blockId;
+            }
+          }
+          return blockId;
+        };
+
+        let runtime;
+        Object.defineProperty(window, '__ngs', {
+          configurable: true,
+          get: () => runtime,
+          set(value) {
+            runtime = value;
+            const pending = value.p.length;
+            demo.log(
+              'shell',
+              'Shell parsed. The inline runtime is installed; the server still has ' +
+                pending +
+                (pending === 1 ? ' request' : ' requests') +
+                ' in flight.',
+            );
+
+            let push;
+            let sink = null;
+            Object.defineProperty(value, 'push', {
+              get: () => push,
+              set(original) {
+                push = function (chunk) {
+                  const names = chunk.b.map((block) => block.id + ' "' + boxOf(block.id) + '"');
+                  const before = sink === null;
+                  original.call(this, chunk);
+                  const what = names.length ? 'swapped in ' + names.join(', ') : 'no markup';
+                  demo.log(
+                    'chunk',
+                    'Chunk applied: ' +
+                      what +
+                      (before ? '. Angular is not running yet; queued for it.' : '.') +
+                      (chunk.done ? ' Marked done: nothing else is coming.' : ''),
+                  );
+                };
+              },
+            });
+            Object.defineProperty(value, 'sink', {
+              get: () => sink,
+              set(next) {
+                sink = next;
+                if (next) {
+                  demo.log('boot', 'Angular started and attached to the stream.');
+                }
+              },
+            });
+          },
+        });
+        document.addEventListener('DOMContentLoaded', () =>
+          demo.log('end', 'Response complete: the parser reached </html>.'),
+        );
+      })();
+    </script>
+  </head>
+  <body>
+    <app-root></app-root>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

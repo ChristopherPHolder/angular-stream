@@ -1,0 +1,127 @@
+<header class="intro">
+  <h1>Response inspector</h1>
+  <p>
+    This fetches the walkthrough page again and splits the response at the boundaries the server
+    writes. Each box below is one flush, shown when its last byte arrives, with the time since the
+    request started.
+  </p>
+  <div class="speeds" role="group" aria-label="Speed">
+    @for (speed of speeds; track speed.scale) {
+      <button
+        type="button"
+        [attr.aria-pressed]="scale() === speed.scale"
+        [disabled]="running()"
+        (click)="run(speed.scale)"
+      >
+        {{ speed.label }}
+      </button>
+    }
+  </div>
+  @if (error(); as message) {
+    <p class="error">The request failed: {{ message }}</p>
+  }
+</header>
+
+@if (flushes().length === 0 && !error()) {
+  <p class="waiting">Waiting for the first flush…</p>
+}
+
+<ol class="flushes">
+  @for (flush of flushes(); track $index; let n = $index) {
+    <li class="box flush" [class]="'box flush flush--' + flush.kind">
+      <header class="box-head">
+        <span class="tag" [class]="'tag tag--' + (flush.kind === 'chunk' ? 'chunk' : 'shell')">
+          {{ flush.kind }}
+        </span>
+        <h2>Flush {{ n + 1 }} · {{ kb(flush.bytes) }} · arrived at {{ flush.at }} ms</h2>
+      </header>
+
+      @switch (flush.kind) {
+        @case ('shell') {
+          <p>
+            The whole page except the data: annotated for hydration, with a placeholder in every
+            block. Nothing after it is needed for Angular to start.
+          </p>
+          <ul>
+            <li>
+              Anchors for {{ flush.anchors.length }} blocks, which chunks will fill:
+              <code>{{ flush.anchors.join(', ') }}</code>
+            </li>
+            <li>
+              Still in flight on the server: {{ flush.pending.length }}
+              <ul>
+                @for (request of flush.pending; track request) {
+                  <li>
+                    <code>{{ path(request) }}</code>
+                  </li>
+                }
+              </ul>
+            </li>
+            <li>
+              Ends with the inline runtime and {{ flush.entryScripts }} entry
+              {{ flush.entryScripts === 1 ? 'script' : 'scripts' }} marked <code>async</code>, so
+              Angular can start now.
+            </li>
+            @if (flush.outsideQuote !== null) {
+              <li>
+                The "outside any block" quote, as sent: <code>{{ flush.outsideQuote }}</code>. It
+                stays like that in the server HTML.
+              </li>
+            }
+            <li>No <code>&lt;/body&gt;</code>: the response is still open.</li>
+          </ul>
+        }
+        @case ('chunk') {
+          <p>
+            A <code>&lt;template&gt;</code> per block, then one <code>__ngs.push(…)</code> script
+            that swaps them in and passes the data to the app.
+          </p>
+          <ul>
+            @for (block of flush.blocks; track block.id) {
+              <li>
+                Replaces <code>{{ block.id }}</code>
+                @if (block.name; as name) {
+                  ({{ name }})
+                }
+                with {{ kb(block.markupBytes) }} of server-rendered markup, in place of the
+                {{ block.replaces }} {{ block.replaces === 1 ? 'node' : 'nodes' }} in front of its
+                anchor.
+                <pre><code>{{ block.excerpt }}</code></pre>
+              </li>
+            } @empty {
+              <li>No markup, only data.</li>
+            }
+            <li>
+              Transfer state: {{ flush.stateEntries }} new
+              {{ flush.stateEntries === 1 ? 'entry' : 'entries' }} ({{ kb(flush.stateBytes) }}). The
+              browser's held request for it is released.
+            </li>
+            <li>
+              @if (flush.pending.length === 0) {
+                Nothing in flight on the server any more.
+              } @else {
+                Still in flight on the server: {{ flush.pending.length }}.
+              }
+            </li>
+            @if (flush.done) {
+              <li>
+                <strong>Marked done:</strong> nothing else is coming. The browser now releases the
+                blocks it was holding back, such as block D with <code>hydrate on idle</code>.
+              </li>
+            }
+          </ul>
+        }
+        @case ('tail') {
+          <p>
+            <code>&lt;/body&gt;&lt;/html&gt;</code>. The parser finishes and
+            <code>DOMContentLoaded</code> fires.
+          </p>
+        }
+      }
+    </li>
+  }
+</ol>
+
+@if (running() && flushes().length > 0) {
+  <p class="waiting">The response is still open…</p>
+}
