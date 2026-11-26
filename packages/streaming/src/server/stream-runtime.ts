@@ -1,4 +1,4 @@
-import type { StreamChunk, StreamInit } from '../../app/streaming/stream-protocol';
+import type { StreamChunk, StreamInit } from '../client/stream-protocol';
 
 /**
  * JSON that is safe inside an inline `<script>`: no `<` to end the element

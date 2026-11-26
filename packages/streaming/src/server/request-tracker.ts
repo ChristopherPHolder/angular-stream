@@ -1,4 +1,4 @@
-import type { ServerRequestTracker } from '../../app/streaming/server-request-tracker';
+import type { ServerRequestTracker } from '../client/server-request-tracker';
 
 /**
  * The request-scoped counter behind `SERVER_REQUEST_TRACKER`. One per render,

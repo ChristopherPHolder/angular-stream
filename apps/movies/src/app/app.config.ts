@@ -9,7 +9,7 @@ import { tmdbReadAccessInterceptor } from './auth/tmdb-http-interceptor.feature'
 import { provideTmdbImageLoader } from './data-access/images/image-loader';
 import { provideRouter } from '@angular/router';
 import { ROUTES } from './routes';
-import { provideStreamHydration, streamHttpInterceptor } from './streaming/stream-hydration';
+import { provideStreamHydration, streamHttpInterceptor } from '@angular-stream/streaming';
 import {
   provideClientHydration,
   withEventReplay,

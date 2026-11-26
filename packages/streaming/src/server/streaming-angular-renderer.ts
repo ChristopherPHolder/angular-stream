@@ -1,5 +1,10 @@
 import { ɵREQUESTS_CONTRIBUTE_TO_STABILITY } from '@angular/common/http';
-import { type ApplicationRef, mergeApplicationConfig } from '@angular/core';
+import {
+  type ApplicationConfig,
+  type ApplicationRef,
+  type Type,
+  mergeApplicationConfig,
+} from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import {
   INITIAL_CONFIG,
@@ -8,15 +13,21 @@ import {
   ɵSERVER_CONTEXT,
   ɵrenderInternal,
 } from '@angular/platform-server';
-import { App } from '../../app/app';
-import { config } from '../../app/app.config.server';
-import { SERVER_REQUEST_TRACKER } from '../../app/streaming/server-request-tracker';
+import { SERVER_REQUEST_TRACKER } from '../client/server-request-tracker';
 import { MANUAL_DEFER_BLOCKS, ServerDeferBlocks } from './defer-blocks';
 import { HydrationStream } from './hydration-stream';
 import { RequestTracker } from './request-tracker';
 import { frameChunk, frameRuntime } from './stream-runtime';
 
 export interface StreamingAngularRenderOptions {
+  /** The application's root component. */
+  rootComponent: Type<unknown>;
+  /**
+   * The application's server config: its browser config merged with
+   * `provideServerRendering()` and whatever else the server needs.
+   */
+  config: ApplicationConfig;
+  /** The `index.html` template to render into. */
   document: string;
   url: string;
 }
@@ -55,6 +66,8 @@ export interface OpenBodyDocument {
  * first byte.
  */
 export async function renderStreamingAngular({
+  rootComponent,
+  config,
   document,
   url,
 }: StreamingAngularRenderOptions): Promise<Response> {
@@ -74,7 +87,7 @@ export async function renderStreamingAngular({
 
   try {
     const applicationRef = await bootstrapApplication(
-      App,
+      rootComponent,
       mergeApplicationConfig(config, {
         providers: [
           // HTTP leaves `whenStable()` to the tracker; see step 1 above.

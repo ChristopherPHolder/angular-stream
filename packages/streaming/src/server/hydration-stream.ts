@@ -14,7 +14,7 @@ import {
   type StreamBlock,
   type StreamChunk,
   type StreamInit,
-} from '../../app/streaming/stream-protocol';
+} from '../client/stream-protocol';
 
 const NGH_DATA_KEY = makeStateKey<SerializedView[]>(NGH.dataKey);
 const NGH_DEFER_KEY = makeStateKey<Record<string, SerializedDeferBlock>>(NGH.deferKey);
