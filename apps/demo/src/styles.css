@@ -19,7 +19,8 @@
   --placeholder: #b06d06;
   --placeholder-bg: #fdf3df;
   --chunk: #7a4cc2;
-  --hydrated: #10806a;
+  /* 4.98:1 on --hydrated-bg, 5.77:1 on --surface: AA for small text. */
+  --hydrated: #0d7360;
   --hydrated-bg: #ddf3ec;
   --warning: #b3261e;
   --warning-bg: #fbe9e7;
