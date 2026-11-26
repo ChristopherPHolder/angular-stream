@@ -5,6 +5,9 @@ import { ActivatedRoute } from '@angular/router';
 import { DemoBackend, STEP_DELAYS, type Step, type StepData } from '../demo-backend';
 import { HydrationStatus } from './hydration-status';
 
+/** The four steps this page shows; the simple page has its own. */
+type WalkthroughStep = Exclude<Step, 'widget'>;
+
 /** `?scale=` multiplies every delay: 3 is slow motion, 0 sends everything at once. */
 export function readScale(value: string | null): number {
   const scale = Number(value ?? 1);
@@ -23,7 +26,7 @@ export class Walkthrough {
   protected readonly scale = readScale(inject(ActivatedRoute).snapshot.queryParamMap.get('scale'));
 
   /** Each step's delay at the current speed, in milliseconds. */
-  protected readonly delay: Record<Step, number> = {
+  protected readonly delay: Record<WalkthroughStep, number> = {
     a: STEP_DELAYS.a * this.scale,
     b: STEP_DELAYS.b * this.scale,
     c: STEP_DELAYS.c * this.scale,
@@ -44,7 +47,7 @@ export class Walkthrough {
     return data ? `Data A arrived after ${data.delayMs} ms.` : '';
   });
 
-  private load(step: Step): Signal<StepData | undefined> {
+  private load(step: WalkthroughStep): Signal<StepData | undefined> {
     return toSignal(
       this.http.get<StepData>(`/api/steps/${step}`, { params: { delay: this.delay[step] } }),
     );

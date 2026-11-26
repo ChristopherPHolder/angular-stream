@@ -7,6 +7,11 @@ export const routes: Routes = [
     loadComponent: () => import('./walkthrough/walkthrough').then((m) => m.Walkthrough),
   },
   {
+    path: 'simple',
+    title: 'Shell, widget, hydration',
+    loadComponent: () => import('./simple/simple').then((m) => m.Simple),
+  },
+  {
     path: 'inspect',
     title: 'Response inspector',
     loadComponent: () => import('./inspector/inspector').then((m) => m.Inspector),

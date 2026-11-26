@@ -259,3 +259,8 @@ button:disabled {
     animation: none;
   }
 }
+
+.layout--single {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 960px;
+}

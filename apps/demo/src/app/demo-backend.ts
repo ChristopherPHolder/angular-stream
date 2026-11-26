@@ -17,10 +17,10 @@ export interface StepData {
   answeredBy: 'server' | 'browser';
 }
 
-export type Step = 'a' | 'b' | 'c' | 'd';
+export type Step = 'a' | 'b' | 'c' | 'd' | 'widget';
 
 /** How long each piece of data takes at normal speed, in milliseconds. */
-export const STEP_DELAYS: Record<Step, number> = { a: 500, d: 800, b: 1200, c: 2000 };
+export const STEP_DELAYS: Record<Step, number> = { a: 500, d: 800, b: 1200, c: 2000, widget: 5000 };
 
 /**
  * A fake API that lives inside the app, on the server and in the browser, so
