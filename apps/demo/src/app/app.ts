@@ -66,6 +66,7 @@ function currentPage(path: string): string | null {
       <div class="bottom-inner">
         <p>Streamed server-side rendering for Angular, on Cloudflare Workers.</p>
         <nav aria-label="Elsewhere">
+          <a href="https://angular-stream.chris-holder.workers.dev/">Angular Movies, a real app</a>
           <a [href]="repo">Source on GitHub</a>
           <a [href]="repo + '/blob/main/docs/streamed-hydration.md'">How it works, in depth</a>
           <a href="https://push-based.io/">PushBased</a>
