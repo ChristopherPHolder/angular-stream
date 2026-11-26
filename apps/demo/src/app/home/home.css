@@ -1,0 +1,67 @@
+:host {
+  display: grid;
+  gap: var(--space-12);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+/* The history: a year, then who did what and why. */
+.history {
+  display: grid;
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.entry-year {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-neutral-600);
+}
+
+.entry-body {
+  display: grid;
+  gap: var(--space-1-5);
+  justify-items: start;
+  padding-left: var(--space-5);
+  border-left: 2px solid var(--color-neutral-200);
+}
+
+.entry-body h3,
+.entry-body p {
+  margin: 0;
+}
+
+.entry-body p {
+  max-width: 72ch;
+}
+
+.entry-body a {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+q {
+  color: var(--color-text-heading);
+}
+
+@media (max-width: 640px) {
+  .entry {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-1);
+  }
+}

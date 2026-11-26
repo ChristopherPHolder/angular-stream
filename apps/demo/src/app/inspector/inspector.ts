@@ -30,7 +30,7 @@ export class Inspector {
     this.error.set(null);
     this.running.set(true);
     try {
-      for await (const flush of readFlushes(`/?scale=${scale}`, entryScriptCount())) {
+      for await (const flush of readFlushes(`/walkthrough?scale=${scale}`, entryScriptCount())) {
         this.flushes.update((flushes) => [...flushes, flush]);
       }
     } catch (error) {

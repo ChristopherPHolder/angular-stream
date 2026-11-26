@@ -1,26 +1,50 @@
 :host {
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-12);
 }
 
-.aside,
-.clock {
+p,
+h2,
+h3,
+ol,
+ul {
   margin: 0;
 }
 
-.steps {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-3);
-  margin: 0;
+ol,
+ul {
   padding: 0;
   list-style: none;
 }
 
-@media (max-width: 640px) {
-  .steps {
-    grid-template-columns: minmax(0, 1fr);
-  }
+.part-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.part-head .pb-btn {
+  margin-left: auto;
+}
+
+.clock,
+.step-n,
+.step-time {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock {
+  color: var(--color-neutral-600);
+}
+
+/* The live demo. */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
 }
 
 .step {
@@ -29,7 +53,7 @@
   padding: var(--space-4);
   border: 1px dashed var(--color-neutral-300);
   border-radius: var(--radius-lg);
-  color: var(--color-text-muted);
+  color: var(--color-neutral-600);
   transition:
     border-color 0.3s,
     background-color 0.3s;
@@ -40,22 +64,6 @@
   border-color: var(--hydrated);
   background: var(--hydrated-bg);
   color: var(--color-text-heading);
-}
-
-.step-n,
-.step-time {
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.clock {
-  min-height: 1.75rem;
-  font-family: var(--font-mono);
-  font-size: 1.125rem;
-  line-height: 1.75rem;
-  font-variant-numeric: tabular-nums;
-  color: var(--color-text-muted);
 }
 
 .frame {
@@ -94,12 +102,38 @@
 }
 
 .placeholder p {
-  margin: 0;
   max-width: 42ch;
 }
 
 .aside {
-  color: var(--color-text-muted);
+  color: var(--color-neutral-600);
   font-size: 0.875rem;
   line-height: 1.25rem;
+}
+
+/* The code: what to do on the left, the code for it on the right. */
+.how {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.how-step,
+.how-text,
+.how-code {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+}
+
+@media (min-width: 900px) {
+  .how-step {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: var(--space-8);
+  }
+}
+
+@media (max-width: 640px) {
+  .steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

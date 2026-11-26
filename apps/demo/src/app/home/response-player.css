@@ -1,0 +1,100 @@
+:host {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-6);
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.bar,
+.steps,
+.arrows {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.bar {
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.caption {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+}
+
+.caption h3,
+.caption p,
+.pane-title {
+  margin: 0;
+}
+
+.caption p {
+  max-width: 78ch;
+}
+
+.panes {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.pane {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.pane-title {
+  font-size: 0.75rem;
+  color: var(--color-neutral-600);
+}
+
+.mock {
+  min-height: 15rem;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1-5);
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--color-neutral-600);
+}
+
+.swatch {
+  width: var(--space-3);
+  height: var(--space-3);
+  border-left: 3px solid var(--color-primary-600);
+  background: var(--color-primary-50);
+}
+
+@media (min-width: 801px) {
+  /* Room for the longest caption, so stepping moves nothing. */
+  .caption {
+    min-height: 8.5rem;
+  }
+}
+
+@media (max-width: 800px) {
+  .panes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* The page first: it is what changes at every step. */
+  .pane--page {
+    order: -1;
+  }
+}

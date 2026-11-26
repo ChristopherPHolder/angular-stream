@@ -1,0 +1,222 @@
+<header class="intro">
+  <p class="text-subtitle eyebrow">Streamed hydration for Angular</p>
+  <h1 class="text-hero-title">Don't make the whole page wait for its slowest part</h1>
+  <p class="text-lead">
+    A server-rendered Angular page is sent when all of it is ready, so one slow request holds
+    everything back. This project sends the page straight away and streams the slow parts into it as
+    they finish, in the same response. Angular hydrates each part as it lands.
+  </p>
+  <p class="hero-actions">
+    <a class="pb-btn pb-btn-lg pb-btn-primary" href="/example">Watch the live example</a>
+    <a class="pb-btn pb-btn-lg pb-btn-ghost" href="/#how-title">See how it works</a>
+  </p>
+</header>
+
+<section class="part" aria-labelledby="why-title">
+  <h2 id="why-title" class="text-section-title">A page is as fast as its slowest request</h2>
+  <p>
+    Take a product page. The product itself renders at once. Its reviews take a second to load, and
+    its recommendations take three. Here is that page sent three ways.
+  </p>
+
+  <demo-race />
+
+  <p>
+    All three finish at the same moment: streaming does not make a slow request faster. What changes
+    is everything else. Sent out of order, the product is on screen after 0.1 seconds and the
+    reviews after 1, where the other two leave the reader with a blank or half-empty page for 3. The
+    browser also gets to start on the styles, fonts and scripts that much sooner.
+  </p>
+</section>
+
+<section class="part" aria-labelledby="how-title">
+  <h2 id="how-title" class="text-section-title">How it works: one response, sent in pieces</h2>
+  <p>
+    There is no second request and no fetching from the browser. The server keeps the response open
+    and adds to it. Step through one page load, with a single slow part:
+  </p>
+
+  <demo-response-player />
+
+  <p>
+    <a class="pb-btn pb-btn-lg pb-btn-primary" href="/example">Watch a real page do this</a>
+  </p>
+</section>
+
+<section class="part" aria-labelledby="history-title">
+  <h2 id="history-title" class="text-section-title">Where the idea comes from</h2>
+  <p>
+    Out-of-order streaming is about fifteen years old. Each framework that has it arrived at it for
+    the same reason.
+  </p>
+
+  <ol class="history">
+    <li class="entry">
+      <p class="entry-year">2010</p>
+      <div class="entry-body">
+        <h3 class="text-card-title">Facebook, BigPipe</h3>
+        <p>
+          The page is cut into “pagelets”. The server flushes each one as soon as it has it, and a
+          script call puts it into its placeholder. The reason given:
+          <q
+            >When the web server is busy generating a page, the browser is idle and wasting its
+            cycles doing nothing.</q
+          >
+          The result:
+          <q>BigPipe reduces user perceived latency by half in most browsers.</q>
+        </p>
+        <a
+          href="https://engineering.fb.com/2010/06/04/web/bigpipe-pipelining-web-pages-for-high-performance/"
+          >BigPipe: Pipelining web pages for high performance</a
+        >
+      </div>
+    </li>
+    <li class="entry">
+      <p class="entry-year">2014</p>
+      <div class="entry-body">
+        <h3 class="text-card-title">eBay, Marko</h3>
+        <p>
+          A late fragment is written into a hidden element, and a script moves it to a placeholder
+          with a matching id. Without streaming,
+          <q>the user will be staring at a blank screen for a large portion of the time</q>; and
+          streaming in order means a fragment that is ready early waits behind the ones above it.
+        </p>
+        <a
+          href="https://calendar.perfplanet.com/2014/async-fragments-rediscovering-progressive-html-rendering-with-marko/"
+          >Async fragments: rediscovering progressive HTML rendering with Marko</a
+        >
+      </div>
+    </li>
+    <li class="entry">
+      <p class="entry-year">2021</p>
+      <div class="entry-body">
+        <h3 class="text-card-title">React 18, and Next.js on top of it</h3>
+        <p>
+          A <code>&lt;Suspense&gt;</code> boundary sends its fallback first, then its HTML with an
+          inline script that swaps it in. React named the problem
+          <q>You have to fetch everything before you can show anything</q>, and the fix:
+          <q>Unlike traditional HTML streaming, it doesn't have to happen in the top-down order.</q>
+          Next.js puts it this way:
+          <q>A single slow database query or API call can block the entire page.</q>
+        </p>
+        <a href="https://github.com/reactwg/react-18/discussions/37"
+          >New Suspense SSR architecture in React 18</a
+        >
+        <a href="https://nextjs.org/docs/app/guides/streaming">Next.js: Streaming</a>
+      </div>
+    </li>
+    <li class="entry">
+      <p class="entry-year">Also</p>
+      <div class="entry-body">
+        <h3 class="text-card-title">SvelteKit and Qwik</h3>
+        <p>
+          SvelteKit streams promises returned from a server <code>load</code>, for
+          <q>slow, non-essential data</q>. Qwik has it as an experimental mode:
+          <q
+            >Out-of-order streaming helps when one section of the page is slow, but the rest of the
+            page is ready.</q
+          >
+        </p>
+        <a href="https://svelte.dev/docs/kit/load">SvelteKit: Loading data</a>
+        <a href="https://next.qwik.dev/docs/labs/suspense/">Qwik: Pending</a>
+      </div>
+    </li>
+    <li class="entry">
+      <p class="entry-year">2026</p>
+      <div class="entry-body">
+        <h3 class="text-card-title">The browser itself</h3>
+        <p>
+          HTML is getting the mechanism built in: a <code>&lt;template for&gt;</code> that fills a
+          <code>&lt;?marker&gt;</code> earlier in the document, with no script. Chrome's intent to
+          ship targets version 150, and notes that these
+          <q>are primitives that have been part of userland libraries for about a decade</q>.
+          Chrome's own guide still calls it <q>shipped in only a single browser engine</q>, so this
+          project moves the markup with a small inline script, as the libraries do.
+        </p>
+        <a href="https://groups.google.com/a/chromium.org/g/blink-dev/c/eAUPFR-sloc"
+          >Intent to ship: Out of order streaming</a
+        >
+        <a
+          href="https://developer.chrome.com/docs/modern-web-guidance/guides/performance/out-of-order-html-streaming"
+          >Chrome: Out-of-order HTML streaming</a
+        >
+      </div>
+    </li>
+  </ol>
+
+  <div class="box">
+    <h3 class="text-title">And Angular?</h3>
+    <p>
+      Angular renders a page on the server and sends it whole; its
+      <a href="https://angular.dev/roadmap">roadmap</a> has no streaming on it. What it does have is
+      <a href="https://angular.dev/guide/incremental-hydration">incremental hydration</a>: a
+      <code>&#64;defer</code> block with a <code>hydrate</code> trigger stays as plain server HTML
+      until the trigger fires. Angular is not touching that markup yet, so the server can replace it
+      underneath a running app. That is the piece this project builds on.
+    </p>
+  </div>
+</section>
+
+<section class="part" aria-labelledby="cost-title">
+  <h2 id="cost-title" class="text-section-title">What it costs</h2>
+  <ul class="cards">
+    <li class="box">
+      <h3 class="text-card-title">The status code is sent first</h3>
+      <p>
+        It goes out with the shell. A part that fails later cannot turn the response into an error
+        page or a redirect.
+      </p>
+    </li>
+    <li class="box">
+      <h3 class="text-card-title">Placeholders get replaced</h3>
+      <p>Content can shift when they are. Give each placeholder the room its content will need.</p>
+    </li>
+    <li class="box">
+      <h3 class="text-card-title">A late part needs JavaScript</h3>
+      <p>A script puts it in place. With scripts off, the reader keeps the placeholder.</p>
+    </li>
+    <li class="box">
+      <h3 class="text-card-title">No caching as it stands</h3>
+      <p>
+        A cached copy of half a response is worse than none, so streamed pages are sent with
+        <code>Cache-Control: no-store</code>.
+      </p>
+    </li>
+  </ul>
+</section>
+
+<section class="part" aria-labelledby="next-title">
+  <h2 id="next-title" class="text-section-title">See it for real</h2>
+  <ul class="cards">
+    <li class="box">
+      <h3 class="text-card-title"><a href="/example">Live example</a></h3>
+      <p>
+        A real page with one slow widget, timed as it streams and hydrates, and the code that does
+        it.
+      </p>
+    </li>
+    <li class="box">
+      <h3 class="text-card-title">
+        <a href="https://angular-stream.chris-holder.workers.dev/">Angular Movies</a>
+      </h3>
+      <p>
+        A real app streamed the same way: a movie browser on the TMDB API, where each list and the
+        cast arrive as their requests finish.
+      </p>
+    </li>
+    <li class="box">
+      <h3 class="text-card-title"><a href="/walkthrough">Walkthrough</a></h3>
+      <p>
+        Four blocks on one page: one nested in another, one that waits for the whole response, and
+        text outside any block. An event log records each step.
+      </p>
+    </li>
+    <li class="box">
+      <h3 class="text-card-title"><a href="/inspect">Response inspector</a></h3>
+      <p>
+        The walkthrough's raw response, cut into the pieces the server wrote, with the size,
+        contents and arrival time of each.
+      </p>
+    </li>
+  </ul>
+</section>
