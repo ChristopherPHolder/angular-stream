@@ -1,10 +1,10 @@
 import { RxState } from '@rx-angular/state';
-import { patch } from '@rx-angular/cdk/transformations';
 import { inject, Service } from '@angular/core';
 import { map } from 'rxjs';
 import { optimizedFetch } from '../shared/cdk/optimized-fetch';
 import { rxActions } from '@rx-angular/state/actions';
 import { withLoadingEmission } from '../shared/cdk/loading/withLoadingEmissions';
+import { mergeKeyedContext } from '../shared/cdk/loading/merge-keyed-context';
 import {
   DiscoverResource,
   TMDBDiscoverResponse,
@@ -56,11 +56,7 @@ export class DiscoverState extends RxState<State> implements AppInitializer {
             ),
         ),
       ),
-      (oldState, newPartial) => {
-        const resultState = patch(oldState?.genreMovies, newPartial);
-        resultState.value = patch(oldState?.genreMovies?.value, resultState.value);
-        return resultState;
-      },
+      (oldState, newPartial) => mergeKeyedContext(oldState?.genreMovies, newPartial),
     );
 
     this.connect(
@@ -75,11 +71,7 @@ export class DiscoverState extends RxState<State> implements AppInitializer {
             ),
         ),
       ),
-      (oldState, newPartial) => {
-        const resultState = patch(oldState?.personMovies, newPartial);
-        resultState.value = patch(oldState?.personMovies?.value, resultState.value);
-        return resultState;
-      },
+      (oldState, newPartial) => mergeKeyedContext(oldState?.personMovies, newPartial),
     );
   }
 

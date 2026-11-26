@@ -1,10 +1,11 @@
 import { RxState } from '@rx-angular/state';
-import { patch, toDictionary } from '@rx-angular/cdk/transformations';
+import { toDictionary } from '@rx-angular/cdk/transformations';
 import { inject, Service } from '@angular/core';
 import { map } from 'rxjs';
 import { optimizedFetch } from '../shared/cdk/optimized-fetch';
 import { rxActions } from '@rx-angular/state/actions';
 import { withLoadingEmission } from '../shared/cdk/loading/withLoadingEmissions';
+import { mergeKeyedContext } from '../shared/cdk/loading/merge-keyed-context';
 import { PersonResource, PersonResponse } from '../data-access/api/resources/person.resource';
 import { AppInitializer } from '../shared/cdk/app-initializer';
 import { WithContext } from '../shared/cdk/loading/context.interface';
@@ -50,11 +51,7 @@ export class PersonState extends RxState<State> implements AppInitializer {
           },
         ),
       ),
-      (oldState, newPartial) => {
-        const resultState = patch(oldState?.person, newPartial);
-        resultState.value = patch(oldState?.person?.value, resultState.value);
-        return resultState;
-      },
+      (oldState, newPartial) => mergeKeyedContext(oldState?.person, newPartial),
     );
   }
 
