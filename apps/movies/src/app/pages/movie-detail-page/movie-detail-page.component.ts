@@ -1,12 +1,6 @@
 import { selectSlice } from '@rx-angular/state/selections';
 import { Location, NgOptimizedImage } from '@angular/common';
-import {
-  Component,
-  ElementRef,
-  inject,
-  ViewEncapsulation,
-  viewChild,
-} from '@angular/core';
+import { Component, ElementRef, inject, ViewEncapsulation, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, mergeWith } from 'rxjs';
 import { MovieCast, MovieDetailAdapter } from './movie-detail-page.adapter';
@@ -108,12 +102,10 @@ export default class MovieDetailPageComponent {
   readonly castListWrapper = viewChild<ElementRef<HTMLElement>>('castListWrapper');
 
   constructor() {
-    this.effects.register(
-      this.ui.dialog$.pipe(map((v) => v === 'show')),
-      (openDialog) =>
-        openDialog
-          ? this.trailerDialog()?.nativeElement?.showModal()
-          : this.trailerDialog()?.nativeElement.close(),
+    this.effects.register(this.ui.dialog$.pipe(map((v) => v === 'show')), (openDialog) =>
+      openDialog
+        ? this.trailerDialog()?.nativeElement?.showModal()
+        : this.trailerDialog()?.nativeElement.close(),
     );
   }
 

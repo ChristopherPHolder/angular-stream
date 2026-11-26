@@ -1,23 +1,6 @@
-import {
-  Component,
-  inject,
-  signal,
-  TrackByFunction,
-  ViewEncapsulation,
-} from '@angular/core';
-import {
-  NavigationEnd,
-  Router,
-  RouterLink,
-  RouterLinkActive,
-} from '@angular/router';
-import {
-  distinctUntilChanged,
-  filter,
-  map,
-  shareReplay,
-  switchMap,
-} from 'rxjs';
+import { Component, inject, signal, TrackByFunction, ViewEncapsulation } from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { distinctUntilChanged, filter, map, shareReplay, switchMap } from 'rxjs';
 import { TMDBMovieGenreModel } from '../data-access/api/model/movie-genre.model';
 import { trackByProp } from '../shared/cdk/track-by';
 import { rxActions } from '@rx-angular/state/actions';
@@ -61,16 +44,12 @@ export class AppShellComponent {
 
   protected readonly sideDrawerOpen = signal(false);
 
-  search$ = this.routerState.select(
-    getIdentifierOfTypeAndLayoutUtil('search', 'list')
-  );
+  search$ = this.routerState.select(getIdentifierOfTypeAndLayoutUtil('search', 'list'));
   protected readonly search = toSignal(this.search$, { initialValue: '' });
 
   accountMenuComponent$ = this.ui.loadAccountMenu$.pipe(
-    switchMap(() =>
-      import('./account-menu/account-menu.component').then((x) => x.default)
-    ),
-    shareReplay(1)
+    switchMap(() => import('./account-menu/account-menu.component').then((x) => x.default)),
+    shareReplay(1),
   );
   readonly accountMenuComponent = toSignal(this.accountMenuComponent$);
 
@@ -80,9 +59,9 @@ export class AppShellComponent {
         this.router.events.pipe(
           filter((e) => e instanceof NavigationEnd),
           map((e) => (e as NavigationEnd).urlAfterRedirects),
-          distinctUntilChanged()
+          distinctUntilChanged(),
         ),
-        () => this.closeSidenav()
+        () => this.closeSidenav(),
       );
     });
   }

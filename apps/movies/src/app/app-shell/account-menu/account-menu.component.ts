@@ -1,8 +1,4 @@
-import {
-  Component,
-  inject,
-  ViewEncapsulation,
-} from '@angular/core';
+import { Component, inject, ViewEncapsulation } from '@angular/core';
 import { rxActions } from '@rx-angular/state/actions';
 import { AuthEffects } from '../../auth/auth.effects';
 import { RouterLink } from '@angular/router';

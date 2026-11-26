@@ -1,10 +1,9 @@
-import {Routes} from '@angular/router';
+import { Routes } from '@angular/router';
 
 const ROUTES: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('../list-detail-page/list-detail-page.component'),
+    loadComponent: () => import('../list-detail-page/list-detail-page.component'),
     children: [
       {
         path: '',
@@ -17,13 +16,11 @@ const ROUTES: Routes = [
       },
       {
         path: 'edit',
-        loadComponent: () =>
-          import('../list-create-page/list-create-page.component'),
+        loadComponent: () => import('../list-create-page/list-create-page.component'),
       },
       {
         path: 'add-remove-items',
-        loadComponent: () =>
-          import('./list-items-edit/list-items-edit.component'),
+        loadComponent: () => import('./list-items-edit/list-items-edit.component'),
       },
       {
         path: 'image',

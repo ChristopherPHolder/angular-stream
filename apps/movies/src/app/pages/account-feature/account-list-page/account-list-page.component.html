@@ -8,11 +8,7 @@
     @for (list of lists(); track trackById($index, list)) {
       <a
         class="ui-grid-list-item"
-        [routerLink]="[
-          '/detail/list',
-          list.id,
-          list.number_of_items ? 'view' : 'add-remove-items'
-        ]"
+        [routerLink]="['/detail/list', list.id, list.number_of_items ? 'view' : 'add-remove-items']"
       >
         <!--
         **🚀 Perf Tip for LCP:**
@@ -33,9 +29,7 @@
             {{ list.name }}
           </h3>
           <p class="account-list--details-stats">
-            {{ list.number_of_items }} items ({{
-              list.public ? 'Public' : 'Private'
-            }})
+            {{ list.number_of_items }} items ({{ list.public ? 'Public' : 'Private' }})
           </p>
         </div>
       </a>

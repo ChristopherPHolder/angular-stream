@@ -1,4 +1,4 @@
-import {TMDBMovieGenreModel} from './movie-genre.model';
+import { TMDBMovieGenreModel } from './movie-genre.model';
 
 export interface TMDBMovieDetailsModel {
   adult: boolean;

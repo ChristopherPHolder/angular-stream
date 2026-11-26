@@ -1,12 +1,9 @@
-import {
-  Component,
-  inject,
-} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import {trackByProp} from '../../../../shared/cdk/track-by';
-import {ListDetailAdapter, ListPoster} from '../list-detail-page.adapter';
-import {GridListComponent} from '../../../../ui/component/grid-list/grid-list.component';
-import {NgOptimizedImage} from '@angular/common';
+import { trackByProp } from '../../../../shared/cdk/track-by';
+import { ListDetailAdapter, ListPoster } from '../list-detail-page.adapter';
+import { GridListComponent } from '../../../../ui/component/grid-list/grid-list.component';
+import { NgOptimizedImage } from '@angular/common';
 
 @Component({
   imports: [GridListComponent, NgOptimizedImage],

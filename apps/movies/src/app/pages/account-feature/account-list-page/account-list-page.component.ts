@@ -1,14 +1,7 @@
-import {
-  Component,
-  inject,
-  ViewEncapsulation,
-} from '@angular/core';
+import { Component, inject, ViewEncapsulation } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { trackByProp } from '../../../shared/cdk/track-by';
-import {
-  AccountListPageAdapter,
-  ListWithPoster,
-} from './account-list-page.adapter';
+import { AccountListPageAdapter, ListWithPoster } from './account-list-page.adapter';
 import { GridListComponent } from '../../../ui/component/grid-list/grid-list.component';
 import { RouterLink } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';

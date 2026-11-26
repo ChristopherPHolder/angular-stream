@@ -1,5 +1,5 @@
-import {Component, ViewEncapsulation,} from '@angular/core';
-import {FastSvgComponent} from '@push-based/ngx-fast-svg';
+import { Component, ViewEncapsulation } from '@angular/core';
+import { FastSvgComponent } from '@push-based/ngx-fast-svg';
 import { RouterLink } from '@angular/router';
 
 @Component({

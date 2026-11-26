@@ -1,8 +1,12 @@
-import {insert, patch} from '@rx-angular/cdk/transformations';
-import {concat, concatMap, EMPTY, map, Observable, scan, takeWhile,} from 'rxjs';
-import {withLoadingEmission} from '../loading/withLoadingEmissions';
-import {InfiniteScrollOptions, InfiniteScrollResult, InfiniteScrollState,} from './infinite-scroll.interface';
-import {coerceObservable} from '../coerceObservable';
+import { insert, patch } from '@rx-angular/cdk/transformations';
+import { concat, concatMap, EMPTY, map, Observable, scan, takeWhile } from 'rxjs';
+import { withLoadingEmission } from '../loading/withLoadingEmissions';
+import {
+  InfiniteScrollOptions,
+  InfiniteScrollResult,
+  InfiniteScrollState,
+} from './infinite-scroll.interface';
+import { coerceObservable } from '../coerceObservable';
 
 type PartialInfiniteScrollState<T> = Partial<InfiniteScrollState<T>>;
 
@@ -45,13 +49,11 @@ type PartialInfiniteScrollState<T> = Partial<InfiniteScrollState<T>>;
  *
  */
 export function infiniteScroll<T>(
-  fetchFn: (
-    incrementedOptions: InfiniteScrollOptions
-  ) => Observable<PartialInfiniteScrollState<T>>,
+  fetchFn: (incrementedOptions: InfiniteScrollOptions) => Observable<PartialInfiniteScrollState<T>>,
   trigger$: Observable<unknown>,
   initialPageOrLastResult:
     | InfiniteScrollResult<unknown>
-    | Observable<InfiniteScrollResult<T>> = {} as InfiniteScrollResult<unknown>
+    | Observable<InfiniteScrollResult<T>> = {} as InfiniteScrollResult<unknown>,
 ): Observable<InfiniteScrollState<T>> {
   let page = 0;
   let total_pages = 2;
@@ -72,7 +74,7 @@ export function infiniteScroll<T>(
     }),
     // in case there is global state connected we take care of just taking the initial value that includes a result.
     // loading emissions are forwarded as they are and merged into the result stream. This "forwards" the possible inflight state of the initial result.
-    takeWhile((r) => !Array.isArray(r.results), true)
+    takeWhile((r) => !Array.isArray(r.results), true),
   );
 
   return concat(
@@ -83,14 +85,11 @@ export function infiniteScroll<T>(
         return page <= total_pages
           ? fetchFn({ page }).pipe(withLoadingEmission())
           : (EMPTY as unknown as Observable<PartialInfiniteScrollState<T>>);
-      })
-    )
+      }),
+    ),
   ).pipe(
     scan(
-      (
-        acc: InfiniteScrollState<T>,
-        response: PartialInfiniteScrollState<T>
-      ) => {
+      (acc: InfiniteScrollState<T>, response: PartialInfiniteScrollState<T>) => {
         // in case the initial value was no set we take total pages from the result
         if (response?.total_pages) {
           total_pages = response.total_pages;
@@ -104,7 +103,7 @@ export function infiniteScroll<T>(
         // the rest gets updated
         return patch(acc, response);
       },
-      { page, total_pages } as unknown as InfiniteScrollState<T>
-    )
+      { page, total_pages } as unknown as InfiniteScrollState<T>,
+    ),
   );
 }

@@ -11,7 +11,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -20,7 +21,8 @@ html, body {
 body {
   color: var(--palette-text-primary);
   background-color: var(--palette-background-default);
-  transition: color var(--duration) var(--timing),
+  transition:
+    color var(--duration) var(--timing),
     background-color var(--duration) var(--timing);
 
   &.modal-visible {

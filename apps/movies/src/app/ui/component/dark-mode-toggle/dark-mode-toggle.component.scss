@@ -15,8 +15,7 @@
   line-height: 0;
   cursor: pointer;
   color: var(--palette-text-primary);
-  transition: color var(--theme-anim-duration-standard)
-    var(--theme-anim-easing-easeInOut);
+  transition: color var(--theme-anim-duration-standard) var(--theme-anim-easing-easeInOut);
 }
 
 .dark-mode-toggle > button:focus {
@@ -75,8 +74,7 @@ input[type='checkbox'].toggle-track + label {
   width: 20px;
   height: 20px;
   border-radius: var(--theme-borderRadius-circle);
-  transition: left var(--theme-anim-duration-standard)
-    var(--theme-anim-easing-easeInOut);
+  transition: left var(--theme-anim-duration-standard) var(--theme-anim-easing-easeInOut);
   cursor: pointer;
   position: absolute;
   left: 2px;

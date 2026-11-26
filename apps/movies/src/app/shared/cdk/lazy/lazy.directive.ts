@@ -34,7 +34,7 @@ export class LazyDirective extends RxState<{
 }> {
   private readonly vCR: ViewContainerRef = inject(ViewContainerRef);
 
-  @Input({required: true})
+  @Input({ required: true })
   set lazy(component: RxInputType<Type<unknown>>) {
     this.connect('component', coerceObservable(component));
   }
@@ -48,7 +48,7 @@ export class LazyDirective extends RxState<{
       (c) => {
         this.vCR.clear();
         this.vCR.createComponent(c);
-      }
+      },
     );
   }
 }

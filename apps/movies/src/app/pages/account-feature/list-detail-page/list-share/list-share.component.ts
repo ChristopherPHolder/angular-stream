@@ -1,9 +1,4 @@
-import {
-  Component,
-  inject,
-  OnDestroy,
-  OnInit,
-} from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ListDetailAdapter } from '../list-detail-page.adapter';
 import { DOCUMENT } from '@angular/common';

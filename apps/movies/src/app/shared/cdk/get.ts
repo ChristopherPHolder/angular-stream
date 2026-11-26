@@ -5,7 +5,7 @@
 export function pluck<T extends Record<string, unknown>, K extends keyof T>(
   o: T,
   p: K,
-  f?: T[K]
+  f?: T[K],
 ): T[K] {
   return o && p in o ? o[p] : (f as T[K]);
 }

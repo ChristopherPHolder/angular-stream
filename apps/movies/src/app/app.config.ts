@@ -1,9 +1,6 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideFastSVG } from '@push-based/ngx-fast-svg';
-import {
-  provideHttpClient,
-  withInterceptors,
-} from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { tmdbContentTypeInterceptor } from './data-access/api/tmdbContentTypeInterceptor';
 import { tmdbReadAccessInterceptor } from './auth/tmdb-http-interceptor.feature';
 import { provideTmdbImageLoader } from './data-access/images/image-loader';
@@ -19,7 +16,11 @@ import {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideHttpClient(
-      withInterceptors([streamHttpInterceptor, tmdbContentTypeInterceptor, tmdbReadAccessInterceptor])
+      withInterceptors([
+        streamHttpInterceptor,
+        tmdbContentTypeInterceptor,
+        tmdbReadAccessInterceptor,
+      ]),
     ),
     provideTmdbImageLoader(),
     provideFastSVG({ url: (name: string) => `assets/svg-icons/${name}.svg` }),

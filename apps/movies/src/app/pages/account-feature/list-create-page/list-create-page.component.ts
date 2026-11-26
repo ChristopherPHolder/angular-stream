@@ -1,8 +1,4 @@
-import {
-  Component,
-  inject,
-  OnDestroy,
-} from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ListCreatePageAdapter } from './list-create-page.adapter';
 
@@ -34,8 +30,7 @@ import { ListCreatePageAdapter } from './list-create-page.adapter';
             #descriptionInput
             (input)="adapter.ui.update({ description: descriptionInput.value })"
             rows="8"
-            >{{ description() }}</textarea
-          >
+            >{{ description() }}</textarea>
         </fieldset>
 
         <fieldset>
@@ -64,10 +59,7 @@ import { ListCreatePageAdapter } from './list-create-page.adapter';
       </button>
     </article>
   `,
-  styleUrls: [
-    './list-create-page.component.scss',
-    '../../../ui/component/button/_button.scss',
-  ],
+  styleUrls: ['./list-create-page.component.scss', '../../../ui/component/button/_button.scss'],
 })
 export default class ListCreateEditPageComponent implements OnDestroy {
   public readonly adapter = inject(ListCreatePageAdapter);

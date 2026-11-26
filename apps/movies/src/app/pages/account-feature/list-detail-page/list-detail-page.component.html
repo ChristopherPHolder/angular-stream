@@ -8,9 +8,7 @@
   </header>
   <div class="tabs">
     @for (item of tabs; track item.link) {
-      <a class="tab" [routerLink]="item.link" routerLinkActive="active">{{
-        item.name
-      }}</a>
+      <a class="tab" [routerLink]="item.link" routerLinkActive="active">{{ item.name }}</a>
     }
   </div>
   <router-outlet></router-outlet>

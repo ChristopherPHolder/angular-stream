@@ -1,11 +1,11 @@
-import {Component, inject,} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import {TMDBMovieDetailsModel} from '../../../../data-access/api/model/movie-details.model';
+import { TMDBMovieDetailsModel } from '../../../../data-access/api/model/movie-details.model';
 
-import {trackByProp} from '../../../../shared/cdk/track-by';
-import {ListItemsEditAdapter, MovieSearchResult,} from './list-items-edit.adapter';
-import {FastSvgComponent} from '@push-based/ngx-fast-svg';
-import {NgOptimizedImage} from '@angular/common';
+import { trackByProp } from '../../../../shared/cdk/track-by';
+import { ListItemsEditAdapter, MovieSearchResult } from './list-items-edit.adapter';
+import { FastSvgComponent } from '@push-based/ngx-fast-svg';
+import { NgOptimizedImage } from '@angular/common';
 
 @Component({
   imports: [NgOptimizedImage, FastSvgComponent],

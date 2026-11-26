@@ -11,13 +11,13 @@ import { exhaustMap, groupBy, map, mergeAll, Observable } from 'rxjs';
  */
 export function optimizedFetch<T, K, O>(
   groupSelector: (value: T) => K,
-  fetch: (t: T) => Observable<O>
+  fetch: (t: T) => Observable<O>,
 ): (o$: Observable<T>) => Observable<O> {
   return (o$: Observable<T>) =>
     o$.pipe(
       groupBy(groupSelector),
       // exhaust by keySelector e.g. url
       map((t$) => t$.pipe(exhaustMap(fetch))),
-      mergeAll()
+      mergeAll(),
     );
 }

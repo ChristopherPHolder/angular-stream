@@ -1,19 +1,11 @@
-import {
-  Component,
-  inject,
-} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FastSvgComponent } from '@push-based/ngx-fast-svg';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ListDetailAdapter } from './list-detail-page.adapter';
 
 @Component({
-  imports: [
-    RouterLink,
-    RouterOutlet,
-    FastSvgComponent,
-    RouterLinkActive,
-  ],
+  imports: [RouterLink, RouterOutlet, FastSvgComponent, RouterLinkActive],
   selector: 'ct-list-detail-page',
   templateUrl: './list-detail-page.component.html',
   styleUrls: ['./list-detail-page.component.scss'],

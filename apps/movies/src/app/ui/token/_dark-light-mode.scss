@@ -27,10 +27,7 @@ body.light {
   --palette-toggle-light-light: #ffb74d;
   --palette-custom-lightBlue: #add8e6;
   --palette-warning-contrast-text: rgba(0, 0, 0, 0.87);
-  --background-blend-gradient: linear-gradient(
-    rgba(255, 255, 255, 0) 68%,
-    rgb(255, 255, 255) 100%
-  );
+  --background-blend-gradient: linear-gradient(rgba(255, 255, 255, 0) 68%, rgb(255, 255, 255) 100%);
 }
 
 body.dark {
@@ -61,8 +58,5 @@ body.dark {
   --palette-warning-dark: #afb20c;
   --palette-warning-light: #fbff41;
   --palette-warning-contrast-text: rgba(0, 0, 0, 0.87);
-  --background-blend-gradient: linear-gradient(
-    rgba(255, 255, 255, 0) 68%,
-    rgb(48, 48, 48) 100%
-  );
+  --background-blend-gradient: linear-gradient(rgba(255, 255, 255, 0) 68%, rgb(48, 48, 48) 100%);
 }

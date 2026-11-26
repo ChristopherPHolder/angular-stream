@@ -26,7 +26,7 @@ export const RxServerRenderStrategy: RxRenderStrategiesConfig<string> = {
       Object.keys(RX_CONCURRENT_STRATEGIES).map((name) => [
         name,
         { ...RX_NATIVE_STRATEGIES.native, name },
-      ])
+      ]),
     ),
   },
 };

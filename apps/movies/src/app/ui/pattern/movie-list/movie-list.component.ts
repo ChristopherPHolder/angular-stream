@@ -63,8 +63,7 @@ import { Movie } from '../../../state/movie.state';
         <!-- If this element is visible in the viewport the paginate event fires -->
         <div (elementVisibility)="onVisible($event)"></div>
       </ui-grid-list>
-    }
-    @else {
+    } @else {
       <div style="display: flex; align-items: center;">
         <span style="font-size: 1.5rem">No results</span>
         <fast-svg name="sad"></fast-svg>
@@ -76,8 +75,7 @@ import { Movie } from '../../../state/movie.state';
   encapsulation: ViewEncapsulation.Emulated,
 })
 export class MovieListComponent {
-  private readonly state =
-    inject<RxState<{ movies?: Movie[]; numPriority: number }>>(RxState);
+  private readonly state = inject<RxState<{ movies?: Movie[]; numPriority: number }>>(RxState);
 
   numPriority() {
     return this.state.get('numPriority');
@@ -86,9 +84,9 @@ export class MovieListComponent {
   @Input()
   set withImgPriority(p: number) {
     if (p) {
-      this.state.set({numPriority: p});
+      this.state.set({ numPriority: p });
     } else {
-      this.state.set({numPriority: 0});
+      this.state.set({ numPriority: 0 });
     }
   }
 
@@ -98,10 +96,10 @@ export class MovieListComponent {
   // if no movies are given we don't need to render nor listen for the infinite scroll trigger
   readonly moviesListVisible = toSignal(
     this.state.select(map((state) => !!state.movies && state.movies.length > 0)),
-    { initialValue: false }
+    { initialValue: false },
   );
 
-  @Input({required: true})
+  @Input({ required: true })
   set movies(movies$: RxInputType<Movie[]>) {
     this.state.connect('movies', coerceObservable(movies$));
   }

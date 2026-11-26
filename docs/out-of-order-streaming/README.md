@@ -36,9 +36,14 @@ for server islands.
 The build emits browser bundles as **module scripts**:
 
 ```html
-<body><script type="text/javascript" id="ng-event-dispatch-contract">…</script>
+<body>
+  <script type="text/javascript" id="ng-event-dispatch-contract">
+    …
+  </script>
   <app-root></app-root>
-<script src="polyfills.js" type="module"></script><script src="main.js" type="module"></script></body>
+  <script src="polyfills.js" type="module"></script>
+  <script src="main.js" type="module"></script>
+</body>
 ```
 
 (`dist/angular-stream/server/index.server.html`)
@@ -119,8 +124,8 @@ between critical-CSS extraction and hoisting — it is a real trade-off, not a d
   writing code — especially the framing rules and the "observe the trailing comment, not the
   template start tag" insight.
 
-**Important difference from that earlier POC:** that work was about *time* (flush the shell
-before async data resolves). This proposal is about *byte order* (the render is already
+**Important difference from that earlier POC:** that work was about _time_ (flush the shell
+before async data resolves). This proposal is about _byte order_ (the render is already
 finished; we just send it in a better sequence). They are orthogonal and can share one
 boundary protocol, but this one is strictly simpler and can land first.
 
@@ -128,14 +133,14 @@ boundary protocol, but this one is strictly simpler and can land first.
 
 All paths below are in `opensrc/repos/github.com/angular/angular/packages`.
 
-| Constraint | Where | Consequence |
-|---|---|---|
-| Hydration locates nodes by **navigation paths** (`f` = firstChild, `n` = nextSibling) from the component host, or from `document.body` for projected/portal nodes | `core/src/hydration/node_lookup_utils.ts` (`calcPathForNode`, `calcPathBetween`), `interfaces.ts` | Restoration must be **structurally exact**, including whitespace text nodes and comment anchors. Node counts and order must match the moment of serialization. |
-| `verifySsrContentsIntegrity` throws `NG0507` unless an `<!--nghm-->` comment is a child of `<body>` | `core/src/hydration/utils.ts` | The marker is inserted as `body.firstChild` during SSR — it must stay in the critical chunk. |
-| Transfer state is a `<script id="<appId>-state" type="application/json">` appended at the very bottom of `<body>`, deliberately after the CLI script tags | `platform-server/src/transfer_state.ts` | Our deferred payloads have to be placed with this in mind; appending before `</body>` is fine because module scripts are deferred. |
-| Event replay: the CLI inlines `ng-event-dispatch-contract` as the **first child of body**, and SSR inserts `__jsaction_bootstrap(document.body, …)` right after it | `platform-server/src/utils.ts` (`insertEventRecordScript`), built `index.server.html` | Delegation is installed on `document.body` inside the critical chunk, so `jsaction` attributes inside deferred content work the moment it is injected. There is a short window where a click on not-yet-injected content is lost — acceptable, it is not on screen. |
-| `prepareForHydration()` (annotation) runs **before** `BEFORE_APP_SERIALIZED` callbacks, which run before `platformState.renderToString()` | `platform-server/src/utils.ts` (`renderInternal`) | `BEFORE_APP_SERIALIZED` is a **public token** and is the correct hook: at that point the DOM is fully hydration-annotated but not yet serialized. |
-| `@defer` blocks get comment anchors (`<!--ngh=<id>-->`) and serialized hydrate triggers | `core/src/hydration/annotate.ts`, `core/src/hydration/interfaces.ts` | Incremental hydration boundaries are a candidate source of "not critical" markers (§6, A2). |
+| Constraint                                                                                                                                                         | Where                                                                                             | Consequence                                                                                                                                                                                                                                                         |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Hydration locates nodes by **navigation paths** (`f` = firstChild, `n` = nextSibling) from the component host, or from `document.body` for projected/portal nodes  | `core/src/hydration/node_lookup_utils.ts` (`calcPathForNode`, `calcPathBetween`), `interfaces.ts` | Restoration must be **structurally exact**, including whitespace text nodes and comment anchors. Node counts and order must match the moment of serialization.                                                                                                      |
+| `verifySsrContentsIntegrity` throws `NG0507` unless an `<!--nghm-->` comment is a child of `<body>`                                                                | `core/src/hydration/utils.ts`                                                                     | The marker is inserted as `body.firstChild` during SSR — it must stay in the critical chunk.                                                                                                                                                                        |
+| Transfer state is a `<script id="<appId>-state" type="application/json">` appended at the very bottom of `<body>`, deliberately after the CLI script tags          | `platform-server/src/transfer_state.ts`                                                           | Our deferred payloads have to be placed with this in mind; appending before `</body>` is fine because module scripts are deferred.                                                                                                                                  |
+| Event replay: the CLI inlines `ng-event-dispatch-contract` as the **first child of body**, and SSR inserts `__jsaction_bootstrap(document.body, …)` right after it | `platform-server/src/utils.ts` (`insertEventRecordScript`), built `index.server.html`             | Delegation is installed on `document.body` inside the critical chunk, so `jsaction` attributes inside deferred content work the moment it is injected. There is a short window where a click on not-yet-injected content is lost — acceptable, it is not on screen. |
+| `prepareForHydration()` (annotation) runs **before** `BEFORE_APP_SERIALIZED` callbacks, which run before `platformState.renderToString()`                          | `platform-server/src/utils.ts` (`renderInternal`)                                                 | `BEFORE_APP_SERIALIZED` is a **public token** and is the correct hook: at that point the DOM is fully hydration-annotated but not yet serialized.                                                                                                                   |
+| `@defer` blocks get comment anchors (`<!--ngh=<id>-->`) and serialized hydrate triggers                                                                            | `core/src/hydration/annotate.ts`, `core/src/hydration/interfaces.ts`                              | Incremental hydration boundaries are a candidate source of "not critical" markers (§6, A2).                                                                                                                                                                         |
 
 ## 6. Candidate approaches
 
@@ -145,7 +150,7 @@ Render fully, then in `BEFORE_APP_SERIALIZED` detach marked subtrees from the do
 document, leave an inert placeholder, and append the payloads at the end of `<body>`.
 
 Pros: no change to render timing, no streaming machinery, compression and `Content-Length`
-stay intact, works through buffering CDNs and proxies (byte *order* survives buffering), and
+stay intact, works through buffering CDNs and proxies (byte _order_ survives buffering), and
 is trivially switchable per route/UA.
 Cons: does not improve TTFB at all; only byte ordering.
 
@@ -159,7 +164,7 @@ Sub-variants by how "non-critical" is marked:
   second step.
 - **A3 — budget-enforced tail cut.** Walk the serialized document, and once the compressed
   budget is spent, hoist everything after the cut. Needs the cut to land at a node boundary
-  we can reconstruct; cutting mid-subtree means the payload has to be *appended into* a
+  we can reconstruct; cutting mid-subtree means the payload has to be _appended into_ a
   located parent rather than replacing a placeholder. Possible, but keep it as future work.
 
 ### B. A + true async streaming
@@ -174,7 +179,7 @@ headers are committed is genuinely hard. Earn this after A proves the ordering w
 
 ### C. `@defer (hydrate on …)` only — the baseline to beat
 
-Angular's incremental hydration already reduces *JavaScript* work and shrinks the hydration
+Angular's incremental hydration already reduces _JavaScript_ work and shrinks the hydration
 critical path. It does **not** change HTML byte order; the dehydrated markup still ships in
 place. Worth measuring as the honest baseline, because if it gets most of the win with zero
 custom infrastructure, that matters.
@@ -194,12 +199,12 @@ Rejected: gives up SSR content for the deferred regions entirely, hurts LCP and 
 
 ### Comparison
 
-| | Improves byte order | Improves TTFB | Needs custom renderer | Survives buffering proxy | Extra RTT |
-|---|---|---|---|---|---|
-| A | yes | no | no | yes | no |
-| B | yes | yes | yes | no | no |
-| C | no | no | no | yes | no |
-| D | yes | no | no | yes | yes, per island |
+|     | Improves byte order | Improves TTFB | Needs custom renderer | Survives buffering proxy | Extra RTT       |
+| --- | ------------------- | ------------- | --------------------- | ------------------------ | --------------- |
+| A   | yes                 | no            | no                    | yes                      | no              |
+| B   | yes                 | yes           | yes                   | no                       | no              |
+| C   | no                  | no            | no                    | yes                      | no              |
+| D   | yes                 | no            | no                    | yes                      | yes, per island |
 
 ## 7. Design sketch for A
 
@@ -249,16 +254,22 @@ and it is addressable with a plain attribute selector.
 Appended immediately before `</body>`, after the module script tags:
 
 ```html
-<template data-sd-payload="drawer">…original outerHTML…</template><script>$sd("drawer")</script>
+<template data-sd-payload="drawer">…original outerHTML…</template>
+<script>
+  $sd('drawer');
+</script>
 ```
 
 with `$sd` defined once in the critical chunk:
 
 ```js
-function $sd(id){
-  var p=document.querySelector('[data-sd-payload="'+id+'"]'),
-      h=document.querySelector('[data-sd-ph="'+id+'"]');
-  if(p&&h){h.replaceWith(...p.content.childNodes);p.remove();}
+function $sd(id) {
+  var p = document.querySelector('[data-sd-payload="' + id + '"]'),
+    h = document.querySelector('[data-sd-ph="' + id + '"]');
+  if (p && h) {
+    h.replaceWith(...p.content.childNodes);
+    p.remove();
+  }
   document.currentScript.remove();
 }
 ```

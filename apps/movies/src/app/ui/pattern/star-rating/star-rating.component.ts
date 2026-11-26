@@ -1,9 +1,4 @@
-import {
-  Component,
-  Input,
-  ViewEncapsulation,
-  input,
-} from '@angular/core';
+import { Component, Input, ViewEncapsulation, input } from '@angular/core';
 
 const range = 10;
 const numStars = 5;

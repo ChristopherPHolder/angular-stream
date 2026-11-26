@@ -4,4 +4,7 @@ export {
   createBufferedRender,
   createStreamingWorker,
 } from './worker';
-export { type StreamingAngularRenderOptions, renderStreamingAngular } from './streaming-angular-renderer';
+export {
+  type StreamingAngularRenderOptions,
+  renderStreamingAngular,
+} from './streaming-angular-renderer';

@@ -13,4 +13,4 @@ export const SUPPORTED_ICONS = [
   'sad',
   'error',
 ] as const;
-export type SupportedIcons = typeof SUPPORTED_ICONS[number];
+export type SupportedIcons = (typeof SUPPORTED_ICONS)[number];

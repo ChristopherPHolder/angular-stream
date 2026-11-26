@@ -1,6 +1,6 @@
-import {ImageTag} from './image-tag.interface';
-import {ImageDimensions} from '../../../data-access/images/image-dimensions.interface';
-import {POSTER_FALLBACK} from '../../../constants';
+import { ImageTag } from './image-tag.interface';
+import { ImageDimensions } from '../../../data-access/images/image-dimensions.interface';
+import { POSTER_FALLBACK } from '../../../constants';
 
 export function addImageTag<T>(
   _res: T,
@@ -10,10 +10,10 @@ export function addImageTag<T>(
     fallback?: string;
     sizes?: string;
     srcset?: string;
-  }
+  },
 ): T & ImageTag {
-  let {fallback} = options;
-  const {pathProp, dims, sizes, srcset} = options;
+  let { fallback } = options;
+  const { pathProp, dims, sizes, srcset } = options;
   fallback = fallback || POSTER_FALLBACK;
 
   const res = _res as T & ImageTag;

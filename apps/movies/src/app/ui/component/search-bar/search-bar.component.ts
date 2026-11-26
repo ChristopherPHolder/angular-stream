@@ -68,9 +68,7 @@ export class SearchBarComponent {
 
   protected readonly open = signal(false);
 
-  readonly searchSubmit = outputFromObservable(
-    this.ui.formSubmit$.pipe(map(() => this.search())),
-  );
+  readonly searchSubmit = outputFromObservable(this.ui.formSubmit$.pipe(map(() => this.search())));
 
   private readonly closedFormClick$ = this.ui.formClick$.pipe(filter(() => !this.open()));
 

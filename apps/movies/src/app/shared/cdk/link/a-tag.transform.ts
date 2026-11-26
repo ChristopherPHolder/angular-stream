@@ -1,4 +1,4 @@
-import {LinkTag} from './a-tag.interface';
+import { LinkTag } from './a-tag.interface';
 
 export function addLinkTag<T>(
   _res: T,
@@ -6,9 +6,9 @@ export function addLinkTag<T>(
   options: {
     target?: string;
     baseUrl?: string;
-  } = {}
+  } = {},
 ): T & LinkTag {
-  let {target, baseUrl} = options;
+  let { target, baseUrl } = options;
   target = target || `_blank`;
   baseUrl = baseUrl || `https://www.imdb.com/title/`;
 

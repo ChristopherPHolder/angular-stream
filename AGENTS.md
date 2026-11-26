@@ -86,7 +86,7 @@ Read `README.md` for how the pieces fit together; the short version:
 - **Styles**: component `styleUrl` files go through Vite's Sass pipeline. Inline
   `styles` are plain CSS only — no Sass there.
 - **Icons**: `<fast-svg name="...">`. Adding an icon means dropping the file in
-  `public/assets/svg-icons/` *and* registering it in
+  `public/assets/svg-icons/` _and_ registering it in
   `src/app/renderer/svg-icons.ts`, or it will not render during SSR.
 
 ### Source code reference

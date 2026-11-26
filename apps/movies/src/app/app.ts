@@ -12,8 +12,3 @@ import { AppShellComponent } from './app-shell/app-shell.component';
   imports: [RouterOutlet, AppShellComponent],
 })
 export class App {}
-
-
-
-
-

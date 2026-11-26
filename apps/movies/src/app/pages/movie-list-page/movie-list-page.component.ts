@@ -1,15 +1,8 @@
 import { selectSlice } from '@rx-angular/state/selections';
-import {
-  Component,
-  inject,
-  ViewEncapsulation,
-} from '@angular/core';
+import { Component, inject, ViewEncapsulation } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, Observable } from 'rxjs';
-import {
-  MovieListPageAdapter,
-  MovieListPageModel,
-} from './movie-list-page.adapter';
+import { MovieListPageAdapter, MovieListPageModel } from './movie-list-page.adapter';
 import { MovieListComponent } from '../../ui/pattern/movie-list/movie-list.component';
 
 type Heading = { main: string; sub: string };
@@ -28,7 +21,7 @@ export default class MovieListPageComponent {
   readonly loading$ = this.adapter.select('loading');
   readonly headings$: Observable<Heading> = this.adapter.select(
     selectSlice(['identifier', 'type', 'genres']),
-    map(toHeading)
+    map(toHeading),
   );
   readonly headings = toSignal(this.headings$, { initialValue: { main: '', sub: '' } });
   readonly loading = toSignal(this.loading$, { initialValue: false });
@@ -49,7 +42,7 @@ export default class MovieListPageComponent {
 }
 
 function toHeading(
-  routerParams: Pick<MovieListPageModel, 'type' | 'identifier' | 'genres'>
+  routerParams: Pick<MovieListPageModel, 'type' | 'identifier' | 'genres'>,
 ): Heading {
   const { identifier, type, genres } = routerParams;
   // default

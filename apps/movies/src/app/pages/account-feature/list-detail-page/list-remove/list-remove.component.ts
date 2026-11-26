@@ -1,10 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  inject,
-  viewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, viewChild } from '@angular/core';
 import { rxState, RxState } from '@rx-angular/state';
 import { rxActions } from '@rx-angular/state/actions';
 import { merge } from 'rxjs';

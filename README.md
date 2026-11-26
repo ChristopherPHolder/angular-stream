@@ -10,16 +10,16 @@ server bundle running directly in workerd, static assets served by Cloudflare's
 
 ## Stack
 
-| Concern   | Choice                                                                     |
-| --------- | -------------------------------------------------------------------------- |
-| Framework | Angular 22 (standalone, zoneless, signal-based APIs)                        |
-| Compiler  | [`@push-based/vite-plugin-ngp`][ngp] — Angular's Rust/TS preprocessor       |
-| Bundler   | Vite 8 (Rolldown)                                                           |
-| SSR       | Streamed, with hydration starting before the response ends; see below       |
-| Host      | Cloudflare Workers via [`@cloudflare/vite-plugin`][cfvite]                  |
-| State     | [`@rx-angular/state`](https://www.rx-angular.io/)                           |
-| Icons     | [`@push-based/ngx-fast-svg`](https://github.com/push-based/ngx-fast-svg)    |
-| Data      | TMDB REST API (v3 + v4)                                                     |
+| Concern   | Choice                                                                   |
+| --------- | ------------------------------------------------------------------------ |
+| Framework | Angular 22 (standalone, zoneless, signal-based APIs)                     |
+| Compiler  | [`@push-based/vite-plugin-ngp`][ngp] — Angular's Rust/TS preprocessor    |
+| Bundler   | Vite 8 (Rolldown)                                                        |
+| SSR       | Streamed, with hydration starting before the response ends; see below    |
+| Host      | Cloudflare Workers via [`@cloudflare/vite-plugin`][cfvite]               |
+| State     | [`@rx-angular/state`](https://www.rx-angular.io/)                        |
+| Icons     | [`@push-based/ngx-fast-svg`](https://github.com/push-based/ngx-fast-svg) |
+| Data      | TMDB REST API (v3 + v4)                                                  |
 
 [ngp]: https://github.com/push-based/vite-plugin-ngp
 [cfvite]: https://developers.cloudflare.com/workers/vite-plugin/
@@ -50,13 +50,13 @@ production. The first install prompts to approve native install scripts
 (`esbuild`, `workerd`, `@parcel/watcher`, `fsevents`); they are already recorded
 under `allowScripts` in `package.json`.
 
-| Script            | What it does                                         |
-| ----------------- | ---------------------------------------------------- |
-| `npm run dev`     | Vite dev server, Worker in workerd                   |
-| `npm run build`   | Client bundle to `dist/client`, Worker to `dist/ssr` |
-| `npm run preview` | Serves the built output in workerd                   |
-| `npm run deploy`  | Builds, then `wrangler deploy`                       |
-| `npm run cf-typegen` | Regenerates `worker-configuration.d.ts`           |
+| Script               | What it does                                         |
+| -------------------- | ---------------------------------------------------- |
+| `npm run dev`        | Vite dev server, Worker in workerd                   |
+| `npm run build`      | Client bundle to `dist/client`, Worker to `dist/ssr` |
+| `npm run preview`    | Serves the built output in workerd                   |
+| `npm run deploy`     | Builds, then `wrangler deploy`                       |
+| `npm run cf-typegen` | Regenerates `worker-configuration.d.ts`              |
 
 ### TMDB credentials
 
@@ -73,10 +73,10 @@ bundle fails CI before anything ships.
 
 Two repository secrets are required for the deploy step:
 
-| Secret                  | Where it comes from                                         |
-| ----------------------- | ----------------------------------------------------------- |
+| Secret                  | Where it comes from                                                                            |
+| ----------------------- | ---------------------------------------------------------------------------------------------- |
 | `CLOUDFLARE_API_TOKEN`  | Cloudflare dashboard → My Profile → API Tokens, using the **Edit Cloudflare Workers** template |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → Workers & Pages → Account ID          |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → Workers & Pages → Account ID                                            |
 
 Until they are set, pull requests still build; only the deploy step fails.
 
@@ -147,7 +147,7 @@ Put it in a `@defer` block with a `hydrate` trigger, directly inside an element:
 ```html
 <article>
   @defer (on immediate; hydrate when listReady()) {
-    <ui-movie-list [movies]="movies$" />
+  <ui-movie-list [movies]="movies$" />
   }
 </article>
 ```
@@ -190,14 +190,14 @@ More in [Verifying a change](docs/streamed-hydration.md#verifying-a-change).
 
 ### Where things live
 
-| File | Role |
-| --- | --- |
-| `src/server/streaming/streaming-angular-renderer.ts` | The response: shell, then a flush per finished request |
-| `src/server/streaming/hydration-stream.ts` | Re-annotates the app each flush and cuts out the blocks that changed |
-| `src/server/streaming/defer-blocks.ts` | Renders `hydrate` blocks on the server between change detection passes |
-| `src/server/streaming/stream-runtime.ts` | The inline script in the shell that applies chunks |
-| `src/app/streaming/stream-hydration.ts` | Keeps Angular's hydration data, block registry and HTTP in step with the stream |
-| `src/app/streaming/stream-protocol.ts` | The wire format shared by all of the above |
+| File                                                 | Role                                                                            |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `src/server/streaming/streaming-angular-renderer.ts` | The response: shell, then a flush per finished request                          |
+| `src/server/streaming/hydration-stream.ts`           | Re-annotates the app each flush and cuts out the blocks that changed            |
+| `src/server/streaming/defer-blocks.ts`               | Renders `hydrate` blocks on the server between change detection passes          |
+| `src/server/streaming/stream-runtime.ts`             | The inline script in the shell that applies chunks                              |
+| `src/app/streaming/stream-hydration.ts`              | Keeps Angular's hydration data, block registry and HTTP in step with the stream |
+| `src/app/streaming/stream-protocol.ts`               | The wire format shared by all of the above                                      |
 
 ### Caveats
 

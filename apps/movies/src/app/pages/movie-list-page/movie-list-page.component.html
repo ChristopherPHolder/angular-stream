@@ -4,11 +4,7 @@
     <h2 data-uf="header-sub">{{ headings().sub }}</h2>
   </header>
   @defer (on immediate; hydrate when listReady()) {
-    <ui-movie-list
-      (paginate)="paginate()"
-      [movies]="movies$"
-    >
-    </ui-movie-list>
+    <ui-movie-list (paginate)="paginate()" [movies]="movies$"> </ui-movie-list>
     @if (loading()) {
       <div class="loader"></div>
     }

@@ -1,22 +1,13 @@
-import {DOCUMENT} from '@angular/common';
-import {
-  Component,
-  inject,
-  ViewEncapsulation,
-} from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, inject, ViewEncapsulation } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import {RxState} from '@rx-angular/state';
+import { RxState } from '@rx-angular/state';
 
 @Component({
   selector: 'ui-dark-mode-toggle',
   template: `
     <div class="dark-mode-toggle">
-      <button
-        aria-label="Enable dark mode"
-        type="button"
-        class="light"
-        (click)="setChecked(true)"
-      >
+      <button aria-label="Enable dark mode" type="button" class="light" (click)="setChecked(true)">
         ☀
       </button>
 
@@ -28,17 +19,10 @@ import {RxState} from '@rx-angular/state';
           [checked]="!isLightTheme()"
           (change)="setChecked(!isLightTheme())"
         />
-        <label style="color: transparent" for="dark-mode">
-          Toggle Switch
-        </label>
+        <label style="color: transparent" for="dark-mode"> Toggle Switch </label>
       </span>
 
-      <button
-        aria-label="Disable dark mode"
-        type="button"
-        class="dark"
-        (click)="setChecked(false)"
-      >
+      <button aria-label="Disable dark mode" type="button" class="dark" (click)="setChecked(false)">
         ☾
       </button>
     </div>
