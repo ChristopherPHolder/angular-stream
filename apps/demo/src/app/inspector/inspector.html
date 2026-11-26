@@ -1,5 +1,5 @@
 <header class="intro">
-  <h1>Response inspector</h1>
+  <h1 class="text-hero-title">Response inspector</h1>
   <p>
     This fetches the walkthrough page again and splits the response at the boundaries the server
     writes. Each box below is one flush, shown when its last byte arrives, with the time since the
@@ -8,6 +8,7 @@
   <div class="speeds" role="group" aria-label="Speed">
     @for (speed of speeds; track speed.scale) {
       <button
+        class="pb-btn pb-btn-ghost"
         type="button"
         [attr.aria-pressed]="scale() === speed.scale"
         [disabled]="running()"
@@ -33,7 +34,9 @@
         <span class="tag" [class]="'tag tag--' + (flush.kind === 'chunk' ? 'chunk' : 'shell')">
           {{ flush.kind }}
         </span>
-        <h2>Flush {{ n + 1 }} · {{ kb(flush.bytes) }} · arrived at {{ flush.at }} ms</h2>
+        <h2 class="text-title">
+          Flush {{ n + 1 }} · {{ kb(flush.bytes) }} · arrived at {{ flush.at }} ms
+        </h2>
       </header>
 
       @switch (flush.kind) {

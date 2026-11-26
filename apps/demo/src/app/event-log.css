@@ -1,19 +1,19 @@
 :host {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
   align-content: start;
 }
 
 h2 {
   margin: 0;
-  font-size: 1rem;
 }
 
 .hint,
 .empty {
   margin: 0;
-  color: var(--muted);
-  font-size: 0.85rem;
+  color: var(--color-neutral-600);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
 }
 
 ol {
@@ -21,32 +21,34 @@ ol {
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 8px;
+  gap: var(--space-3);
 }
 
 li {
   display: grid;
   grid-template-columns: 4.5rem 1fr;
-  gap: 2px 8px;
-  font-size: 0.85rem;
-  line-height: 1.4;
+  gap: var(--space-1) var(--space-2);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  letter-spacing: -0.28px;
 }
 
 .at {
   grid-row: span 2;
-  font-family: var(--mono);
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  color: var(--muted);
+  color: var(--color-neutral-600);
 }
 
 .kind {
   justify-self: start;
-  font-family: var(--mono);
-  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 0 6px;
-  border-radius: 4px;
+  letter-spacing: 0.04em;
+  padding: 0 var(--space-1-5);
+  border-radius: var(--radius-base);
   border: 1px solid currentColor;
 }
 

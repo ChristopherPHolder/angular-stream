@@ -19,7 +19,13 @@ import { logDemoEvent } from '../event-log';
         }
       </p>
       <p class="widget-value" aria-live="polite">{{ count() }}</p>
-      <button type="button" (click)="count.set(count() + 1)">Add one</button>
+      <button
+        class="pb-btn pb-btn-lg pb-btn-primary"
+        type="button"
+        (click)="count.set(count() + 1)"
+      >
+        Add one
+      </button>
       <p class="widget-note">
         @if (hydrated()) {
           Angular owns the widget now, so the button works.

@@ -1,5 +1,5 @@
 <header class="intro">
-  <h1>Shell, then widget, then hydration</h1>
+  <h1 class="text-hero-title">Shell, then widget, then hydration</h1>
   <p>
     One request. The server sends the page shell straight away. The widget's data takes
     {{ delayMs / 1000 }} seconds, so the widget follows in a later piece of the same response. Then
@@ -10,17 +10,17 @@
 <ol class="steps">
   <li class="step" [class.step--done]="shellAt() !== null">
     <span class="step-n" aria-hidden="true">1</span>
-    <strong>Shell arrives</strong>
+    <strong class="text-card-title">Shell arrives</strong>
     <span class="step-time">{{ shellAt() === null ? 'waiting' : shellAt() + ' ms' }}</span>
   </li>
   <li class="step" [class.step--done]="widgetAt() !== null">
     <span class="step-n" aria-hidden="true">2</span>
-    <strong>Widget HTML arrives</strong>
+    <strong class="text-card-title">Widget HTML arrives</strong>
     <span class="step-time">{{ widgetAt() === null ? 'waiting' : widgetAt() + ' ms' }}</span>
   </li>
   <li class="step" [class.step--done]="hydratedAt() !== null">
     <span class="step-n" aria-hidden="true">3</span>
-    <strong>Widget hydrates</strong>
+    <strong class="text-card-title">Widget hydrates</strong>
     <span class="step-time">{{ hydratedAt() === null ? 'waiting' : hydratedAt() + ' ms' }}</span>
   </li>
 </ol>
@@ -33,7 +33,7 @@
 
 <section class="frame" aria-label="The page">
   <div class="frame-bar">
-    <span class="frame-tag">shell</span>
+    <span class="tag tag--shell">shell</span>
     Everything outside the widget was rendered and sent at once, before the widget's data existed.
   </div>
   <div class="slot" data-box="Widget">

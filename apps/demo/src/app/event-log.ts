@@ -57,7 +57,7 @@ const LABELS: Record<DemoEventKind, string> = {
 @Component({
   selector: 'demo-event-log',
   template: `
-    <h2>Event log</h2>
+    <h2 class="text-card-title">Event log</h2>
     <p class="hint">Milliseconds since the navigation started.</p>
     @if (events().length === 0) {
       <p class="empty">

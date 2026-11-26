@@ -1,5 +1,5 @@
 <header class="intro">
-  <h1>Streamed hydration, step by step</h1>
+  <h1 class="text-hero-title">Streamed hydration, step by step</h1>
   <p>
     This page is one HTTP response that arrives in pieces. Each box says which piece it came in,
     what it is waiting for, and whether Angular has taken it over yet. The event log records each
@@ -17,12 +17,25 @@
     </p>
   }
   <nav class="speeds" aria-label="Speed">
-    <a href="/" [attr.aria-current]="scale === 1 ? 'page' : null">Normal speed</a>
-    <a href="/?scale=3" [attr.aria-current]="scale === 3 ? 'page' : null">Slow motion (×3)</a>
-    <a href="/?scale=0.05" [attr.aria-current]="scale === 0.05 ? 'page' : null"
+    <a class="pb-btn pb-btn-ghost" href="/" [attr.aria-current]="scale === 1 ? 'page' : null"
+      >Normal speed</a
+    >
+    <a
+      class="pb-btn pb-btn-ghost"
+      href="/?scale=3"
+      [attr.aria-current]="scale === 3 ? 'page' : null"
+      >Slow motion (×3)</a
+    >
+    <a
+      class="pb-btn pb-btn-ghost"
+      href="/?scale=0.05"
+      [attr.aria-current]="scale === 0.05 ? 'page' : null"
       >Fast: data races Angular's start-up</a
     >
-    <a href="/?scale=0" [attr.aria-current]="scale === 0 ? 'page' : null"
+    <a
+      class="pb-btn pb-btn-ghost"
+      href="/?scale=0"
+      [attr.aria-current]="scale === 0 ? 'page' : null"
       >No delay: all data lands in the shell</a
     >
   </nav>
@@ -31,7 +44,7 @@
 <section class="box" data-box="Shell">
   <header class="box-head">
     <span class="tag tag--shell">shell</span>
-    <h2>1 · The shell</h2>
+    <h2 class="text-title">1 · The shell</h2>
   </header>
   <p>
     Everything outside the <code>&#64;defer</code> blocks below is the shell: this text, every box's
@@ -49,7 +62,7 @@
 <section class="box" data-box="Block A">
   <header class="box-head">
     <span class="tag tag--block">&#64;defer · hydrate when a()</span>
-    <h2>2 · Block A hydrates as soon as its own data is there</h2>
+    <h2 class="text-title">2 · Block A hydrates as soon as its own data is there</h2>
   </header>
   <p>
     The frame of this box is shell. Its contents are a <code>&#64;defer</code> block: when data A is
@@ -84,7 +97,7 @@
 <section class="box" data-box="Block B">
   <header class="box-head">
     <span class="tag tag--block">&#64;defer · hydrate when b()</span>
-    <h2>3 · Block B, with block C nested inside</h2>
+    <h2 class="text-title">3 · Block B, with block C nested inside</h2>
   </header>
   <p>
     Data B takes {{ delay.b }} ms. Block C sits inside block B's contents, so it doesn't exist until
@@ -103,7 +116,7 @@
           <div class="box box--nested" data-box="Block C">
             <header class="box-head">
               <span class="tag tag--block">&#64;defer · hydrate when c()</span>
-              <h3>Block C, nested</h3>
+              <h3 class="text-card-title">Block C, nested</h3>
             </header>
             @defer (on immediate; hydrate when c()) {
               <div class="stage" data-block="Block C">
@@ -142,7 +155,7 @@
 <section class="box" data-box="Block D">
   <header class="box-head">
     <span class="tag tag--block">&#64;defer · hydrate on idle</span>
-    <h2>4 · Block D waits for the whole stream</h2>
+    <h2 class="text-title">4 · Block D waits for the whole stream</h2>
   </header>
   <p>
     Data D is ready after {{ delay.d }} ms, before B and C, and its chunk arrives then. But
@@ -179,7 +192,7 @@
 <section class="box box--warning" data-box="Outside">
   <header class="box-head">
     <span class="tag tag--warning">no block</span>
-    <h2>5 · Outside any block: never in the server HTML</h2>
+    <h2 class="text-title">5 · Outside any block: never in the server HTML</h2>
   </header>
   <p>
     The quotes below show data A, just like block A, but they are not inside a
@@ -195,7 +208,7 @@
 <section class="box" data-box="Requests">
   <header class="box-head">
     <span class="tag tag--shell">shell</span>
-    <h2>6 · Requests the browser sent: {{ backend.browserRequests() }}</h2>
+    <h2 class="text-title">6 · Requests the browser sent: {{ backend.browserRequests() }}</h2>
   </header>
   <p>
     The page asks for all four pieces of data in the browser too. A request the server is already

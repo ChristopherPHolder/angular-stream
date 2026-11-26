@@ -91,6 +91,11 @@ Streamed SSR for Angular 22 on Cloudflare Workers, as a Vite+ monorepo. Read
 - **Demo**: every box in `apps/demo` states what is happening at that step. If a
   change to `packages/streaming` changes what happens, update the demo's text
   and `docs/streamed-hydration.md` with it.
+- **Demo styles**: `apps/demo` uses the PushBased design system in
+  `apps/demo/src/design-system/` (read its `README.md`). Use its tokens and the
+  `.pb-*` component classes and `.text-*` type styles; never hard-code colours,
+  spacing or radii. `apps/demo/src/styles.css` maps the demo's meaning colours
+  (`--server`, `--placeholder`, `--chunk`, `--hydrated`) onto its state scales.
 - **Server entry**: each app's `src/worker.ts`, a Workers `fetch` handler. It
   runs in workerd: no `node:fs`, no `window`, no Node globals. Check any new
   server-side dependency against that before reaching for it.
