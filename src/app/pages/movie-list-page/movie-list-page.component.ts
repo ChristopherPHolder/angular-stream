@@ -11,12 +11,11 @@ import {
   MovieListPageModel,
 } from './movie-list-page.adapter';
 import { MovieListComponent } from '../../ui/pattern/movie-list/movie-list.component';
-import { StreamBoundaryDirective } from '../../streaming/stream-boundary.directive';
 
 type Heading = { main: string; sub: string };
 
 @Component({
-  imports: [MovieListComponent, StreamBoundaryDirective],
+  imports: [MovieListComponent],
   selector: 'ct-movies-list',
   templateUrl: './movie-list-page.component.html',
   styleUrls: ['./movie-list-page.component.scss'],
@@ -35,18 +34,14 @@ export default class MovieListPageComponent {
   readonly loading = toSignal(this.loading$, { initialValue: false });
 
   /**
-   * Readiness for the SSR stream boundary: true once the first page of movies
-   * has actually rendered. Until then the server holds the boundary back and
-   * the shell goes out without it.
+   * True once the first page has an answer, even an empty one. This is the
+   * list's hydrate trigger: on a streamed render the client's copy of that
+   * answer arrives together with the markup the server rendered from it, so
+   * the block hydrates the moment the two agree.
    */
-  readonly listReady = toSignal(
-    this.movies$.pipe(map((movies) => (movies?.length ?? 0) > 0)),
-    { initialValue: false },
-  );
-
-  constructor() {
-    this.adapter.set({ loading: true });
-  }
+  readonly listReady = toSignal(this.movies$.pipe(map((movies) => movies !== undefined)), {
+    initialValue: false,
+  });
 
   paginate() {
     this.adapter.paginate();

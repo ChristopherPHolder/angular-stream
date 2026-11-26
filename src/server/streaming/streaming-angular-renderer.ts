@@ -11,14 +11,10 @@ import {
 import { App } from '../../app/app';
 import { config } from '../../app/app.config.server';
 import { SERVER_REQUEST_TRACKER } from '../../app/streaming/server-request-tracker';
-import { STREAM_BOUNDARY_SINK } from '../../app/streaming/stream-boundary.directive';
+import { MANUAL_DEFER_BLOCKS, ServerDeferBlocks } from './defer-blocks';
+import { HydrationStream } from './hydration-stream';
 import { RequestTracker } from './request-tracker';
-import {
-  STREAM_BOUNDARY_PREVIEW_RUNTIME,
-  frameFinalDocument,
-  frameStreamBoundary,
-} from './stream-boundary-protocol';
-import { RequestStreamBoundarySink } from './stream-boundary-sink';
+import { frameChunk, frameRuntime } from './stream-runtime';
 
 export interface StreamingAngularRenderOptions {
   document: string;
@@ -31,27 +27,29 @@ export interface OpenBodyDocument {
 }
 
 /**
- * Renders the application as a streamed response.
- *
- * The sequence, which is the whole point:
+ * Renders the application as a streamed response the browser can start
+ * hydrating before it has all of it.
  *
  *  1. Bootstrap, then wait until the structure is stable: the initial
  *     navigation has finished, lazy routes are loaded and `@defer` blocks
- *     have rendered. HTTP requests don't count towards this (see
- *     `SERVER_REQUEST_TRACKER`), so it doesn't wait for TMDB. Without this
- *     wait the shell can be taken before a lazy route or a deferred boundary
- *     exists, and that boundary's frame then has no placeholder to land in.
- *  2. Serialize that shell with the module scripts detached, and send
- *     everything up to `</body>` plus the client runtime. The response is now
- *     open and the browser can paint.
- *  3. Frame each boundary into the open response as it becomes ready.
- *  4. Once the application is stable and no request is in flight, ask Angular
- *     for the authoritative, hydration-annotated document, send it, and close.
+ *     have rendered (see `ServerDeferBlocks` for why that is done by hand).
+ *     HTTP requests don't count towards this (see `SERVER_REQUEST_TRACKER`),
+ *     so it doesn't wait for TMDB.
+ *  2. Annotate that state for hydration and send it, with the client runtime
+ *     and the application's entry scripts at the end. This shell is a
+ *     complete, hydratable Angular document in its own right — rendered
+ *     early, with loaders where the data will go. The browser starts loading
+ *     and hydrating it now.
+ *  3. Each time a request finishes and the application has rendered the
+ *     result, annotate again and send every `@defer` block that changed,
+ *     together with the transfer state the change came from.
+ *  4. When nothing is in flight any more, say so and close.
  *
- * Only step 4 is a hydration source. Steps 2 and 3 are preview markup that the
- * client runtime throws away when the authoritative document lands, which is
- * what keeps this clear of NG0500-series mismatches: Angular never hydrates
- * anything it did not serialize itself.
+ * `@defer` blocks with a `hydrate` trigger are what make step 3 sound. Angular
+ * does not touch their markup until the trigger fires, so it can be replaced
+ * underneath an application that is already running. Anything that changes
+ * outside such a block after the shell is simply rendered by the client, from
+ * the same transfer state.
  *
  * Unlike `renderApplication`, nothing here waits for stability before the
  * first byte.
@@ -60,12 +58,10 @@ export async function renderStreamingAngular({
   document,
   url,
 }: StreamingAngularRenderOptions): Promise<Response> {
-  const boundarySink = new RequestStreamBoundarySink();
   const requestTracker = new RequestTracker();
   const platformRef = platformServer([
     { provide: INITIAL_CONFIG, useValue: { document, url } },
     { provide: ɵSERVER_CONTEXT, useValue: 'streamed-ssr' },
-    { provide: STREAM_BOUNDARY_SINK, useValue: boundarySink },
   ]);
 
   let destroyPromise: Promise<void> | undefined;
@@ -84,18 +80,22 @@ export async function renderStreamingAngular({
           // HTTP leaves `whenStable()` to the tracker; see step 1 above.
           { provide: ɵREQUESTS_CONTRIBUTE_TO_STABILITY, useValue: false },
           { provide: SERVER_REQUEST_TRACKER, useValue: requestTracker },
+          MANUAL_DEFER_BLOCKS,
         ],
       }),
       { platformRef },
     );
+    const deferBlocks = new ServerDeferBlocks(applicationRef);
     await applicationRef.whenStable();
-    const platformState = platformRef.injector.get(PlatformState);
+    await deferBlocks.render();
 
-    const previewDocument = renderWithoutModuleScripts(
-      platformState.getDocument() as unknown as ServerDocument,
-      () => platformState.renderToString(),
+    const serverDocument = platformRef.injector.get(PlatformState).getDocument() as Document;
+    const entryScripts = takeEntryScripts(serverDocument);
+    const { shell, tail } = splitOpenBodyDocument(
+      await ɵrenderInternal(platformRef, applicationRef),
     );
-    const { shell, tail } = splitOpenBodyDocument(previewDocument);
+    const stream = new HydrationStream(applicationRef, serverDocument);
+    const init = stream.begin(requestTracker.pending());
 
     const encoder = new TextEncoder();
     let controller!: ReadableStreamDefaultController<Uint8Array>;
@@ -121,7 +121,10 @@ export async function renderStreamingAngular({
       },
     });
 
-    controller.enqueue(encoder.encode(`${shell}${STREAM_BOUNDARY_PREVIEW_RUNTIME}`));
+    // The runtime has to exist before the application does, and the
+    // application's scripts go last so that everything they hydrate has
+    // already been parsed.
+    controller.enqueue(encoder.encode(`${shell}${frameRuntime(init)}${entryScripts}`));
 
     const terminateAfterCommit = (error: unknown): Promise<void> => {
       if (terminated) {
@@ -132,7 +135,8 @@ export async function renderStreamingAngular({
       console.error('[ssr] streaming render failed after commit', error);
       try {
         // Headers are long gone, so the only honest signal left is a broken
-        // stream. The browser keeps whatever already painted.
+        // stream. The browser keeps what it has, and the runtime releases the
+        // application to fetch the rest itself once the document ends.
         controller.error(error);
       } catch {
         // The stream may already be in a terminal state.
@@ -140,36 +144,27 @@ export async function renderStreamingAngular({
       return destroyOnce();
     };
 
-    boundarySink.subscribe((payload) => {
-      if (terminated) {
-        return;
-      }
-
-      try {
-        controller.enqueue(encoder.encode(frameStreamBoundary(payload)));
-      } catch (error) {
-        void terminateAfterCommit(error);
-      }
-    });
-
     void (async () => {
       try {
-        await whenSettled(applicationRef, requestTracker);
-        if (terminated) {
-          return;
+        for (;;) {
+          await requestTracker.nextCompletion();
+          await whenRendered(applicationRef);
+          await deferBlocks.render();
+          if (terminated) {
+            return;
+          }
+
+          const done = requestTracker.idle;
+          const flush = stream.flush(requestTracker.pending(), done);
+          if (flush !== null) {
+            controller.enqueue(encoder.encode(frameChunk(flush.chunk, flush.markup)));
+          }
+          if (done) {
+            break;
+          }
         }
 
-        const pending = boundarySink.pending();
-        if (pending.length > 0) {
-          console.warn(`[ssr] stream boundaries never became ready: ${pending.join(', ')}`);
-        }
-
-        const finalDocument = await ɵrenderInternal(platformRef, applicationRef);
-        if (terminated) {
-          return;
-        }
-
-        controller.enqueue(encoder.encode(`${frameFinalDocument(finalDocument)}${tail}`));
+        controller.enqueue(encoder.encode(tail));
         controller.close();
         terminated = true;
         await destroyOnce();
@@ -194,7 +189,7 @@ export async function renderStreamingAngular({
 
 /**
  * Splits the serialized document at the closing `</body>`, so the first flush
- * can leave the body open for boundary frames to be appended into.
+ * can leave the body open for chunks to be appended into.
  */
 export function splitOpenBodyDocument(document: string): OpenBodyDocument {
   const terminalBodyIndex = document.toLowerCase().lastIndexOf('</body>');
@@ -211,102 +206,37 @@ export function splitOpenBodyDocument(document: string): OpenBodyDocument {
   return { shell: document.slice(0, terminalBodyIndex), tail };
 }
 
-interface ServerNode {
-  nextSibling: ServerNode | null;
-  parentNode: ServerNode | null;
-  insertBefore(node: ServerNode, referenceNode: ServerNode | null): void;
-  removeChild(node: ServerNode): void;
-}
+/**
+ * Removes the application's module scripts from the document and returns them
+ * as markup for the end of the shell, marked `async`.
+ *
+ * A module script is deferred by default: it does not run until the parser
+ * has finished, and here the parser does not finish until the last chunk has
+ * arrived. `async` makes it run as soon as it has loaded instead. Moving it
+ * to the end of the shell is what guarantees `<app-root>` and transfer state
+ * have been parsed by then — an async script in `<head>` could run first.
+ */
+export function takeEntryScripts(document: Document): string {
+  let markup = '';
+  for (const script of Array.from(document.querySelectorAll('script[type="module"]'))) {
+    script.setAttribute('async', '');
+    markup += script.outerHTML;
+    script.remove();
+  }
 
-interface ServerDocument {
-  querySelectorAll(selector: string): ArrayLike<ServerNode>;
+  return markup;
 }
 
 /**
- * Serializes the document with `<script type="module">` tags removed.
- *
- * The shell must not carry the application's entry points. If it did, the
- * browser would start fetching and then bootstrapping Angular against the
- * preview DOM, which is not hydration-annotated. The scripts come back in the
- * authoritative document at the end, and the client runtime activates them
- * only once that document is installed.
- *
- * The nodes are restored into the live document afterwards — the same
- * `PlatformState` is rendered again by `ɵrenderInternal`, so removing them
- * permanently would strip them from the authoritative output too.
+ * Stable, a task later, and stable again. A response is handed to the
+ * application in the same turn its request finishes, but what the application
+ * does with it — a state update, another request — may take a hop or two to
+ * show, and near-simultaneous responses are better sent as one flush.
  */
-export function renderWithoutModuleScripts(
-  document: ServerDocument,
-  render: () => string,
-): string {
-  const detachedScripts: Array<{
-    script: ServerNode;
-    parent: ServerNode;
-    nextSibling: ServerNode | null;
-  }> = [];
-  let renderedDocument!: string;
-  let renderFailed = false;
-  let renderError: unknown;
-
-  try {
-    for (const script of Array.from(document.querySelectorAll('script[type="module"]'))) {
-      const parent = script.parentNode;
-      if (parent === null) {
-        continue;
-      }
-
-      const nextSibling = script.nextSibling;
-      parent.removeChild(script);
-      detachedScripts.push({ script, parent, nextSibling });
-    }
-
-    renderedDocument = render();
-  } catch (error) {
-    renderFailed = true;
-    renderError = error;
-  }
-
-  // Restore in reverse so each `nextSibling` reference is back in place before
-  // the node that was recorded against it.
-  let restorationFailed = false;
-  let restorationError: unknown;
-
-  for (const { script, parent, nextSibling } of detachedScripts.reverse()) {
-    try {
-      parent.insertBefore(script, nextSibling);
-    } catch (error) {
-      if (!restorationFailed) {
-        restorationFailed = true;
-        restorationError = error;
-      }
-    }
-  }
-
-  if (restorationFailed) {
-    throw restorationError;
-  }
-
-  if (renderFailed) {
-    throw renderError;
-  }
-
-  return renderedDocument;
-}
-
-/**
- * Stable *and* no request in flight: what `whenStable()` alone means when
- * HTTP contributes to stability. A response can render more of the app,
- * which can start more requests, so check both until both hold at once.
- */
-async function whenSettled(applicationRef: ApplicationRef, tracker: RequestTracker): Promise<void> {
-  for (;;) {
-    await applicationRef.whenStable();
-    if (tracker.idle) {
-      return;
-    }
-
-    await tracker.whenIdle();
-  }
+async function whenRendered(applicationRef: ApplicationRef): Promise<void> {
+  await applicationRef.whenStable();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await applicationRef.whenStable();
 }
 
 /**

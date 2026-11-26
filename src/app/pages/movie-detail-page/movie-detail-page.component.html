@@ -1,5 +1,5 @@
 <article class="movie-detail-wrapper">
-  @defer (on immediate; hydrate on idle) {
+  @defer (on immediate; hydrate when movie()) {
   @if (movie(); as movie) {
     <ui-detail-grid [style.opacity]="!!movie ? 1 : 0">
       <div detailGridMedia>
@@ -64,29 +64,32 @@
               #castListWrapper
               class="cast-list"
               >
-              @for (c of castList().value; track c.cast_id; let idx = $index) {
-                <a
-                  [routerLink]="['/detail/person/', c.id]"
-                  (click)="$event.preventDefault()"
-                  [attr.data-uf]="'cast-' + idx"
-                  class="movie-detail--cast-actor"
-                  [attr.aria-label]="c.name"
-                >
-                  <picture>
-                    <img
-                      [ngSrc]="c.imgSrc"
-                      [ngSrcset]="c.imgSrcset"
-                      [sizes]="c.imgSizes"
-                      [width]="c.imgWidth"
-                      [height]="c.imgHeight"
-                      [alt]="c.name"
-                      [title]="c.name"
-                    />
-                  </picture>
-                </a>
-              }
-              @if (castList().loading) {
-                <div class="loader"></div>
+              <!-- Nested, so the cast streams in without resending the block around it. -->
+              @defer (on immediate; hydrate when castList().value.length > 0) {
+                @for (c of castList().value; track c.cast_id; let idx = $index) {
+                  <a
+                    [routerLink]="['/detail/person/', c.id]"
+                    (click)="$event.preventDefault()"
+                    [attr.data-uf]="'cast-' + idx"
+                    class="movie-detail--cast-actor"
+                    [attr.aria-label]="c.name"
+                  >
+                    <picture>
+                      <img
+                        [ngSrc]="c.imgSrc"
+                        [ngSrcset]="c.imgSrcset"
+                        [sizes]="c.imgSizes"
+                        [width]="c.imgWidth"
+                        [height]="c.imgHeight"
+                        [alt]="c.name"
+                        [title]="c.name"
+                      />
+                    </picture>
+                  </a>
+                }
+                @if (castList().loading) {
+                  <div class="loader"></div>
+                }
               }
             </div>
             <button
@@ -188,7 +191,7 @@
       <h1>Recommended</h1>
       <h2>Movies</h2>
     </header>
-    @defer (on immediate; hydrate on idle) {
+    @defer (on immediate; hydrate when !recommendations().loading) {
       <ui-movie-list
         (paginate)="paginateRecommendations()"
         [movies]="recommendations().results"
