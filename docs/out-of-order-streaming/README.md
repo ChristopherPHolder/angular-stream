@@ -1,6 +1,18 @@
 # Out-of-order SSR: getting first paint into the first flight
 
-Research notes and candidate approaches. Nothing here is implemented yet.
+> **Historical.** These notes were written before streaming shipped, against the
+> setup this repo used then: Angular 21, `@angular/ssr`, `AngularNodeAppEngine` and
+> Fastify. That setup is gone, and so are files cited below such as
+> `src/server/ssr.plugin.ts` and `src/app/app.routes.server.ts`.
+>
+> What shipped is closest to approach B (§6): a custom renderer that streams, on
+> Cloudflare Workers. It uses `@defer (hydrate …)` blocks as the boundaries instead of
+> a `streamDefer` directive, and the browser hydrates the shell before the response
+> ends. Approach A, reordering a finished render, was not built; the
+> [baseline](baseline/README.md) found it saves no round trip on the list page. For
+> how rendering works now, read [`docs/streamed-hydration.md`](../streamed-hydration.md).
+
+Research notes and candidate approaches, kept for the reasoning behind them.
 
 ## 1. The idea
 
@@ -89,7 +101,7 @@ on by default, so Angular (via beasties) inlines critical CSS into the head and 
 sheet. That inlined CSS is itself several KB of our 12 KB budget. See §7 for the interaction
 between critical-CSS extraction and hoisting — it is a real trade-off, not a detail.
 
-## 4. Where this repo stands
+## 4. Where this repo stood
 
 - Angular 21.1.6, `@angular/ssr` 21.1.5, Fastify 5, `RenderMode.Server` for `**`
   (`src/app/app.routes.server.ts`).

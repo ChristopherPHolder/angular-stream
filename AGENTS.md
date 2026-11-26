@@ -73,7 +73,10 @@ Read `README.md` for how the pieces fit together; the short version:
 - **Streaming**: content that depends on HTTP data belongs in a `@defer` block
   with a `hydrate` trigger, placed directly inside an element — prefer
   `hydrate when <its data is there>`. Read "Streamed hydration" in `README.md`
-  before changing `src/app/streaming/` or `src/server/streaming/`.
+  and `docs/streamed-hydration.md` before changing `src/app/streaming/` or
+  `src/server/streaming/`, and verify such changes the way the latter's
+  "Verifying a change" section describes. `docs/out-of-order-streaming/` is
+  the pre-implementation research, not a description of the current code.
 - **Server entry**: `src/worker.ts`, a Workers `fetch` handler. It runs in
   workerd — no `node:fs`, no `window`, no Node globals. Check any new
   server-side dependency against that before reaching for it.
