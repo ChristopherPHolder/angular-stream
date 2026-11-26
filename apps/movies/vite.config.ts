@@ -1,10 +1,10 @@
 import { cloudflare } from '@cloudflare/vite-plugin';
 import { ngp } from '@push-based/vite-plugin-ngp';
-import { defineConfig } from 'vite';
+import { defineConfig, lazyPlugins } from 'vite-plus';
 
 export default defineConfig({
   optimizeDeps: { entries: ['index.html'] },
-  plugins: [
+  plugins: lazyPlugins(() => [
     ngp({
       entries: ['src/main.ts', 'src/worker.ts'],
       budgets: [
@@ -13,5 +13,5 @@ export default defineConfig({
       ],
     }),
     cloudflare({ viteEnvironment: { name: 'ssr' } }),
-  ],
+  ]),
 });

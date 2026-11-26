@@ -8,12 +8,14 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev -w movies",
-    "build": "npm run build --workspaces --if-present"
+    "dev": "vp run movies#dev",
+    "dev:demo": "vp run demo#dev",
+    "build": "vp run -r build",
+    "ready": "vp check && vp run -r build"
   },
   "packageManager": "npm@11.13.0",
   "devDependencies": {
-    "prettier": "^3.8.1"
+    "vite-plus": "1.8.0"
   },
   "engines": {
     "node": ">=26"
@@ -24,5 +26,8 @@
     "workerd@1.20261104.1": true,
     "@parcel/watcher@2.6.0": true,
     "fsevents@2.3.3": true
+  },
+  "overrides": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8001"
   }
 }
