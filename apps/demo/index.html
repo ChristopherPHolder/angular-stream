@@ -57,6 +57,14 @@
                   const names = chunk.b.map((block) => block.id + ' "' + boxOf(block.id) + '"');
                   const before = sink === null;
                   original.call(this, chunk);
+                  if (chunk.aborted) {
+                    demo.log(
+                      'end',
+                      'The response ended without a done chunk: the stream broke off. The ' +
+                        'browser releases its held requests and fetches the missing data itself.',
+                    );
+                    return;
+                  }
                   const what = names.length ? 'swapped in ' + names.join(', ') : 'no markup';
                   demo.log(
                     'chunk',
@@ -80,7 +88,7 @@
           },
         });
         document.addEventListener('DOMContentLoaded', () =>
-          demo.log('end', 'Response complete: the parser reached </html>.'),
+          demo.log('end', 'The document has finished parsing (DOMContentLoaded).'),
         );
       })();
     </script>

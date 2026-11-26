@@ -38,38 +38,56 @@
 
       @switch (flush.kind) {
         @case ('shell') {
-          <p>
-            The whole page except the data: annotated for hydration, with a placeholder in every
-            block. Nothing after it is needed for Angular to start.
-          </p>
-          <ul>
-            <li>
-              Anchors for {{ flush.anchors.length }} blocks, which chunks will fill:
-              <code>{{ flush.anchors.join(', ') }}</code>
-            </li>
-            <li>
-              Still in flight on the server: {{ flush.pending.length }}
-              <ul>
-                @for (request of flush.pending; track request) {
-                  <li>
-                    <code>{{ path(request) }}</code>
-                  </li>
-                }
-              </ul>
-            </li>
-            <li>
-              Ends with the inline runtime and {{ flush.entryScripts }} entry
-              {{ flush.entryScripts === 1 ? 'script' : 'scripts' }} marked <code>async</code>, so
-              Angular can start now.
-            </li>
-            @if (flush.outsideQuote !== null) {
-              <li>
-                The "outside any block" quote, as sent: <code>{{ flush.outsideQuote }}</code>. It
-                stays like that in the server HTML.
-              </li>
+          @if (flush.complete) {
+            <p>
+              <strong>The whole document in one piece.</strong> The streaming renderer failed before
+              its first flush, so the server fell back to a buffered render: it waited for all the
+              data, sent the page once, and nothing streams after it. The browser renders the
+              <code>&#64;defer</code> blocks itself.
+            </p>
+          } @else {
+            @if (flush.pending.length === 0) {
+              <p>
+                The whole page, data included: every request finished before the server took the
+                shell, so the data is already in it. Only an empty chunk marked done follows.
+              </p>
+            } @else {
+              <p>
+                The whole page except the data: annotated for hydration, with a placeholder in every
+                block that is still waiting. Nothing after it is needed for Angular to start.
+              </p>
             }
-            <li>No <code>&lt;/body&gt;</code>: the response is still open.</li>
-          </ul>
+            <ul>
+              <li>
+                Anchors for {{ flush.anchors.length }} blocks, which chunks can replace:
+                <code>{{ flush.anchors.join(', ') }}</code>
+              </li>
+              <li>
+                Still in flight on the server: {{ flush.pending.length }}
+                @if (flush.pending.length > 0) {
+                  <ul>
+                    @for (request of flush.pending; track request) {
+                      <li>
+                        <code>{{ path(request) }}</code>
+                      </li>
+                    }
+                  </ul>
+                }
+              </li>
+              <li>
+                Ends with the inline runtime and {{ flush.entryScripts }} entry
+                {{ flush.entryScripts === 1 ? 'script' : 'scripts' }} marked <code>async</code>, so
+                Angular can start now.
+              </li>
+              @if (flush.outsideQuote !== null) {
+                <li>
+                  The "outside any block" quote, as sent: <code>{{ flush.outsideQuote }}</code>. The
+                  shell is not sent again, so the server HTML keeps it like this.
+                </li>
+              }
+              <li>No <code>&lt;/body&gt;</code>: the response is still open.</li>
+            </ul>
+          }
         }
         @case ('chunk') {
           <p>
@@ -89,13 +107,17 @@
                 <pre><code>{{ block.excerpt }}</code></pre>
               </li>
             } @empty {
-              <li>No markup, only data.</li>
+              <li>No markup.</li>
             }
-            <li>
-              Transfer state: {{ flush.stateEntries }} new
-              {{ flush.stateEntries === 1 ? 'entry' : 'entries' }} ({{ kb(flush.stateBytes) }}). The
-              browser's held request for it is released.
-            </li>
+            @if (flush.stateEntries > 0) {
+              <li>
+                Transfer state: {{ flush.stateEntries }} new
+                {{ flush.stateEntries === 1 ? 'entry' : 'entries' }} ({{ kb(flush.stateBytes) }}).
+                The browser releases the requests it was holding for this data.
+              </li>
+            } @else {
+              <li>No new transfer state.</li>
+            }
             <li>
               @if (flush.pending.length === 0) {
                 Nothing in flight on the server any more.

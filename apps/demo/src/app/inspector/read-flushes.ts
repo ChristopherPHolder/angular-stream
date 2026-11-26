@@ -17,6 +17,11 @@ export type Flush =
       /** Milliseconds from the request to the last byte of this flush. */
       at: number;
       bytes: number;
+      /**
+       * True when this is the whole document: the server fell back to a
+       * buffered render, and nothing streams after it.
+       */
+      complete: boolean;
       anchors: string[];
       pending: string[];
       entryScripts: number;
@@ -37,6 +42,7 @@ export type Flush =
 
 const CHUNK_START = '<script>__ngs.push(';
 const CHUNK_END = ')</script>';
+const TEMPLATE_START = '<template data-ngs="';
 const TAIL = '</body>';
 /** The start of the inline runtime, the last thing in the shell before the entry scripts. */
 const RUNTIME_START = 'var S=window.__ngs=';
@@ -47,9 +53,12 @@ const ENTRY_SCRIPT = /<script[^>]*type="module"[^>]*><\/script>/y;
  * completes: the shell, every chunk, and the closing tags.
  *
  * Network packets do not line up with flushes, so this cuts the response at
- * the boundaries the renderer writes rather than at each read.
+ * the boundaries the renderer writes rather than at each read. The shell ends
+ * with `entryScripts` module scripts, written in the same flush; it is
+ * reported once all of them have arrived, so a read that stops part way
+ * through them does not cut it short.
  */
-export async function* readFlushes(url: string): AsyncGenerator<Flush> {
+export async function* readFlushes(url: string, entryScripts: number): AsyncGenerator<Flush> {
   const started = performance.now();
   const response = await fetch(url, { cache: 'no-store' });
   if (response.body === null) {
@@ -72,7 +81,7 @@ export async function* readFlushes(url: string): AsyncGenerator<Flush> {
     const bytes = (part: string) => encoder.encode(part).length;
 
     if (!shellSent) {
-      const end = shellEnd(text);
+      const end = shellEnd(text, entryScripts);
       if (end === -1 && !finished) {
         continue;
       }
@@ -100,7 +109,7 @@ export async function* readFlushes(url: string): AsyncGenerator<Flush> {
 
       const frame = text.slice(cursor, end + CHUNK_END.length);
       const chunk = JSON.parse(text.slice(start + CHUNK_START.length, end)) as StreamChunk;
-      yield { kind: 'chunk', at, bytes: bytes(frame), ...describeChunk(frame, chunk) };
+      yield { kind: 'chunk', at, bytes: bytes(frame), ...describeChunk(frame, chunk, bytes) };
       cursor = end + CHUNK_END.length;
     }
   }
@@ -108,10 +117,14 @@ export async function* readFlushes(url: string): AsyncGenerator<Flush> {
 
 /**
  * Where the shell ends: after the inline runtime and the entry scripts that
- * follow it, which the server writes in the same flush. -1 until that much
- * has arrived.
+ * follow it. -1 until that much has arrived.
+ *
+ * The shell is complete once `expected` entry scripts are in, or once the
+ * next flush has visibly started, whichever comes first. The second rule
+ * covers a wrong `expected`; the first means the shell is reported as soon as
+ * its own last byte is in, not when the next flush begins.
  */
-function shellEnd(text: string): number {
+function shellEnd(text: string, expected: number): number {
   const runtime = text.indexOf(RUNTIME_START);
   const runtimeEnd = runtime === -1 ? -1 : text.indexOf('</script>', runtime);
   if (runtimeEnd === -1) {
@@ -119,18 +132,26 @@ function shellEnd(text: string): number {
   }
 
   let end = runtimeEnd + '</script>'.length;
+  let found = 0;
   ENTRY_SCRIPT.lastIndex = end;
-  for (let match = ENTRY_SCRIPT.exec(text); match !== null; match = ENTRY_SCRIPT.exec(text)) {
+  while (ENTRY_SCRIPT.exec(text) !== null) {
     end = ENTRY_SCRIPT.lastIndex;
+    found++;
   }
 
-  return end;
+  const rest = text.slice(end);
+  const nextFlushStarted = [TEMPLATE_START, CHUNK_START, TAIL].some((marker) =>
+    rest.startsWith(marker),
+  );
+  return found >= expected || nextFlushStarted ? end : -1;
 }
 
 function describeShell(shell: string) {
   const init = /sink:null\},(\{.*?\})\);/s.exec(shell);
   const quote = /class="quote"[^>]*>([\s\S]*?)<\/p>/.exec(shell);
   return {
+    // Only a buffered fallback has no inline runtime.
+    complete: !shell.includes(RUNTIME_START),
     anchors: [...shell.matchAll(/<!--ngh=(d\d+)-->/g)].map((match) => match[1]),
     pending: init ? (JSON.parse(init[1]) as StreamInit).p : [],
     entryScripts: (shell.match(/<script[^>]*type="module"[^>]*async/g) ?? []).length,
@@ -138,7 +159,7 @@ function describeShell(shell: string) {
   };
 }
 
-function describeChunk(frame: string, chunk: StreamChunk) {
+function describeChunk(frame: string, chunk: StreamChunk, bytes: (part: string) => number) {
   const markup = new Map(
     [...frame.matchAll(/<template data-ngs="([^"]+)">([\s\S]*?)<\/template>/g)].map((match) => [
       match[1],
@@ -153,12 +174,12 @@ function describeChunk(frame: string, chunk: StreamChunk) {
         id: block.id,
         name: /data-block="([^"]+)"/.exec(html)?.[1] ?? null,
         replaces: block.o,
-        markupBytes: html.length,
+        markupBytes: bytes(html),
         excerpt: excerpt(html),
       };
     }),
     stateEntries: Object.keys(chunk.s).length,
-    stateBytes: JSON.stringify(chunk.s).length,
+    stateBytes: bytes(JSON.stringify(chunk.s)),
     pending: chunk.p,
     done: chunk.done === true,
   };

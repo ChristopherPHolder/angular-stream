@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, type Signal, inject } from '@angular/core';
+import { Component, type Signal, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { DemoBackend, STEP_DELAYS, type Step, type StepData } from '../demo-backend';
@@ -37,6 +37,12 @@ export class Walkthrough {
   protected readonly b = this.load('b');
   protected readonly c = this.load('c');
   protected readonly d = this.load('d');
+
+  /** Shown outside any block, so it never reaches the server HTML. See box 5. */
+  protected readonly outsideQuote = computed(() => {
+    const data = this.a();
+    return data ? `Data A arrived after ${data.delayMs} ms.` : '';
+  });
 
   private load(step: Step): Signal<StepData | undefined> {
     return toSignal(

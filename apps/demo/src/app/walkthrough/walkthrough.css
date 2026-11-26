@@ -71,3 +71,10 @@
   border-radius: 8px;
   background: var(--surface-2);
 }
+
+.note {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--placeholder);
+  background: var(--placeholder-bg);
+}

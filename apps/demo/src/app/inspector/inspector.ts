@@ -30,7 +30,7 @@ export class Inspector {
     this.error.set(null);
     this.running.set(true);
     try {
-      for await (const flush of readFlushes(`/?scale=${scale}`)) {
+      for await (const flush of readFlushes(`/?scale=${scale}`, entryScriptCount())) {
         this.flushes.update((flushes) => [...flushes, flush]);
       }
     } catch (error) {
@@ -47,4 +47,14 @@ export class Inspector {
   protected path(request: string): string {
     return request.replace(/^GET https?:\/\/[^/]+/, 'GET ');
   }
+}
+
+/**
+ * How many entry scripts end a shell. The page being inspected comes from the
+ * same template as this one, so it ends with the same scripts: the server
+ * moved them out of `<head>` and marked them `async`. Falls back to one when
+ * this page itself was not streamed.
+ */
+function entryScriptCount(): number {
+  return Math.max(1, document.querySelectorAll('script[type="module"][async]').length);
 }

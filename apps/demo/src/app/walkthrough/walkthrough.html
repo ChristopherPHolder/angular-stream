@@ -9,6 +9,13 @@
     The server's data takes {{ delay.a }} ms (A), {{ delay.d }} ms (D), {{ delay.b }} ms (B) and
     {{ delay.c }} ms (C). Reload to watch it again, or change the speed:
   </p>
+  @if (scale === 0) {
+    <p class="note">
+      <strong>No delay:</strong> every request finishes before the server takes the shell, so the
+      data is already in it. The boxes below describe the streamed case; here every block arrives
+      filled in the shell, and only an empty chunk marked done follows.
+    </p>
+  }
   <nav class="speeds" aria-label="Speed">
     <a href="/" [attr.aria-current]="scale === 1 ? 'page' : null">Normal speed</a>
     <a href="/?scale=3" [attr.aria-current]="scale === 3 ? 'page' : null">Slow motion (×3)</a>
@@ -28,10 +35,10 @@
   </header>
   <p>
     Everything outside the <code>&#64;defer</code> blocks below is the shell: this text, every box's
-    frame and heading, and the placeholders inside the blocks. The server rendered it before any
-    data existed and sent it in the first flush, with an inline runtime and the app's script at the
-    end. The response stays open, and Angular starts and hydrates the shell while the rest is still
-    on its way.
+    frame and heading, and the placeholders inside the blocks. The server rendered it once the route
+    was in place, without waiting for the data, and sent it in the first flush, with an inline
+    runtime and the app's script at the end. The response stays open, and Angular starts and
+    hydrates the shell while the rest is still on its way.
   </p>
   <demo-hydration-status
     name="The shell"
@@ -176,18 +183,13 @@
   </header>
   <p>
     The quotes below show data A, just like block A, but they are not inside a
-    <code>&#64;defer</code> block. They belong to the shell, which went out before data A existed
+    <code>&#64;defer</code> block. They belong to the shell, which went out before data A arrived
     and is never sent again. So the server HTML has empty quotes, and the text appears only because
     Angular renders it in the browser once data A arrives. The response inspector shows the empty
-    quotes in the shell.
+    quotes in the shell. (With no delay, data A is ready before the shell is taken, so the quotes
+    are filled in the server HTML too.)
   </p>
-  <p class="quote">
-    “
-    @if (a(); as data) {
-      Data A arrived after {{ data.delayMs }} ms.
-    }
-    ”
-  </p>
+  <p class="quote">“{{ outsideQuote() }}”</p>
 </section>
 
 <section class="box" data-box="Requests">
@@ -199,6 +201,7 @@
     The page asks for all four pieces of data in the browser too. A request the server is already
     making is held back until its response arrives on the stream, then answered from transfer state,
     so the browser never fetches it. If this number goes above 0, the browser fetched something
-    itself: the stream broke off, or Angular fell back to a normal render.
+    itself. That happens when the stream breaks off before all the data has arrived: the client then
+    releases its held requests and lets them go to the network.
   </p>
 </section>
