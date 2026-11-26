@@ -100,12 +100,19 @@ export function frameRuntime(init: StreamInit): string {
 }
 
 /**
- * One flush: a `<template>` per replaced block, then the script that applies
- * them. The script comes last because it runs the moment the parser reaches
- * it, and by then every template ahead of it is complete.
+ * One flush: the stylesheets of components new to the page, a `<template>`
+ * per replaced block, then the script that applies them. The styles come
+ * first so they apply before the markup that needs them is swapped in; a
+ * `<style>` or `<link>` in `<body>` applies like one in `<head>`. The script
+ * comes last because it runs the moment the parser reaches it, and by then
+ * every template ahead of it is complete.
  */
-export function frameChunk(chunk: StreamChunk, markup: ReadonlyMap<string, string>): string {
-  let frame = '';
+export function frameChunk(
+  chunk: StreamChunk,
+  markup: ReadonlyMap<string, string>,
+  styles = '',
+): string {
+  let frame = styles;
   for (const block of chunk.b) {
     frame += `<template data-ngs="${block.id}">${markup.get(block.id) ?? ''}</template>`;
   }

@@ -1,0 +1,62 @@
+<header class="intro">
+  <h1>Shell, then widget, then hydration</h1>
+  <p>
+    One request. The server sends the page shell straight away. The widget's data takes
+    {{ delayMs / 1000 }} seconds, so the widget follows in a later piece of the same response. Then
+    Angular takes it over. Reload to watch it again.
+  </p>
+</header>
+
+<ol class="steps">
+  <li class="step" [class.step--done]="shellAt() !== null">
+    <span class="step-n" aria-hidden="true">1</span>
+    <strong>Shell arrives</strong>
+    <span class="step-time">{{ shellAt() === null ? 'waiting' : shellAt() + ' ms' }}</span>
+  </li>
+  <li class="step" [class.step--done]="widgetAt() !== null">
+    <span class="step-n" aria-hidden="true">2</span>
+    <strong>Widget HTML arrives</strong>
+    <span class="step-time">{{ widgetAt() === null ? 'waiting' : widgetAt() + ' ms' }}</span>
+  </li>
+  <li class="step" [class.step--done]="hydratedAt() !== null">
+    <span class="step-n" aria-hidden="true">3</span>
+    <strong>Widget hydrates</strong>
+    <span class="step-time">{{ hydratedAt() === null ? 'waiting' : hydratedAt() + ' ms' }}</span>
+  </li>
+</ol>
+
+<p class="clock">
+  @if (elapsed(); as seconds) {
+    {{ seconds }} s
+  }
+</p>
+
+<section class="frame" aria-label="The page">
+  <div class="frame-bar">
+    <span class="frame-tag">shell</span>
+    Everything outside the widget was rendered and sent at once, before the widget's data existed.
+  </div>
+  <div class="slot" data-box="Widget">
+    @defer (on immediate; hydrate when hydrateNow()) {
+      <div data-block="Widget">
+        @if (widget(); as data) {
+          <demo-simple-widget [delayMs]="data.delayMs" />
+        } @else {
+          <div class="placeholder">
+            <span class="loader" aria-hidden="true"></span>
+            <p>
+              <strong>Placeholder.</strong> This came with the shell. The server is still fetching
+              the widget's data; the response stays open until it can send the widget.
+            </p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>
+
+<p class="aside">
+  In a real app the widget hydrates about a millisecond after its HTML arrives, as soon as its data
+  is there. Here the browser holds hydration back for {{ pauseMs / 1000 }} seconds, so you can see
+  the two steps apart.
+</p>
