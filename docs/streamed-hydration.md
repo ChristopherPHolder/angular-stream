@@ -5,9 +5,11 @@ piece while the rest is still on its way. The [README](../README.md#streamed-hyd
 has the short version and the rules for templates; this is the long one, with
 a real response taken apart flush by flush.
 
-To watch each of these steps happen in a browser, run the demo app
-(`npm run dev:demo`). It has one labelled box per behaviour described here, a
-live event log, and a response inspector that shows each flush as it arrives.
+To watch these steps happen in a browser, run the demo app
+(`npm run dev:demo`). `/simple` shows the core idea and nothing else: the shell,
+a widget streamed in five seconds later, then its hydration. `/` has one
+labelled box per behaviour described here and a live event log, and `/inspect`
+shows each flush of the response as it arrives.
 
 - [The request at a glance](#the-request-at-a-glance)
 - [Walkthrough: `/detail/movie/550`](#walkthrough-detailmovie550)
@@ -369,14 +371,25 @@ hydration errors.
 Defined in [`stream-protocol.ts`](../packages/streaming/src/client/stream-protocol.ts).
 Field names are short because every chunk repeats them.
 
-A chunk is one `<template data-ngs="id">` per block, followed by one script:
+A chunk is the stylesheets of any components new to the page, then one
+`<template data-ngs="id">` per block, then one script:
 
 ```html
+<style ng-app-id="ng">
+  …
+</style>
 <template data-ngs="d1">…the block's new root nodes…</template>
 <script>
   __ngs.push({ "b": [...], "s": {...}, "p": [...], "done": true })
 </script>
 ```
+
+Angular adds a component's stylesheet to `<head>` the first time the component
+renders: a `<style>` in a production build, a `<link>` in dev. A component that
+first renders inside a streamed block does so after the shell has gone out, so
+the chunk carries its stylesheet, ahead of the markup that needs it. Without
+that, the block would stay unstyled until the browser rendered the component
+itself at hydration.
 
 The script comes last so every template ahead of it has been fully parsed when
 it runs.

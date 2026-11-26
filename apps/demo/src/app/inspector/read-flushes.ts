@@ -33,6 +33,8 @@ export type Flush =
       at: number;
       bytes: number;
       blocks: FlushBlock[];
+      /** Stylesheets for components that are new to the page. */
+      styles: number;
       stateEntries: number;
       stateBytes: number;
       pending: string[];
@@ -178,6 +180,7 @@ function describeChunk(frame: string, chunk: StreamChunk, bytes: (part: string) 
         excerpt: excerpt(html),
       };
     }),
+    styles: (frame.split('<template')[0].match(/<style\b|<link\b/g) ?? []).length,
     stateEntries: Object.keys(chunk.s).length,
     stateBytes: bytes(JSON.stringify(chunk.s)),
     pending: chunk.p,

@@ -109,6 +109,12 @@
             } @empty {
               <li>No markup.</li>
             }
+            @if (flush.styles > 0) {
+              <li>
+                {{ flush.styles }} {{ flush.styles === 1 ? 'stylesheet' : 'stylesheets' }} for
+                components the page had not rendered before, ahead of the markup that needs them.
+              </li>
+            }
             @if (flush.stateEntries > 0) {
               <li>
                 Transfer state: {{ flush.stateEntries }} new
