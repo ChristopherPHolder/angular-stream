@@ -1,0 +1,51 @@
+.widget {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 28px 20px;
+  text-align: center;
+  border: 3px solid var(--server);
+  border-radius: 14px;
+  background: var(--server-bg);
+  transition:
+    border-color 0.4s,
+    background-color 0.4s;
+}
+
+.widget--live {
+  border-color: var(--hydrated);
+  background: var(--hydrated-bg);
+}
+
+.widget p {
+  margin: 0;
+}
+
+.widget-state {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--server);
+}
+
+.widget--live .widget-state {
+  color: var(--hydrated);
+}
+
+.widget-value {
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.widget button {
+  font-size: 1rem;
+  padding: 6px 18px;
+}
+
+.widget-note {
+  max-width: 42ch;
+  color: var(--muted);
+}
