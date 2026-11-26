@@ -1,4 +1,4 @@
-import { PlatformLocation } from '@angular/common';
+import { NgOptimizedImage, PlatformLocation } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { EventLog } from './event-log';
@@ -7,13 +7,18 @@ import { EventLog } from './event-log';
   selector: 'app-root',
   template: `
     <header class="top">
-      <a class="brand" href="/">angular-stream <span>demo</span></a>
-      <!-- Plain links: every page load should be a fresh streamed response. -->
-      <nav aria-label="Pages">
-        <a href="/simple">Simple</a>
-        <a href="/">Walkthrough</a>
-        <a href="/inspect">Response inspector</a>
-      </nav>
+      <div class="top-inner">
+        <a class="brand text-card-title" href="/">
+          <img ngSrc="pushbased-logo.svg" alt="PushBased" width="86" height="32" priority />
+          angular-stream <span>demo</span>
+        </a>
+        <!-- Plain links: every page load should be a fresh streamed response. -->
+        <nav class="text-link-mono" aria-label="Pages">
+          <a href="/simple">Simple</a>
+          <a href="/">Walkthrough</a>
+          <a href="/inspect">Response inspector</a>
+        </nav>
+      </div>
     </header>
     <div class="layout" [class.layout--single]="!showLog">
       <main>
@@ -26,7 +31,7 @@ import { EventLog } from './event-log';
       }
     </div>
   `,
-  imports: [RouterOutlet, EventLog],
+  imports: [NgOptimizedImage, RouterOutlet, EventLog],
 })
 export class App {
   /**

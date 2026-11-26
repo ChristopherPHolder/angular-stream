@@ -15,7 +15,7 @@ import { logDemoEvent } from '../event-log';
       <p class="status status--hydrated">
         <strong>Hydrated at {{ at }} ms.</strong>
         Angular owns these nodes now, so they respond to events.
-        <button type="button" (click)="clicks.set(clicks() + 1)">
+        <button class="pb-btn pb-btn-ghost" type="button" (click)="clicks.set(clicks() + 1)">
           Clicked {{ clicks() }} {{ clicks() === 1 ? 'time' : 'times' }}
         </button>
       </p>

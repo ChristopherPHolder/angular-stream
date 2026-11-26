@@ -1,11 +1,11 @@
 .widget {
   display: grid;
   justify-items: center;
-  gap: 10px;
-  padding: 28px 20px;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-5);
   text-align: center;
-  border: 3px solid var(--server);
-  border-radius: 14px;
+  border: 2px solid var(--server);
+  border-radius: var(--radius-lg);
   background: var(--server-bg);
   transition:
     border-color 0.4s,
@@ -22,10 +22,10 @@
 }
 
 .widget-state {
-  font-family: var(--mono);
-  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
   color: var(--server);
 }
 
@@ -35,17 +35,13 @@
 
 .widget-value {
   font-size: 3.5rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-}
-
-.widget button {
-  font-size: 1rem;
-  padding: 6px 18px;
+  color: var(--color-text-heading);
 }
 
 .widget-note {
   max-width: 42ch;
-  color: var(--muted);
+  color: var(--color-neutral-600);
 }
