@@ -5,6 +5,10 @@ piece while the rest is still on its way. The [README](../README.md#streamed-hyd
 has the short version and the rules for templates; this is the long one, with
 a real response taken apart flush by flush.
 
+To watch each of these steps happen in a browser, run the demo app
+(`npm run dev:demo`). It has one labelled box per behaviour described here, a
+live event log, and a response inspector that shows each flush as it arrives.
+
 - [The request at a glance](#the-request-at-a-glance)
 - [Walkthrough: `/detail/movie/550`](#walkthrough-detailmovie550)
 - [The wire format](#the-wire-format)
@@ -106,7 +110,7 @@ In the mockups below, each region is labelled with its state:
 
 The server bootstrapped the app and waited for `whenStable()` with HTTP left
 out of it, then rendered the `@defer` blocks (see
-[`defer-blocks.ts`](../src/server/streaming/defer-blocks.ts)). No TMDB request
+[`defer-blocks.ts`](../packages/streaming/src/server/defer-blocks.ts)). No TMDB request
 has answered yet, so every block holds its loading state.
 
 ```html
@@ -362,7 +366,7 @@ hydration errors.
 
 ## The wire format
 
-Defined in [`stream-protocol.ts`](../src/app/streaming/stream-protocol.ts).
+Defined in [`stream-protocol.ts`](../packages/streaming/src/client/stream-protocol.ts).
 Field names are short because every chunk repeats them.
 
 A chunk is one `<template data-ngs="id">` per block, followed by one script:
@@ -394,12 +398,12 @@ The shell carries `StreamInit` (`n`, `p`) inline in the runtime script.
 
 ## What the server does on each flush
 
-[`streaming-angular-renderer.ts`](../src/server/streaming/streaming-angular-renderer.ts)
+[`streaming-angular-renderer.ts`](../packages/streaming/src/server/streaming-angular-renderer.ts)
 loops: wait for the next tracked request to finish, wait for the app to
 settle (stable, a task, stable again, so near-simultaneous responses share a
 flush), render any new `@defer` blocks, then flush.
 
-[`hydration-stream.ts`](../src/server/streaming/hydration-stream.ts) builds
+[`hydration-stream.ts`](../packages/streaming/src/server/hydration-stream.ts) builds
 the flush. Angular's hydration annotation only works on a whole app, so every
 flush:
 
@@ -419,7 +423,7 @@ pending list, and not done.
 ## What the browser does with a chunk
 
 **The inline runtime**
-([`stream-runtime.ts`](../src/server/streaming/stream-runtime.ts)) is a
+([`stream-runtime.ts`](../packages/streaming/src/server/stream-runtime.ts)) is a
 classic script, so it exists before Angular does, and each chunk's script
 calls it while the parser is still running. For each block it:
 
@@ -434,7 +438,7 @@ Before Angular attaches, chunks are queued in `__ngs.log`. After that they go
 straight to the app.
 
 **`StreamHydrationClient`**
-([`stream-hydration.ts`](../src/app/streaming/stream-hydration.ts)) keeps
+([`stream-hydration.ts`](../packages/streaming/src/client/stream-hydration.ts)) keeps
 Angular in step:
 
 - **Hydration data.** It rewrites the view Angular holds for a replaced block
@@ -480,7 +484,8 @@ consequences that are easy to miss:
 
 - **Before the first flush:** the Worker catches the error, logs
   `[ssr] streaming render failed before commit, falling back`, and renders the
-  page with the buffered `render()` from `main.server.ts`. That render has
+  page with a buffered `renderApplication` instead (`createStreamingWorker()`
+  in [`worker.ts`](../packages/streaming/src/server/worker.ts)). That render has
   incremental hydration switched off, so `@defer` blocks are left for the
   client. A page with no `window.__ngs` came from this path.
 - **After the first flush:** the status is already sent. The server logs

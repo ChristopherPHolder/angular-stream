@@ -59,35 +59,49 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 ## This project
 
-An Angular 22 TMDB movie browser, server-side rendered on Cloudflare Workers.
-Read `README.md` for how the pieces fit together; the short version:
+Streamed SSR for Angular 22 on Cloudflare Workers, as a Vite+ monorepo. Read
+`README.md` for how the pieces fit together; the short version:
 
-- **Build**: Vite 8, with Angular compiled by `@push-based/vite-plugin-ngp`.
-  There is no `angular.json` and no Angular CLI — `ng` commands do not apply
-  here. Use `npm run dev` / `build` / `preview` / `deploy`.
-- **SSR**: streamed by `src/server/streaming/`; the browser hydrates the shell
-  while the response is still open. `src/main.server.ts` exports the buffered
-  `render(url, document)` fallback. `@angular/ssr` is **not** used, so
-  `AngularAppEngine`, `serverRoutes`, per-route render modes and SSR status
-  codes are unavailable.
+- **Layout**: `apps/movies` (the TMDB movie browser), `apps/demo` (streamed
+  hydration shown step by step, with an in-process fake API) and
+  `packages/streaming` (`@angular-stream/streaming`, the renderer, inline
+  runtime and client both apps use). npm workspaces.
+- **Toolchain**: Vite+ (`vp`), with Angular compiled by
+  `@push-based/vite-plugin-ngp`. There is no `angular.json` and no Angular CLI;
+  `ng` commands do not apply here. At the root: `npm run dev` / `dev:demo` /
+  `build` / `ready`. In an app: `vp -C apps/<app> dev|build|preview`. Run
+  `vp check` before committing; it formats with Oxfmt (not Prettier) and lints
+  with Oxlint. Import from `vite-plus`, not `vite`.
+- **Shared code**: `@angular-stream/streaming` ships TypeScript source that ngp
+  compiles with each app. Code there must not import from an app; take what it
+  needs as options, the way `createStreamingWorker()` takes the root component
+  and config.
+- **SSR**: streamed by `packages/streaming/src/server/`; the browser hydrates
+  the shell while the response is still open. `createStreamingWorker()` falls
+  back to a buffered `renderApplication` if streaming fails before its first
+  byte. `@angular/ssr` is **not** used, so `AngularAppEngine`, `serverRoutes`,
+  per-route render modes and SSR status codes are unavailable.
 - **Streaming**: content that depends on HTTP data belongs in a `@defer` block
-  with a `hydrate` trigger, placed directly inside an element — prefer
+  with a `hydrate` trigger, placed directly inside an element; prefer
   `hydrate when <its data is there>`. Read "Streamed hydration" in `README.md`
-  and `docs/streamed-hydration.md` before changing `src/app/streaming/` or
-  `src/server/streaming/`, and verify such changes the way the latter's
-  "Verifying a change" section describes. `docs/out-of-order-streaming/` is
-  the pre-implementation research, not a description of the current code.
-- **Server entry**: `src/worker.ts`, a Workers `fetch` handler. It runs in
-  workerd — no `node:fs`, no `window`, no Node globals. Check any new
+  and `docs/streamed-hydration.md` before changing `packages/streaming/`, and
+  verify such changes the way the latter's "Verifying a change" section
+  describes, in both apps. `docs/out-of-order-streaming/` is the
+  pre-implementation research, not a description of the current code.
+- **Demo**: every box in `apps/demo` states what is happening at that step. If a
+  change to `packages/streaming` changes what happens, update the demo's text
+  and `docs/streamed-hydration.md` with it.
+- **Server entry**: each app's `src/worker.ts`, a Workers `fetch` handler. It
+  runs in workerd: no `node:fs`, no `window`, no Node globals. Check any new
   server-side dependency against that before reaching for it.
-- **Angular version is pinned to exactly `22.3.0-rc.0`.** Do not bump any
-  `@angular/*` package on its own; ngp imports private `@angular/compiler-cli`
-  APIs and only works against that exact release.
+- **Angular version is pinned to exactly `22.3.0-rc.0`** in every workspace.
+  Do not bump any `@angular/*` package on its own; ngp imports private
+  `@angular/compiler-cli` APIs and only works against that exact release.
 - **Styles**: component `styleUrl` files go through Vite's Sass pipeline. Inline
-  `styles` are plain CSS only — no Sass there.
-- **Icons**: `<fast-svg name="...">`. Adding an icon means dropping the file in
-  `public/assets/svg-icons/` _and_ registering it in
-  `src/app/renderer/svg-icons.ts`, or it will not render during SSR.
+  `styles` are plain CSS only, no Sass there.
+- **Icons (movies)**: `<fast-svg name="...">`. Adding an icon means dropping the
+  file in `apps/movies/public/assets/svg-icons/` _and_ registering it in
+  `apps/movies/src/app/renderer/svg-icons.ts`, or it will not render during SSR.
 
 ### Source code reference
 

@@ -1,7 +1,9 @@
 # angular-stream
 
-A real Angular application — a TMDB-backed movie browser — server-side rendered
-on the Cloudflare Workers runtime, built with Vite.
+Streamed server-side rendering for Angular on Cloudflare Workers, built with
+Vite+. The browser starts hydrating the page while the response is still
+arriving. The repo holds two apps that use it: a real TMDB-backed movie browser,
+and a demo that shows each step of streamed hydration as it happens.
 
 Most Angular SSR guides target a Node server and the Angular CLI. This repo
 takes the other path: Angular compiled by [ngp][ngp] through Vite, with the
@@ -14,7 +16,7 @@ server bundle running directly in workerd, static assets served by Cloudflare's
 | --------- | ------------------------------------------------------------------------ |
 | Framework | Angular 22 (standalone, zoneless, signal-based APIs)                     |
 | Compiler  | [`@push-based/vite-plugin-ngp`][ngp] — Angular's Rust/TS preprocessor    |
-| Bundler   | Vite 8 (Rolldown)                                                        |
+| Toolchain | [Vite+][vite-plus] (`vp`): Vite 8, Oxlint, Oxfmt, task runner            |
 | SSR       | Streamed, with hydration starting before the response ends; see below    |
 | Host      | Cloudflare Workers via [`@cloudflare/vite-plugin`][cfvite]               |
 | State     | [`@rx-angular/state`](https://www.rx-angular.io/)                        |
@@ -23,6 +25,38 @@ server bundle running directly in workerd, static assets served by Cloudflare's
 
 [ngp]: https://github.com/push-based/vite-plugin-ngp
 [cfvite]: https://developers.cloudflare.com/workers/vite-plugin/
+[vite-plus]: https://viteplus.dev/guide/
+
+## Layout
+
+An npm-workspaces monorepo, laid out the way `vp create vite:monorepo` sets one
+up:
+
+| Path                 | What                                                                                      |
+| -------------------- | ----------------------------------------------------------------------------------------- |
+| `apps/movies`        | The TMDB movie browser. Deployed as the `angular-stream` Worker.                          |
+| `apps/demo`          | Streamed hydration, step by step, with no external API. The `angular-stream-demo` Worker. |
+| `packages/streaming` | `@angular-stream/streaming`: the streaming renderer, its inline runtime and the client.   |
+| `vite.config.ts`     | Workspace-wide lint, format and task-cache settings.                                      |
+
+`@angular-stream/streaming` ships TypeScript source; ngp compiles it with the
+app that imports it, like the app's own code. An app needs two things from it:
+
+```ts
+// src/app/app.config.ts
+providers: [
+  provideHttpClient(withInterceptors([streamHttpInterceptor /* , ... */])),
+  provideClientHydration(/* ... */),
+  provideStreamHydration(), // after provideClientHydration()
+];
+
+// src/worker.ts
+export default createStreamingWorker({
+  rootComponent: App,
+  config, // the server ApplicationConfig
+  allowedHosts: ['localhost', 'my-app.example.workers.dev'],
+}) satisfies ExportedHandler<Env>;
+```
 
 ## Requirements
 
@@ -42,80 +76,102 @@ toolchain more than a normal Angular app:
 
 ```bash
 npm install
-npm run dev
+npm run dev        # the movie browser
+npm run dev:demo   # the demo
 ```
 
-The dev server runs the Worker in workerd, so SSR behaves as it does in
-production. The first install prompts to approve native install scripts
-(`esbuild`, `workerd`, `@parcel/watcher`, `fsevents`); they are already recorded
-under `allowScripts` in `package.json`.
+The dev server runs each Worker in workerd, so SSR behaves as it does in
+production. Run one app at a time: both start workerd's inspector on port 9232,
+and the second fails silently. The first install prompts to approve native
+install scripts (`esbuild`, `workerd`, `@parcel/watcher`, `fsevents`); they are
+already recorded under `allowScripts` in `package.json`.
 
-| Script               | What it does                                         |
-| -------------------- | ---------------------------------------------------- |
-| `npm run dev`        | Vite dev server, Worker in workerd                   |
-| `npm run build`      | Client bundle to `dist/client`, Worker to `dist/ssr` |
-| `npm run preview`    | Serves the built output in workerd                   |
-| `npm run deploy`     | Builds, then `wrangler deploy`                       |
-| `npm run cf-typegen` | Regenerates `worker-configuration.d.ts`              |
+At the root:
+
+| Script             | What it does                                               |
+| ------------------ | ---------------------------------------------------------- |
+| `npm run dev`      | `vp run movies#dev`                                        |
+| `npm run dev:demo` | `vp run demo#dev`                                          |
+| `npm run build`    | `vp run -r build`: every app, with Vite+'s task cache      |
+| `npm run ready`    | `vp check` (format, lint, type-aware lint), then the build |
+
+In each app (`npm run <script> -w movies`, or `vp -C apps/movies <command>`):
+
+| Script       | What it does                                         |
+| ------------ | ---------------------------------------------------- |
+| `dev`        | `vp dev`: Vite dev server, Worker in workerd         |
+| `build`      | Client bundle to `dist/client`, Worker to `dist/ssr` |
+| `preview`    | Serves the built output in workerd                   |
+| `deploy`     | Builds, then `wrangler deploy`                       |
+| `cf-typegen` | Regenerates `worker-configuration.d.ts`              |
 
 ### TMDB credentials
 
-`src/environments/environment.ts` ships with a working read-only TMDB key. To
-use your own, copy `environment.local.example.ts` to `environment.local.ts`
-(gitignored) and fill in `tmdbApiKey` and `tmdbApiReadAccessKey`.
+`apps/movies/src/environments/environment.ts` ships with a working read-only
+TMDB key. To use your own, copy `environment.local.example.ts` to
+`environment.local.ts` (gitignored) and fill in `tmdbApiKey` and
+`tmdbApiReadAccessKey`.
 
 ## Continuous deployment
 
-`.github/workflows/ci.yml` builds every pull request and every push to `main`,
-and deploys to Cloudflare Workers on pushes to `main` only. The build step also
-runs ngp's type check and the bundle budgets, so a type error or an oversized
-bundle fails CI before anything ships.
+`.github/workflows/ci.yml` checks and builds every pull request and every push
+to `main`, and deploys both Workers on pushes to `main` only. `vp check` fails
+on formatting and lint errors; each build also runs ngp's type check and the
+bundle budgets, so a type error or an oversized bundle fails CI before anything
+ships.
 
-Two repository secrets are required for the deploy step:
+Two repository secrets are required for the deploy steps:
 
 | Secret                  | Where it comes from                                                                            |
 | ----------------------- | ---------------------------------------------------------------------------------------------- |
 | `CLOUDFLARE_API_TOKEN`  | Cloudflare dashboard → My Profile → API Tokens, using the **Edit Cloudflare Workers** template |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → Workers & Pages → Account ID                                            |
 
-Until they are set, pull requests still build; only the deploy step fails.
+Until they are set, pull requests still build; only the deploy steps fail.
 
-Deploying by hand is `npm run deploy`. Either way `wrangler` reads the config
-that `vite build` generated (`dist/ssr/wrangler.json`, reached through
-`.wrangler/deploy/config.json`) rather than the `wrangler.jsonc` at the repo
-root, whose `main` points at TypeScript source.
+Deploying by hand is `npm run deploy -w movies` (or `-w demo`). Either way
+`wrangler` reads the config that `vp build` generated (`dist/ssr/wrangler.json`,
+reached through the app's `.wrangler/deploy/config.json`) rather than the app's
+`wrangler.jsonc`, whose `main` points at TypeScript source.
 
 ## How the pieces fit
+
+Both apps are wired the same way; paths below are relative to an app.
 
 **`index.html` is the template, not the page.** `wrangler.jsonc` sets
 `assets.html_handling: "none"`, so the asset server matches only exact file
 paths. `/assets/*` and `/favicon.ico` are served directly; every navigation
 falls through to the Worker.
 
-**`src/worker.ts`** fetches `/index.html` through the `ASSETS` binding and hands
-it to the renderer. In dev that binding is backed by the Vite dev server, so the
-template already carries Vite's transforms.
+**`src/worker.ts`** is `createStreamingWorker()` from
+`@angular-stream/streaming/server`. It applies Angular's host guard
+(`allowedHosts` must list every hostname the Worker answers for), fetches
+`/index.html` through the `ASSETS` binding and streams the route into it. In dev
+that binding is backed by the Vite dev server, so the template already carries
+Vite's transforms. If the streaming renderer fails before its first byte, the
+Worker falls back to a buffered `renderApplication`.
 
-**`src/server/streaming/`** is the renderer the Worker uses: it sends a
-hydratable shell as soon as the route's structure exists and streams the rest.
-See [Streamed hydration](#streamed-hydration).
+**`packages/streaming/src/server/`** is the renderer: it sends a hydratable
+shell as soon as the route's structure exists and streams the rest. See
+[Streamed hydration](#streamed-hydration).
 
-**`src/main.server.ts`** is the SSR contract ngp expects: a default export
-`render(url, document)` resolving to HTML. The Worker only falls back to it when
-the streaming renderer fails before its first byte. `ALLOWED_HOSTS` must list
-every hostname the Worker answers for, or the request is rejected.
+**`src/app/app.config.server.ts`** is the server config handed to the Worker. In
+the movie browser it also swaps in a Workers-safe SVG strategy: the default one
+touches `window` and fetches over HTTP, so icons are instead inlined into the
+server bundle from `public/assets/svg-icons/*.svg?raw` and the real `<svg>`
+lands in the SSR HTML.
 
-**`src/app/app.config.server.ts`** swaps in a Workers-safe SVG strategy. The
-default one touches `window` and fetches over HTTP; icons are instead inlined
-into the server bundle from `public/assets/svg-icons/*.svg?raw` so the real
-`<svg>` lands in the SSR HTML and hydrates from the DOM.
+**`vite.config.ts`** is just `ngp()` and `cloudflare()`, wrapped in Vite+'s
+`lazyPlugins` so `vp check` doesn't load them. The Cloudflare plugin owns the
+`ssr` environment and runs it in workerd, so ngp's own `ssr` option stays off.
+ngp still compiles the Worker with its server compiler and links Angular
+libraries in that environment's dependency pre-bundle. `optimizeDeps.entries`
+points dependency discovery at `index.html` only.
 
-**`vite.config.ts`** is just `ngp()` and `cloudflare()`. The Cloudflare plugin
-owns the `ssr` environment and runs it in workerd, so ngp's own `ssr` option
-stays off. ngp still compiles the Worker with its server compiler and links
-Angular libraries in that environment's dependency pre-bundle.
-`optimizeDeps.entries` points dependency discovery at `index.html` only, so it
-doesn't scan HTML files elsewhere in the repo.
+**The demo's data** comes from `DemoBackend`, an `HttpBackend` that answers
+`/api/steps/*` inside the app after the delay the URL asks for. Requests still
+go through `HttpClient`, its interceptors and the transfer cache, so they stream
+exactly as calls to a real API would.
 
 ## Streamed hydration
 
@@ -183,6 +239,8 @@ inside a block.
   `[ssr] streaming render failed before commit`.
 - Check hydration under `npm run dev`. Angular only checks node matches in
   dev mode.
+- To see the steps one at a time, run the demo (`npm run dev:demo`): its event
+  log and response inspector show each flush and each hydration as it happens.
 - Request each page at least twice on the same server process. NG0600 from
   `hydrate when` only shows from the second request on.
 
@@ -190,14 +248,17 @@ More in [Verifying a change](docs/streamed-hydration.md#verifying-a-change).
 
 ### Where things live
 
-| File                                                 | Role                                                                            |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `src/server/streaming/streaming-angular-renderer.ts` | The response: shell, then a flush per finished request                          |
-| `src/server/streaming/hydration-stream.ts`           | Re-annotates the app each flush and cuts out the blocks that changed            |
-| `src/server/streaming/defer-blocks.ts`               | Renders `hydrate` blocks on the server between change detection passes          |
-| `src/server/streaming/stream-runtime.ts`             | The inline script in the shell that applies chunks                              |
-| `src/app/streaming/stream-hydration.ts`              | Keeps Angular's hydration data, block registry and HTTP in step with the stream |
-| `src/app/streaming/stream-protocol.ts`               | The wire format shared by all of the above                                      |
+All under `packages/streaming/src/`:
+
+| File                                   | Role                                                                            |
+| -------------------------------------- | ------------------------------------------------------------------------------- |
+| `server/worker.ts`                     | `createStreamingWorker()`: host guard, template, stream, buffered fallback      |
+| `server/streaming-angular-renderer.ts` | The response: shell, then a flush per finished request                          |
+| `server/hydration-stream.ts`           | Re-annotates the app each flush and cuts out the blocks that changed            |
+| `server/defer-blocks.ts`               | Renders `hydrate` blocks on the server between change detection passes          |
+| `server/stream-runtime.ts`             | The inline script in the shell that applies chunks                              |
+| `client/stream-hydration.ts`           | Keeps Angular's hydration data, block registry and HTTP in step with the stream |
+| `client/stream-protocol.ts`            | The wire format shared by all of the above                                      |
 
 ### Caveats
 
@@ -224,8 +285,8 @@ More in [Verifying a change](docs/streamed-hydration.md#verifying-a-change).
 These come from the ngp SSR path, which deliberately does not use
 `@angular/ssr`:
 
-- **No HTTP status codes.** `render` returns HTML only, so the not-found page is
-  served with `200`. Per-route render modes and `AngularNodeAppEngine` are not
+- **No HTTP status codes.** The Worker answers every page with `200`, so the
+  not-found page is served with `200` too. Per-route render modes and `AngularNodeAppEngine` are not
   available either.
 - **No prerendering, service worker, critical CSS inlining, or SRI.**
 - **Inline component `styles` are plain CSS.** There is no
@@ -235,6 +296,6 @@ These come from the ngp SSR path, which deliberately does not use
 
 ## Analytics
 
-The Cloudflare Web Analytics beacon in `index.html` is commented out: the token
+The Cloudflare Web Analytics beacon in `apps/movies/index.html` is commented out: the token
 it carried belongs to a different property. Create a Web Analytics site for this
 app, swap in its token, and uncomment.
