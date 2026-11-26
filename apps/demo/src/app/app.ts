@@ -14,8 +14,9 @@ import { EventLog } from './event-log';
         </a>
         <!-- Plain links: every page load should be a fresh streamed response. -->
         <nav class="text-link-mono" aria-label="Pages">
-          <a href="/simple">Simple</a>
-          <a href="/">Walkthrough</a>
+          <a href="/">Overview</a>
+          <a href="/example">Example</a>
+          <a href="/walkthrough">Walkthrough</a>
           <a href="/inspect">Response inspector</a>
         </nav>
       </div>
@@ -25,7 +26,8 @@ import { EventLog } from './event-log';
         <router-outlet />
       </main>
       @if (showLog) {
-        <aside class="log">
+        <!-- Focusable: the log scrolls once it is taller than the window. -->
+        <aside class="log" tabindex="0" aria-label="Event log">
           <demo-event-log />
         </aside>
       }
@@ -38,8 +40,8 @@ export class App {
    * Every page load is a full navigation, so the path at bootstrap is the page
    * for good. Read from the location rather than the router, which has not
    * navigated yet when this component is created; server and browser must
-   * agree here, or hydration fails. The simple page leaves the log out to
-   * keep to its three steps.
+   * agree here, or hydration fails. Only the walkthrough and the inspector
+   * have the log; the other pages explain themselves.
    */
-  protected readonly showLog = !inject(PlatformLocation).pathname.startsWith('/simple');
+  protected readonly showLog = /^\/(walkthrough|inspect)\b/.test(inject(PlatformLocation).pathname);
 }

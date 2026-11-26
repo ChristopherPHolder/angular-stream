@@ -8,7 +8,7 @@ import { logDemoEvent } from '../event-log';
  * marks the moment of hydration.
  */
 @Component({
-  selector: 'demo-simple-widget',
+  selector: 'demo-widget',
   template: `
     <div class="widget" [class.widget--live]="hydrated()">
       <p class="widget-state">
@@ -36,9 +36,9 @@ import { logDemoEvent } from '../event-log';
       </p>
     </div>
   `,
-  styleUrl: './simple-widget.css',
+  styleUrl: './widget.css',
 })
-export class SimpleWidget {
+export class Widget {
   readonly delayMs = input.required<number>();
 
   protected readonly hydrated = signal(false);

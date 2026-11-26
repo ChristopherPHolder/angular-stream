@@ -17,24 +17,27 @@
     </p>
   }
   <nav class="speeds" aria-label="Speed">
-    <a class="pb-btn pb-btn-ghost" href="/" [attr.aria-current]="scale === 1 ? 'page' : null"
+    <a
+      class="pb-btn pb-btn-ghost"
+      href="/walkthrough"
+      [attr.aria-current]="scale === 1 ? 'page' : null"
       >Normal speed</a
     >
     <a
       class="pb-btn pb-btn-ghost"
-      href="/?scale=3"
+      href="/walkthrough?scale=3"
       [attr.aria-current]="scale === 3 ? 'page' : null"
       >Slow motion (×3)</a
     >
     <a
       class="pb-btn pb-btn-ghost"
-      href="/?scale=0.05"
+      href="/walkthrough?scale=0.05"
       [attr.aria-current]="scale === 0.05 ? 'page' : null"
       >Fast: data races Angular's start-up</a
     >
     <a
       class="pb-btn pb-btn-ghost"
-      href="/?scale=0"
+      href="/walkthrough?scale=0"
       [attr.aria-current]="scale === 0 ? 'page' : null"
       >No delay: all data lands in the shell</a
     >

@@ -12,7 +12,9 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { STEP_DELAYS, type StepData } from '../demo-backend';
 import { DemoEvents } from '../event-log';
-import { SimpleWidget } from './simple-widget';
+import { CodeSample } from '../code-sample';
+import { COMPONENT, CONFIG, TEMPLATE, WORKER } from './samples';
+import { Widget } from './widget';
 
 /**
  * How long the browser waits, once the widget's HTML is in, before letting
@@ -21,14 +23,24 @@ import { SimpleWidget } from './simple-widget';
  */
 export const HYDRATION_PAUSE_MS = 2000;
 
-/** Shell first, the widget about five seconds later, then hydration. */
+/**
+ * The idea, live: the shell first, the widget about five seconds later, then
+ * its hydration. Below it, the least code that does the same.
+ */
 @Component({
-  selector: 'demo-simple',
-  templateUrl: './simple.html',
-  styleUrl: './simple.css',
-  imports: [SimpleWidget],
+  selector: 'demo-example',
+  templateUrl: './example.html',
+  styleUrl: './example.css',
+  imports: [CodeSample, Widget],
 })
-export class Simple {
+export class Example {
+  protected readonly samples = {
+    template: TEMPLATE,
+    component: COMPONENT,
+    config: CONFIG,
+    worker: WORKER,
+  };
+
   protected readonly delayMs = STEP_DELAYS.widget;
   protected readonly pauseMs = HYDRATION_PAUSE_MS;
 
@@ -74,6 +86,11 @@ export class Simple {
       clearTimeout(timer);
       clearInterval(tick);
     });
+  }
+
+  /** A time from the event log, or that it has not happened yet. */
+  protected ms(at: number | null): string {
+    return at === null ? 'waiting' : `${at} ms`;
   }
 
   private firstEvent(match: (event: { kind: string; text: string }) => boolean) {

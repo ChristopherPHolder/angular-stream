@@ -38,9 +38,10 @@
   --btn-bg-hover: var(--color-primary-700);
 }
 
-/* Toggle buttons and the current link in a group of ghost buttons. */
+/* Toggle buttons, and the current link or step in a group of ghost buttons. */
 .pb-btn-ghost[aria-pressed='true'],
-.pb-btn-ghost[aria-current='page'] {
+.pb-btn-ghost[aria-current='page'],
+.pb-btn-ghost[aria-current='step'] {
   --btn-border: 1px solid var(--color-primary-600);
   --btn-color: var(--color-primary-700);
   --btn-color-hover: var(--color-primary-800);
@@ -177,6 +178,130 @@ a {
   margin: 0;
 }
 
+/* The landing page and the example: a column of sections. */
+.eyebrow {
+  margin: 0;
+  color: var(--color-primary-700);
+}
+
+.part {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.part > h2,
+.part > p {
+  margin: 0;
+}
+
+.part > p,
+.intro .text-lead {
+  max-width: 68ch;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cards .box {
+  align-content: start;
+  gap: var(--space-2);
+}
+
+.cards h3,
+.box > h3 {
+  margin: 0;
+}
+
+/*
+ * A drawing of a page in a browser, for the landing page's visuals. Each part
+ * says in words what state it is in; the colour repeats it.
+ */
+.mock {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--radius-lg);
+}
+
+.mock-part {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--radius-md);
+}
+
+.mock-part--placeholder {
+  border-style: dashed;
+  border-color: var(--placeholder);
+  background: var(--placeholder-bg);
+}
+
+.mock-part--server {
+  border-color: var(--server);
+  background: var(--server-bg);
+}
+
+.mock-part--hydrated {
+  border-color: var(--hydrated);
+  background: var(--hydrated-bg);
+}
+
+.mock-label {
+  font-weight: 500;
+  color: var(--color-text-heading);
+}
+
+.mock-state {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-neutral-600);
+}
+
+.mock-part--placeholder .mock-state {
+  color: var(--placeholder);
+}
+
+.mock-part--server .mock-state {
+  color: var(--server);
+}
+
+.mock-part--hydrated .mock-state {
+  color: var(--hydrated);
+}
+
+/* Two lines standing in for text. */
+.mock-bars {
+  flex: 0 0 100%;
+  height: var(--space-4);
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--color-neutral-200) 0 var(--space-1-5),
+    transparent var(--space-1-5) var(--space-2-5)
+  );
+}
+
+.mock-empty {
+  margin: 0;
+  padding: var(--space-8) 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-neutral-600);
+}
+
 /* A box: one thing the page demonstrates. The design system's card. */
 .box {
   display: grid;
@@ -233,6 +358,10 @@ a {
 .tag--block,
 .tag--chunk {
   color: var(--chunk);
+}
+
+.tag--hydrated {
+  color: var(--hydrated);
 }
 
 .tag--warning {

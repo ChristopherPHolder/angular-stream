@@ -191,7 +191,9 @@ arrives instead of waiting for the last one:
    trigger fires. Nothing is fetched twice: a request the server is already
    making is held back in the browser until its response arrives on the stream.
 
-[`docs/streamed-hydration.md`](docs/streamed-hydration.md) takes a real
+[`docs/streamed-hydration.md`](docs/streamed-hydration.md) starts with
+[why](docs/streamed-hydration.md#why-stream-out-of-order): what streaming out of
+order buys, and how other frameworks came to it. Then it takes a real
 response apart flush by flush. It shows the HTML each flush carries, what the
 page looks like after it, and when each part hydrates. It also covers the wire
 format and how to verify a change.
@@ -239,8 +241,9 @@ inside a block.
   `[ssr] streaming render failed before commit`.
 - Check hydration under `npm run dev`. Angular only checks node matches in
   dev mode.
-- To see the steps one at a time, run the demo (`npm run dev:demo`): its event
-  log and response inspector show each flush and each hydration as it happens.
+- To see the steps one at a time, run the demo (`npm run dev:demo`). `/example`
+  streams one widget and shows the code for it; `/walkthrough` and `/inspect`
+  show each flush and each hydration as it happens.
 - Request each page at least twice on the same server process. NG0600 from
   `hydrate when` only shows from the second request on.
 

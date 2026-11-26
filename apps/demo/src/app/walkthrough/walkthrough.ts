@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { DemoBackend, STEP_DELAYS, type Step, type StepData } from '../demo-backend';
 import { HydrationStatus } from './hydration-status';
 
-/** The four steps this page shows; the simple page has its own. */
+/** The four steps this page shows; the example page has its own. */
 type WalkthroughStep = Exclude<Step, 'widget'>;
 
 /** `?scale=` multiplies every delay: 3 is slow motion, 0 sends everything at once. */

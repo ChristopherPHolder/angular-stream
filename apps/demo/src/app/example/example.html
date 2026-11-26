@@ -1,0 +1,165 @@
+<header class="intro">
+  <p class="text-subtitle eyebrow">Live example</p>
+  <h1 class="text-hero-title">One page, one slow widget</h1>
+  <p class="text-lead">
+    This page was streamed. Its shell arrived at once. The widget needs data that takes
+    {{ delayMs / 1000 }} seconds, so it followed in a later piece of the same response, and Angular
+    hydrated it when it landed.
+  </p>
+</header>
+
+<section class="part" aria-labelledby="live-title">
+  <div class="part-head">
+    <h2 id="live-title" class="text-section-title">Watch it happen</h2>
+    <p class="clock">
+      @if (elapsed(); as seconds) {
+        {{ seconds }} s
+      }
+    </p>
+    <a class="pb-btn pb-btn-primary" href="/">Run it again</a>
+  </div>
+  <ol class="steps">
+    <li class="step" [class.step--done]="shellAt() !== null">
+      <span class="step-n" aria-hidden="true">1</span>
+      <strong class="text-card-title">Shell arrives</strong>
+      <span class="step-time">{{ ms(shellAt()) }}</span>
+    </li>
+    <li class="step" [class.step--done]="widgetAt() !== null">
+      <span class="step-n" aria-hidden="true">2</span>
+      <strong class="text-card-title">Widget HTML arrives</strong>
+      <span class="step-time">{{ ms(widgetAt()) }}</span>
+    </li>
+    <li class="step" [class.step--done]="hydratedAt() !== null">
+      <span class="step-n" aria-hidden="true">3</span>
+      <strong class="text-card-title">Widget hydrates</strong>
+      <span class="step-time">{{ ms(hydratedAt()) }}</span>
+    </li>
+  </ol>
+
+  <div class="frame">
+    <div class="frame-bar">
+      <span class="tag tag--shell">shell</span>
+      Everything outside the widget was rendered and sent at once, before the widget's data existed.
+    </div>
+    <div class="slot" data-box="Widget">
+      @defer (on immediate; hydrate when hydrateNow()) {
+        <div data-block="Widget">
+          @if (widget(); as data) {
+            <demo-widget [delayMs]="data.delayMs" />
+          } @else {
+            <div class="placeholder">
+              <span class="loader" aria-hidden="true"></span>
+              <p>
+                <strong>Placeholder.</strong> This came with the shell. The server is still fetching
+                the widget's data; the response stays open until it can send the widget.
+              </p>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <p class="aside">
+    This page holds hydration back for {{ pauseMs / 1000 }} seconds, so you can see the widget
+    before and after. Normally it follows the widget's HTML by about a millisecond.
+  </p>
+</section>
+
+<section class="part" aria-labelledby="code-title">
+  <h2 id="code-title" class="text-section-title">The code</h2>
+  <p>Three steps. The first two are per part; the third is once per app.</p>
+
+  <ol class="how">
+    <li class="how-step">
+      <div class="how-text">
+        <h3 class="text-title">1 · Put the slow part in a <code>&#64;defer</code> block</h3>
+        <p>
+          The block is what the server can send later. Everything outside it is the shell, sent at
+          once. Give the block a <code>hydrate when</code> trigger that turns true when its data is
+          there.
+        </p>
+        <p>
+          The <code>&#64;else</code> branch goes out with the shell, so it is what paints first.
+        </p>
+      </div>
+      <demo-code [sample]="samples.template" />
+    </li>
+    <li class="how-step">
+      <div class="how-text">
+        <h3 class="text-title">2 · Load its data with <code>HttpClient</code></h3>
+        <p>
+          The server makes the request and streams the block when the response is in. The browser
+          asks for the same data, but its request is held back and answered from the stream. Nothing
+          is fetched twice.
+        </p>
+      </div>
+      <demo-code [sample]="samples.component" />
+    </li>
+    <li class="how-step">
+      <div class="how-text">
+        <h3 class="text-title">3 · Switch streaming on</h3>
+        <p>
+          Two additions to the app's providers, and a Cloudflare Worker entry that renders with the
+          streaming renderer.
+        </p>
+      </div>
+      <div class="how-code">
+        <demo-code [sample]="samples.config" />
+        <demo-code [sample]="samples.worker" />
+      </div>
+    </li>
+  </ol>
+</section>
+
+<section class="part" aria-labelledby="rules-title">
+  <h2 id="rules-title" class="text-section-title">Three rules</h2>
+  <ul class="cards">
+    <li class="box">
+      <h3 class="text-card-title">What depends on data goes inside a block</h3>
+      <p>
+        The shell is sent once. If something outside a block changes afterwards, the browser renders
+        the change, and the server HTML never has it.
+      </p>
+    </li>
+    <li class="box">
+      <h3 class="text-card-title">A block sits directly inside an element</h3>
+      <p>
+        Not at the root of an <code>&#64;if</code>, in an <code>ng-container</code> or in projected
+        content. The server warns about such a block and leaves it to the browser.
+      </p>
+    </li>
+    <li class="box">
+      <h3 class="text-card-title">Tie hydration to the data</h3>
+      <p>
+        With <code>hydrate when</code>, a block hydrates as soon as its own chunk lands.
+        <code>hydrate on idle</code>, <code>immediate</code>, <code>timer</code> and
+        <code>viewport</code> say nothing about data, so they wait for the end of the response.
+      </p>
+    </li>
+  </ul>
+</section>
+
+<section class="part" aria-labelledby="more-title">
+  <h2 id="more-title" class="text-section-title">See more</h2>
+  <ul class="cards">
+    <li class="box">
+      <h3 class="text-card-title"><a href="/">Why, and how it works</a></h3>
+      <p>What streaming out of order buys you, and the response followed step by step.</p>
+    </li>
+    <li class="box">
+      <h3 class="text-card-title"><a href="/walkthrough">Walkthrough</a></h3>
+      <p>
+        Four blocks on one page: one nested in another, one that waits for the whole response, and
+        text outside any block. An event log records each step.
+      </p>
+    </li>
+    <li class="box">
+      <h3 class="text-card-title"><a href="/inspect">Response inspector</a></h3>
+      <p>
+        The walkthrough's raw response, cut into the pieces the server wrote, with the size,
+        contents and arrival time of each.
+      </p>
+    </li>
+  </ul>
+</section>

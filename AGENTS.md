@@ -88,9 +88,19 @@ Streamed SSR for Angular 22 on Cloudflare Workers, as a Vite+ monorepo. Read
   verify such changes the way the latter's "Verifying a change" section
   describes, in both apps. `docs/out-of-order-streaming/` is the
   pre-implementation research, not a description of the current code.
-- **Demo**: every box in `apps/demo` states what is happening at that step. If a
-  change to `packages/streaming` changes what happens, update the demo's text
-  and `docs/streamed-hydration.md` with it.
+- **Demo**: four pages, from the idea to the detail. `/`
+  (`apps/demo/src/app/home/`) is the landing page: why, shown as the same page
+  sent three ways, then how, as one response stepped through, then where the
+  idea comes from. Both visuals are drawings with fixed times and made-up
+  content. `/example` is the real thing with one widget, and the least code
+  that streams it. `/walkthrough` and `/inspect` hold everything more involved.
+  Keep the first two simple. Every box in `apps/demo` states what is happening
+  at that step. If a change to `packages/streaming` changes what happens, its
+  API or its wire format, update the demo's text, the hand-written code in
+  `example/samples.ts` and `home/response-player.ts`, and
+  `docs/streamed-hydration.md` with it. Quotes on the landing page and in the
+  docs' "Why stream out of order" are verbatim from the linked sources; do not
+  reword them.
 - **Demo styles**: `apps/demo` uses the PushBased design system in
   `apps/demo/src/design-system/` (read its `README.md`). Use its tokens and the
   `.pb-*` component classes and `.text-*` type styles; never hard-code colours,
