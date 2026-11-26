@@ -15,7 +15,7 @@ server bundle running directly in workerd, static assets served by Cloudflare's
 | Framework | Angular 22 (standalone, zoneless, signal-based APIs)                        |
 | Compiler  | [`@push-based/vite-plugin-ngp`][ngp] — Angular's Rust/TS preprocessor       |
 | Bundler   | Vite 8 (Rolldown)                                                           |
-| SSR       | `renderApplication` from `@angular/platform-server`, run in workerd         |
+| SSR       | Streamed, with hydration starting before the response ends; see below       |
 | Host      | Cloudflare Workers via [`@cloudflare/vite-plugin`][cfvite]                  |
 | State     | [`@rx-angular/state`](https://www.rx-angular.io/)                           |
 | Icons     | [`@push-based/ngx-fast-svg`](https://github.com/push-based/ngx-fast-svg)    |
@@ -96,10 +96,14 @@ falls through to the Worker.
 it to the renderer. In dev that binding is backed by the Vite dev server, so the
 template already carries Vite's transforms.
 
+**`src/server/streaming/`** is the renderer the Worker uses: it sends a
+hydratable shell as soon as the route's structure exists and streams the rest.
+See [Streamed hydration](#streamed-hydration).
+
 **`src/main.server.ts`** is the SSR contract ngp expects: a default export
-`render(url, document)` resolving to HTML. `allowedHosts` must list every
-hostname the Worker answers for, or Angular's host guard rejects the request
-with `NG05706`.
+`render(url, document)` resolving to HTML. The Worker only falls back to it when
+the streaming renderer fails before its first byte. `ALLOWED_HOSTS` must list
+every hostname the Worker answers for, or the request is rejected.
 
 **`src/app/app.config.server.ts`** swaps in a Workers-safe SVG strategy. The
 default one touches `window` and fetches over HTTP; icons are instead inlined
@@ -112,6 +116,83 @@ stays off. ngp still compiles the Worker with its server compiler and links
 Angular libraries in that environment's dependency pre-bundle.
 `optimizeDeps.entries` points dependency discovery at `index.html` only, so it
 doesn't scan HTML files elsewhere in the repo.
+
+## Streamed hydration
+
+A page request is answered in pieces, and the browser hydrates each piece as it
+arrives instead of waiting for the last one:
+
+1. **Shell.** The server bootstraps, waits for the route and its `@defer` blocks
+   to exist — not for TMDB — and sends that state, annotated for hydration, with
+   the entry script at the end marked `async`. The browser loads Angular and
+   hydrates the shell while the response is still open.
+2. **Chunks.** Each time a request finishes and the application has rendered the
+   result, the server sends every `@defer` block that changed: its markup in a
+   `<template>`, then an inline script carrying the block's hydration data and
+   the transfer state the change came from. The script swaps the markup in front
+   of the block's anchor comment, whether or not Angular is running yet.
+3. **Hydration.** The block hydrates against the streamed markup when its
+   trigger fires. Nothing is fetched twice: a request the server is already
+   making is held back in the browser until its response arrives on the stream.
+
+### Making something stream
+
+Put it in a `@defer` block with a `hydrate` trigger, directly inside an element:
+
+```html
+<article>
+  @defer (on immediate; hydrate when listReady()) {
+    <ui-movie-list [movies]="movies$" />
+  }
+</article>
+```
+
+Angular leaves such a block's markup alone until the trigger fires, which is
+what lets the server replace it underneath a running application. Everything
+outside a block is the shell: if it changes after the shell was sent, the client
+renders the change itself from the streamed data.
+
+- **`hydrate when <data is there>`** hydrates the block as soon as its own data
+  has arrived, while other blocks are still streaming. Prefer it.
+- **`hydrate on idle | immediate | timer | viewport`** say nothing about data, so
+  on a streamed render they wait for the end of the stream.
+- **Blocks nest.** A block that changes inside an unchanged one is sent by
+  itself, and can still be swapped in after the outer block has hydrated. The
+  cast list on the movie page works this way.
+- **"Directly inside an element"** is a requirement. Angular finds nodes by
+  counting, and a block at the root of an `@if`, in an `<ng-container>` or in
+  projected content is part of its parent's count. The server logs a warning for
+  such a block and leaves it to the client.
+
+### Where things live
+
+| File | Role |
+| --- | --- |
+| `src/server/streaming/streaming-angular-renderer.ts` | The response: shell, then a flush per finished request |
+| `src/server/streaming/hydration-stream.ts` | Re-annotates the app each flush and cuts out the blocks that changed |
+| `src/server/streaming/defer-blocks.ts` | Renders `hydrate` blocks on the server between change detection passes |
+| `src/server/streaming/stream-runtime.ts` | The inline script in the shell that applies chunks |
+| `src/app/streaming/stream-hydration.ts` | Keeps Angular's hydration data, block registry and HTTP in step with the stream |
+| `src/app/streaming/stream-protocol.ts` | The wire format shared by all of the above |
+
+### Caveats
+
+- **It leans on Angular internals**: the layout of serialized hydration data,
+  `ɵannotateForHydration`, the dehydrated block registry, and `DeferBlockFixture`'s
+  way of rendering a block. One more reason for the exact version pin.
+- **`hydrate when` is rendered by hand on the server.** Angular renders it during
+  a template update, which throws `NG0600` from the second request on if the
+  component has signal queries. The buffered fallback cannot work around that, so
+  it renders without incremental hydration and leaves `@defer` blocks to the
+  client.
+- **`hydrate on viewport`** blocks only take streamed markup that arrives before
+  Angular starts, or after the trigger has fired; its observer cannot follow
+  replaced elements.
+- **`hydrate on hover | interaction`** need Angular's event-dispatch contract
+  script, which this build does not inline.
+- **No CSP nonce** on the inline scripts yet.
+- **If the response breaks off**, the browser keeps what it has and the client
+  fetches the rest itself.
 
 ## Known limitations
 

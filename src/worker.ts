@@ -14,9 +14,9 @@ const allowedHosts = new Set<string>(ALLOWED_HOSTS);
  * In `vite dev` the binding is backed by the Vite dev server, so the template
  * already carries Vite's dev transforms.
  *
- * Rendering is streamed. The shell goes out while TMDB is still in flight,
- * each boundary follows as it resolves, and Angular's authoritative
- * hydration-annotated document lands last. If the streaming renderer throws
+ * Rendering is streamed. A hydratable shell goes out while TMDB is still in
+ * flight and the browser starts hydrating it straight away; each `@defer`
+ * block follows as its data arrives. If the streaming renderer throws
  * *before* its first flush, nothing is committed yet and we can still fall
  * back to a buffered render with a real status code.
  */

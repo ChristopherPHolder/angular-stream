@@ -65,9 +65,15 @@ Read `README.md` for how the pieces fit together; the short version:
 - **Build**: Vite 8, with Angular compiled by `@push-based/vite-plugin-ngp`.
   There is no `angular.json` and no Angular CLI — `ng` commands do not apply
   here. Use `npm run dev` / `build` / `preview` / `deploy`.
-- **SSR**: `src/main.server.ts` exports `render(url, document)` via
-  `renderApplication`. `@angular/ssr` is **not** used, so `AngularAppEngine`,
-  `serverRoutes`, per-route render modes and SSR status codes are unavailable.
+- **SSR**: streamed by `src/server/streaming/`; the browser hydrates the shell
+  while the response is still open. `src/main.server.ts` exports the buffered
+  `render(url, document)` fallback. `@angular/ssr` is **not** used, so
+  `AngularAppEngine`, `serverRoutes`, per-route render modes and SSR status
+  codes are unavailable.
+- **Streaming**: content that depends on HTTP data belongs in a `@defer` block
+  with a `hydrate` trigger, placed directly inside an element — prefer
+  `hydrate when <its data is there>`. Read "Streamed hydration" in `README.md`
+  before changing `src/app/streaming/` or `src/server/streaming/`.
 - **Server entry**: `src/worker.ts`, a Workers `fetch` handler. It runs in
   workerd — no `node:fs`, no `window`, no Node globals. Check any new
   server-side dependency against that before reaching for it.
