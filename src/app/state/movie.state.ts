@@ -6,6 +6,7 @@ import { optimizedFetch } from '../shared/cdk/optimized-fetch';
 import { AppInitializer } from '../shared/cdk/app-initializer';
 import { rxActions } from '@rx-angular/state/actions';
 import { withLoadingEmission } from '../shared/cdk/loading/withLoadingEmissions';
+import { mergeKeyedContext } from '../shared/cdk/loading/merge-keyed-context';
 import {
   CategoryResponse,
   MovieResource,
@@ -96,11 +97,7 @@ export class MovieState extends RxState<MovieModel> implements AppInitializer {
             ),
         ),
       ),
-      (oldState, newPartial) => {
-        const resultState = patch(oldState?.categoryMovies, newPartial);
-        resultState.value = patch(oldState?.categoryMovies?.value, resultState?.value);
-        return resultState;
-      },
+      (oldState, newPartial) => mergeKeyedContext(oldState?.categoryMovies, newPartial),
     );
   }
 
