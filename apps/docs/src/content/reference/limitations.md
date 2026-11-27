@@ -32,7 +32,9 @@ The Cloudflare setup compiles Angular with ngp and renders without
 - **No HTTP status codes.** The Worker answers every page with `200`, so a
   not-found page is served with `200` too. Per-route render modes and
   `AngularAppEngine` are not available either.
-- **No service worker, critical CSS inlining or SRI.**
+- **No critical CSS inlining or SRI, and no `@angular/service-worker`
+  build step.** The [Service Worker guide](../guides/service-worker.md) has an
+  experimental worker of its own, which renders the pages.
 - **Inline component `styles` are plain CSS.** There is no
   `inlineStyleLanguage`; `styleUrl` files do go through Vite's Sass pipeline.
 - **ngp is a prototype.** Any Angular commit can break it, hence the exact

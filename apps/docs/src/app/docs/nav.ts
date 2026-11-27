@@ -89,6 +89,13 @@ export const DOCS: DocSection[] = [
           'How to tell that a page really streams and hydrates, and what to do when it does not.',
         load: () => import('../../content/guides/debugging.md'),
       },
+      {
+        slug: 'service-worker',
+        title: 'Service Worker (experimental)',
+        description:
+          'Render and stream every navigation from a Service Worker in the browser, offline included, and what that costs.',
+        load: () => import('../../content/guides/service-worker.md'),
+      },
     ],
   },
   {
