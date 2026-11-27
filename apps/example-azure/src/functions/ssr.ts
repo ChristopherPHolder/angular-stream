@@ -12,28 +12,42 @@ app.setup({ enableHttpStream: true });
 const templateFile = new URL('../client/index.html', import.meta.url);
 let template: Promise<string> | undefined;
 
+function readTemplate(): Promise<string> {
+  // A failed read isn't kept: the next request tries again.
+  template ??= readFile(templateFile, 'utf8').catch((error: unknown) => {
+    template = undefined;
+    throw error;
+  });
+  return template;
+}
+
 const handle = createStreamingHandler({
   rootComponent: ExamplePage,
   config,
   eventDispatchContract,
   allowedHosts: ['localhost'],
-  loadTemplate: async () => new Response(await (template ??= readFile(templateFile, 'utf8'))),
+  loadTemplate: async () => new Response(await readTemplate()),
 });
 
 /** Every navigation. Static assets are served by the static host in front, never by this function. */
 app.http('ssr', {
   route: '{*path}',
-  methods: ['GET'],
+  methods: ['GET', 'HEAD'],
   authLevel: 'anonymous',
   handler: async (request) => {
     const response = await handle(
       new Request(request.url, { method: request.method, headers: request.headers }),
     );
 
+    // A HEAD request, such as a health probe, gets the status of a real render
+    // once its shell is ready, and the render stops there.
+    const head = request.method === 'HEAD';
+    if (head) await response.body?.cancel();
+
     return new HttpResponse({
       status: response.status,
       headers: response.headers,
-      body: response.body ?? undefined,
+      body: head ? undefined : (response.body ?? undefined),
     });
   },
 });

@@ -1,12 +1,18 @@
-# What `func azure functionapp publish` leaves out. The function app needs
-# host.json, package.json, dist/server and the template, dist/client/index.html.
-# The rest of dist/client goes to the static host.
+# What `func pack` and `func azure functionapp publish` leave out. The function
+# app needs host.json, package.json, dist/server and the template,
+# dist/client/index.html. The bundle carries its dependencies, so node_modules
+# stays behind, and the rest of dist/client goes to the static host. Name each
+# entry exactly: Core Tools matched neither `node_modules/` against the folder
+# nor `tsconfig*.json` against tsconfig.json.
 .funcignore
 local.settings.json
+local.settings.example.json
+node_modules
 index.html
 public/
 src/
-tsconfig*.json
+tsconfig.json
+tsconfig.app.json
 vite.config.ts
 dist/client/*
 !dist/client/index.html
