@@ -1,0 +1,7 @@
+{
+  "extends": "../../tsconfig.base.json",
+  // The Vite plugin is loaded by Node from source, in this repo's Vite configs,
+  // so its relative imports name the `.ts` file.
+  "compilerOptions": { "allowImportingTsExtensions": true, "noEmit": true },
+  "include": ["src/**/*.ts"]
+}
