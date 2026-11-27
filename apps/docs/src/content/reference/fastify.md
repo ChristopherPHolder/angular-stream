@@ -205,8 +205,10 @@ if (import.meta.env.PROD) {
   would route and log `/index.html`.
 - `listen()` only in production: in dev, the Vite server is the one listening.
 
-Only page requests reach the default export in dev: a `GET` or `HEAD` that
-asks for HTML. API requests are answered by Vite.
+Page requests reach the default export in dev, `GET`s and `HEAD`s that ask
+for HTML, and so does every request the plugin's
+[`routes`](node.md#angularstreamnode) names, such as `routes: ['/api']`. Vite
+answers the rest.
 
 ## `BadRequestError`
 

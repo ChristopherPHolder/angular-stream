@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import type { IncomingMessage } from 'node:http';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 import path from 'node:path';
 // Types only: an app that uses this plugin has Vite.
 import type { Plugin, RunnableDevEnvironment } from 'vite';
@@ -15,6 +15,10 @@ const PLUGIN_NAME = 'angular-stream-node';
 /** The name of the plugin `ngp()` from `@push-based/vite-plugin-ngp` returns first. */
 const NGP_PLUGIN_NAME = 'vite-plugin-ngp';
 
+/** A request as Vite's Connect middleware gets it. */
+type DevRequest = IncomingMessage & { originalUrl?: string };
+type Next = (error?: unknown) => void;
+
 export interface AngularStreamNodeOptions {
   /**
    * The server entry, relative to Vite's root. Its default export is a
@@ -24,6 +28,17 @@ export interface AngularStreamNodeOptions {
   entry?: string;
   /** The template, relative to Vite's root. Default: `index.html`. */
   template?: string;
+  /**
+   * Requests other than pages that go to the server entry too, such as the
+   * app's API routes. Either path prefixes, where `'/api'` matches `/api` and
+   * everything under `/api/` but not `/api.json`, or a function that is given
+   * the path (without the query, not decoded) and the request.
+   *
+   * A matching request goes to the server entry before Vite's own middleware
+   * sees it, whatever its method and `Accept` header. Default: none, only
+   * pages go to the server entry.
+   */
+  routes?: readonly string[] | ((pathname: string, req: IncomingMessage) => boolean);
 }
 
 /**
@@ -33,7 +48,8 @@ export interface AngularStreamNodeOptions {
  * calls its default export, the handler `createNodeHandler()` returned, with
  * `index.html` as the dev server transforms it: the template carries Vite's
  * client and the app's entry as source, the way the `ASSETS` binding gives a
- * Worker in dev. Static files and modules are left to Vite.
+ * Worker in dev. Static files and modules are left to Vite, and so is every
+ * other request, unless `routes` names it.
  *
  * List it before ngp, whose own SSR middleware would otherwise call the
  * handler as `(url, document)`, which it isn't. The dev server refuses to start
@@ -47,6 +63,7 @@ export interface AngularStreamNodeOptions {
 export function angularStreamNode(options: AngularStreamNodeOptions = {}): Plugin {
   const entry = options.entry ?? 'src/server.ts';
   const template = options.template ?? 'index.html';
+  const isRoute = routeMatcher(options.routes ?? []);
 
   return {
     name: PLUGIN_NAME,
@@ -66,52 +83,102 @@ export function angularStreamNode(options: AngularStreamNodeOptions = {}): Plugi
       }
     },
     configureServer(server) {
+      /** Requests handed to the server entry. One it passes on to `next` is Vite's to answer. */
+      const forwarded = new WeakSet<IncomingMessage>();
+
+      const fail = (next: Next) => (error: unknown) => {
+        if (error instanceof Error) {
+          server.ssrFixStacktrace(error);
+        }
+        next(error);
+      };
+
+      /** `index.html` as the dev server transforms it for this request. */
+      const devTemplate = async (req: DevRequest): Promise<string> => {
+        const raw = await readFile(path.join(server.config.root, template), 'utf8');
+        return server.transformIndexHtml(req.originalUrl ?? req.url ?? '/', raw, req.originalUrl);
+      };
+
+      /**
+       * Calls the server entry's default export with the request, and the dev
+       * template on it: the template itself, or a function that reads it when
+       * the app renders a page after all.
+       */
+      const callEntry = async (
+        req: DevRequest,
+        res: ServerResponse,
+        next: Next,
+        html: string | (() => Promise<string>),
+      ): Promise<void> => {
+        const environment = server.environments['ssr'];
+        if (environment === undefined || !('runner' in environment)) {
+          throw new Error(`[${PLUGIN_NAME}] the ssr environment has no module runner`);
+        }
+        const { runner } = environment as RunnableDevEnvironment;
+        const module = (await runner.import(entry)) as { default?: unknown };
+        if (typeof module.default !== 'function') {
+          throw new Error(
+            `[${PLUGIN_NAME}] ${entry} must default-export a request listener, (req, res, next?), such as the handler createNodeHandler() returns`,
+          );
+        }
+
+        Object.assign(req, { [DEV_TEMPLATE]: html });
+        forwarded.add(req);
+        (module.default as NodeHandler)(req, res, fail(next));
+      };
+
+      // `routes`: before Vite's own middleware, which would answer them itself,
+      // with `index.html` for most of them.
+      server.middlewares.use((req: DevRequest, res, next) => {
+        const pathname = (req.url ?? '').split('?')[0] ?? '';
+        if (!isRoute(pathname, req)) {
+          next();
+          return;
+        }
+        // Read only if the app renders the request as a page, which needs it.
+        let html: Promise<string> | undefined;
+        callEntry(req, res, next, () => (html ??= devTemplate(req))).catch(fail(next));
+      });
+
       // Returned: runs after Vite's own middlewares, once the HTML fallback has
       // rewritten a page request to `/index.html`.
       return () => {
-        server.middlewares.use((req: IncomingMessage & { originalUrl?: string }, res, next) => {
+        server.middlewares.use((req: DevRequest, res, next) => {
           const accept = req.headers.accept ?? '';
           const pathname = (req.url ?? '').split('?')[0] ?? '';
           if (
             (req.method !== 'GET' && req.method !== 'HEAD') ||
             !pathname.endsWith('.html') ||
-            !accept.includes('text/html')
+            !accept.includes('text/html') ||
+            // A route the app passed on: Vite answers it.
+            forwarded.has(req)
           ) {
             next();
             return;
           }
 
-          const url = req.originalUrl ?? req.url ?? '/';
-          void (async () => {
-            const environment = server.environments['ssr'];
-            if (environment === undefined || !('runner' in environment)) {
-              throw new Error('[angular-stream-node] the ssr environment has no module runner');
-            }
-            const { runner } = environment as RunnableDevEnvironment;
-            const raw = await readFile(path.join(server.config.root, template), 'utf8');
-            const html = await server.transformIndexHtml(url, raw, req.originalUrl);
-            const module = (await runner.import(entry)) as { default?: unknown };
-            if (typeof module.default !== 'function') {
-              throw new Error(
-                `[angular-stream-node] ${entry} must default-export a request listener, (req, res, next?), such as the handler createNodeHandler() returns`,
-              );
-            }
-
-            Object.assign(req, { [DEV_TEMPLATE]: html });
-            (module.default as NodeHandler)(req, res, (error) => {
-              if (error instanceof Error) {
-                server.ssrFixStacktrace(error);
-              }
-              next(error);
-            });
-          })().catch((error: unknown) => {
-            if (error instanceof Error) {
-              server.ssrFixStacktrace(error);
-            }
-            next(error);
-          });
+          devTemplate(req)
+            .then((html) => callEntry(req, res, next, html))
+            .catch(fail(next));
         });
       };
     },
   };
+}
+
+/** Whether a path is one of `routes`: a prefix, or what the function says. */
+function routeMatcher(
+  routes: NonNullable<AngularStreamNodeOptions['routes']>,
+): (pathname: string, req: IncomingMessage) => boolean {
+  if (typeof routes === 'function') {
+    return routes;
+  }
+  const prefixes = routes.map((route) => {
+    if (!route.startsWith('/')) {
+      throw new Error(`[${PLUGIN_NAME}] routes are paths that start with "/": "${route}" isn't`);
+    }
+    return route.replace(/\/+$/, '');
+  });
+  return (pathname) =>
+    prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
