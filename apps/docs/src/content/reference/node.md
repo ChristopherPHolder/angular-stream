@@ -261,12 +261,16 @@ type StaticHandler = (req: IncomingMessage, res: ServerResponse) => Promise<bool
 Serves `GET` and `HEAD` requests for files in `dir`, and resolves `false` for
 everything else: other methods, folders, paths that leave `dir`, files that
 don't exist, and every `.html` file, in any case and percent-encoded or not,
-so `/`, `/index.html`, `/INDEX.HTML` and `/index%2Ehtml` reach the renderer. It reads the path as `toWebRequest()` does, so `//x/favicon.svg` is
+so `/`, `/index.html`, `/INDEX.HTML` and `/index%2Ehtml` reach the renderer.
+It reads the path as `toWebRequest()` does, so `//x/favicon.svg` is
 `x/favicon.svg`. It sets `Content-Type`, `Content-Length`, `ETag` and
 `Last-Modified`, and answers `304` to an `If-None-Match` of `*` or a list that
 holds the file's ETag. Files under
 `assets/`, which Vite names by their content hash, are cached for a year;
-everything else is revalidated. A `dir` that doesn't exist serves nothing.
+everything else is revalidated. A file under `assets/` that doesn't exist,
+such as an old hashed chunk after a deploy, gets a `404` rather than a page,
+which would fail to load as a script. A `dir` that doesn't exist serves
+nothing.
 
 ## Building an adapter on it
 
