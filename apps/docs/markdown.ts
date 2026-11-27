@@ -187,10 +187,15 @@ export function renderPage(source: string, file: string, options: MarkdownOption
         const body = known
           ? hljs.highlight(text, { language, ignoreIllegals: true }).value
           : escapeHtml(text);
-        const caption = title ? `<figcaption>${escapeHtml(title)}</figcaption>` : '';
         const label = known ? ` data-lang="${escapeHtml(language)}"` : '';
+        // Above every block: its file name, or else its language, and the copy
+        // button, which `DocPage` handles: this HTML carries no script.
+        const name = escapeHtml(title ?? (known ? language : ''));
+        const bar =
+          `<div class="code-bar"><span class="code-title">${name}</span>` +
+          `<button type="button" class="code-copy">Copy</button></div>`;
         // `tabindex`: a block that scrolls sideways has to be reachable by keyboard.
-        return `<figure class="code">${caption}<pre tabindex="0"${label}><code class="hljs">${body}</code></pre></figure>\n`;
+        return `<div class="code">${bar}<pre tabindex="0"${label}><code class="hljs">${body}</code></pre></div>\n`;
       },
       codespan({ text }: Tokens.Codespan) {
         return `<code>${breakable(escapeHtml(text))}</code>`;

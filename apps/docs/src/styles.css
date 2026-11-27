@@ -67,6 +67,17 @@ a {
   outline: none;
 }
 
+/* Read by a screen reader, not shown. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .skip-link {
   position: absolute;
   left: var(--space-4);
@@ -483,6 +494,12 @@ details[open] > summary.sidebar-title::after {
   color: var(--color-primary-700);
 }
 
+/* The section being read. */
+.toc a.toc-current {
+  color: var(--color-primary-700);
+  font-weight: 500;
+}
+
 /* The same outline, folded above the article where there is no room beside it. */
 .toc--inline {
   display: none;
@@ -622,9 +639,16 @@ details[open] > summary.sidebar-title::after {
 
 .prose .anchor {
   margin-left: var(--space-2);
-  color: var(--color-neutral-400);
+  color: var(--color-neutral-500);
   text-decoration: none;
   opacity: 0;
+}
+
+/* Nothing hovers on a touch screen: there the link to a section always shows. */
+@media (hover: none) {
+  .prose .anchor {
+    opacity: 1;
+  }
 }
 
 .prose :is(h2, h3, h4):hover .anchor,
@@ -726,12 +750,43 @@ details[open] > summary.sidebar-title::after {
   overflow: hidden;
 }
 
-.code figcaption {
-  padding: var(--space-2) var(--space-4);
+/* Above a block: its file name or its language, and the copy button. */
+.code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-1-5) var(--space-1) var(--space-4);
   border-bottom: 1px solid var(--color-border);
   color: var(--color-neutral-600);
-  font-family: var(--font-mono);
   font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.code-title {
+  min-width: 0;
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.code-copy {
+  appearance: none;
+  flex: none;
+  /* The same width for "Copy" and "Copied", so the bar doesn't shift. */
+  min-width: var(--space-16);
+  padding: var(--space-1-5) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.code-copy:hover {
+  background: var(--color-neutral-100);
+  color: var(--color-neutral-900);
 }
 
 .code pre {
@@ -751,8 +806,13 @@ pre.mermaid:focus-visible {
 }
 
 @media (max-width: 560px) {
-  .code figcaption {
-    padding-inline: var(--space-3);
+  .code-bar {
+    padding-left: var(--space-3);
+  }
+
+  /* 36px tall: enough for a finger. */
+  .code-copy {
+    padding-block: var(--space-2-5);
   }
 
   .code pre {

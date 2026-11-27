@@ -162,6 +162,7 @@ export class App {
         this.skipLink.set(location.path().replace(/^\//, '') + '#content');
         this.currentSection.set(sectionOf(location.path()));
         this.toggledSections.set({});
+        afterNextRender(() => this.showCurrentLink(), { injector: this.injector });
       });
 
     // A heading the router scrolls to lands below the sticky header, not under it.
@@ -197,6 +198,23 @@ export class App {
       },
       { injector: this.injector },
     );
+  }
+
+  /**
+   * The sidebar scrolls by itself when it is taller than the window: brings
+   * the current page's link into its view. Not `scrollIntoView()`, which would
+   * scroll the page as well.
+   */
+  private showCurrentLink(): void {
+    const sidebar = this.sidebar().nativeElement;
+    const link = sidebar.querySelector<HTMLElement>('a.active');
+    if (!link) {
+      return;
+    }
+    const top = link.getBoundingClientRect().top - sidebar.getBoundingClientRect().top;
+    if (top < 0 || top + link.offsetHeight > sidebar.clientHeight) {
+      sidebar.scrollTop += top - sidebar.clientHeight / 2;
+    }
   }
 
   protected isOpen(section: DocSection): boolean {
