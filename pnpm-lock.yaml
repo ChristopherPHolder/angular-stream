@@ -326,6 +326,58 @@ importers:
         specifier: 1.8.0
         version: 1.8.0(@types/node@20.19.43)(@vitest/browser-preview@5.1.1)(@vitest/ui@5.1.1)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(vitest@5.1.1)(yaml@2.9.0)
 
+  apps/example-azure:
+    dependencies:
+      '@angular-stream/stream-example':
+        specifier: workspace:*
+        version: link:../../libs/stream-example
+      '@angular/common':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@angular/compiler':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0
+      '@angular/core':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2)
+      '@angular/platform-browser':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/common@22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))
+      '@angular/platform-server':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/common@22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.3.0-rc.0)(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(@angular/platform-browser@22.3.0-rc.0(@angular/common@22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@azure/functions':
+        specifier: ^4.17.1
+        version: 4.17.1
+      '@push-based/angular-stream-core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      rxjs:
+        specifier: ~7.8.0
+        version: 7.8.2
+      tslib:
+        specifier: ^2.3.0
+        version: 2.9.1
+    devDependencies:
+      '@angular/compiler-cli':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3)
+      '@push-based/vite-plugin-ngp':
+        specifier: ^0.4.3
+        version: 0.4.3(@angular/compiler-cli@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3))(@angular/compiler@22.3.0-rc.0)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(typescript@7.0.2)
+      '@types/node':
+        specifier: ^20.19.43
+        version: 20.19.43
+      typescript:
+        specifier: ~6.0.2
+        version: 6.0.3
+      vite:
+        specifier: npm:@voidzero-dev/vite-plus-core@8.3.8001
+        version: '@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0)'
+      vite-plus:
+        specifier: 1.8.0
+        version: 1.8.0(@types/node@20.19.43)(@vitest/browser-preview@5.1.1)(@vitest/ui@5.1.1)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(vitest@5.1.1)(yaml@2.9.0)
+
   apps/example-bun:
     dependencies:
       '@angular-stream/stream-example':
@@ -1124,6 +1176,14 @@ packages:
 
   '@antfu/install-pkg@2.1.0':
     resolution: {integrity: sha512-sdg9NxU3zR4Mnawfbc/x6GB5Wf17WYud5qOuEuxXjaKpYpMkISSJEjItGebXJ2bQ4DIcly4NYH23mtkGJjvKUw==}
+
+  '@azure/functions-extensions-base@0.3.0':
+    resolution: {integrity: sha512-Cux0hLu5ZXlC/Kb+yvJVhRLIdkfFwui2HeT5oGZL00r/GCUUkhGTzRfZUjRN4Bq729mPv3okPucz2z7SMQLStA==}
+    engines: {node: '>=18.0'}
+
+  '@azure/functions@4.17.1':
+    resolution: {integrity: sha512-uvfAoU/j89p1IJ4pi1r4DJysznmbdLV/KZgx26TxF3z06Cnu2NiiNZLHL83Km9oHy+sSuaSUKuEsdj32tL3C6A==}
+    engines: {node: '>=20.0'}
 
   '@babel/code-frame@7.29.7':
     resolution: {integrity: sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==}
@@ -3698,6 +3758,10 @@ packages:
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
 
+  cookie@0.7.2:
+    resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
+    engines: {node: '>= 0.6'}
+
   cookie@1.1.1:
     resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
     engines: {node: '>=18'}
@@ -5298,6 +5362,13 @@ snapshots:
     dependencies:
       package-manager-detector: 1.9.0
       tinyexec: 1.4.0
+
+  '@azure/functions-extensions-base@0.3.0': {}
+
+  '@azure/functions@4.17.1':
+    dependencies:
+      '@azure/functions-extensions-base': 0.3.0
+      cookie: 0.7.2
 
   '@babel/code-frame@7.29.7':
     dependencies:
@@ -7682,6 +7753,8 @@ snapshots:
   convert-source-map@1.9.0: {}
 
   convert-source-map@2.0.0: {}
+
+  cookie@0.7.2: {}
 
   cookie@1.1.1: {}
 
