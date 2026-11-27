@@ -9,7 +9,8 @@
 :root {
   /* The design system has one light theme. */
   color-scheme: light;
-  --content-width: 46rem;
+  /* Wide enough for a 96-character line of code, which most of the samples stay under. */
+  --content-width: 50rem;
 }
 
 /* White on --color-primary-500 is under AA for 14px labels; the README says use 600. */
@@ -72,6 +73,28 @@ main:focus {
   outline: none;
 }
 
+/*
+ * A box that scrolls sideways (code, a wide table, a diagram) shades the edge
+ * it continues past. The first two layers move with the content and cover the
+ * shade once that end is reached; --scroll-bg is the box's own background.
+ */
+.code pre,
+.table-wrap,
+pre.mermaid {
+  --scroll-bg: var(--color-surface);
+  --scroll-shade: color-mix(in srgb, var(--color-neutral-900) 16%, transparent);
+  background:
+    linear-gradient(to right, var(--scroll-bg) 40%, transparent) left / var(--space-10) 100%
+      no-repeat local,
+    linear-gradient(to left, var(--scroll-bg) 40%, transparent) right / var(--space-10) 100%
+      no-repeat local,
+    linear-gradient(to right, var(--scroll-shade), transparent) left / var(--space-4) 100% no-repeat
+      scroll,
+    linear-gradient(to left, var(--scroll-shade), transparent) right / var(--space-4) 100% no-repeat
+      scroll;
+  background-color: var(--scroll-bg);
+}
+
 .eyebrow {
   margin: 0 0 var(--space-2);
   color: var(--color-primary-700);
@@ -92,7 +115,7 @@ main:focus {
 .top-inner,
 .shell,
 .bottom-inner {
-  width: min(80rem, 100% - 2 * var(--space-5));
+  width: min(84rem, 100% - 2 * var(--space-5));
   margin: 0 auto;
 }
 
@@ -259,6 +282,12 @@ main:focus {
   margin: 0;
 }
 
+/* A long identifier in a heading wraps instead of widening the page. */
+.doc-header h1,
+.prose :is(h2, h3, h4) {
+  overflow-wrap: anywhere;
+}
+
 .toc {
   position: sticky;
   top: var(--space-6);
@@ -350,6 +379,7 @@ main:focus {
 
 .prose {
   color: var(--color-text);
+  overflow-wrap: break-word;
 }
 
 .prose > :first-child {
@@ -458,6 +488,26 @@ main:focus {
   font-weight: 600;
 }
 
+/*
+ * In a cell, an identifier breaks only where markdown.ts allows it (after a
+ * slash, a dot, a hyphen), so a column is never narrower than a word; a table
+ * that then doesn't fit scrolls in its wrapper.
+ */
+.prose :is(th, td) code {
+  overflow-wrap: normal;
+}
+
+@media (max-width: 560px) {
+  .prose th,
+  .prose td {
+    padding-inline: var(--space-2);
+  }
+
+  .prose :is(th, td):first-child {
+    padding-left: 0;
+  }
+}
+
 /* Code: a light panel, highlighted with the design system's colours. */
 
 .code {
@@ -477,11 +527,31 @@ main:focus {
 }
 
 .code pre {
+  --scroll-bg: var(--color-surface-subtle);
   margin: 0;
   padding: var(--space-4);
   overflow-x: auto;
   font-size: 0.8125rem;
   line-height: 1.25rem;
+}
+
+/* The focus ring of a scrolling box, drawn inside it: its parent clips. */
+.code pre:focus-visible,
+.table-wrap:focus-visible,
+pre.mermaid:focus-visible {
+  outline-offset: -2px;
+}
+
+@media (max-width: 560px) {
+  .code figcaption {
+    padding-inline: var(--space-3);
+  }
+
+  .code pre {
+    padding: var(--space-3);
+    font-size: 0.75rem;
+    line-height: 1.125rem;
+  }
 }
 
 .code code {
@@ -548,7 +618,11 @@ pre.mermaid {
 
 pre.mermaid[data-processed] {
   text-align: center;
-  background: var(--color-surface);
+}
+
+/* A diagram keeps a readable size and scrolls, instead of shrinking to a phone's width. */
+pre.mermaid[data-processed] svg {
+  min-width: 40rem;
 }
 
 /* GitHub-style callouts: > [!NOTE], [!TIP], [!IMPORTANT], [!WARNING], [!CAUTION]. */
@@ -620,6 +694,11 @@ pre.mermaid[data-processed] {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
   gap: var(--space-5);
+}
+
+/* The design system's card is 300px wide at most; here the grid sizes it. */
+.cards .pb-card {
+  max-width: none;
 }
 
 .cards h2 {

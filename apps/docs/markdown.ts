@@ -105,6 +105,17 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
+/**
+ * Lets a long identifier in inline code wrap after a separator
+ * (`@push-based/<wbr>angular-stream-node`, `app.<wbr>component.<wbr>html`)
+ * instead of in the middle of a word. Only between a word and a letter, so
+ * `22.3.0`, `...` and `.html` stay whole. Takes escaped HTML: no entity holds
+ * one of these characters.
+ */
+function breakable(html: string): string {
+  return html.replace(/(?<=[\w)\]])([/.:(,])(?=[A-Za-z_$])/g, '$1<wbr>');
+}
+
 const CALLOUTS: Record<string, string> = {
   NOTE: 'Note',
   TIP: 'Tip',
@@ -163,7 +174,7 @@ export function renderPage(source: string, file: string, options: MarkdownOption
         const title = /title="([^"]+)"/.exec(info)?.[1];
         if (language === 'mermaid') {
           // Drawn in the browser, on pages that have one; the source is the fallback.
-          return `<pre class="mermaid">${escapeHtml(text)}</pre>\n`;
+          return `<pre class="mermaid" tabindex="0">${escapeHtml(text)}</pre>\n`;
         }
         const known = language !== '' && hljs.getLanguage(language) !== undefined;
         const body = known
@@ -171,7 +182,11 @@ export function renderPage(source: string, file: string, options: MarkdownOption
           : escapeHtml(text);
         const caption = title ? `<figcaption>${escapeHtml(title)}</figcaption>` : '';
         const label = known ? ` data-lang="${escapeHtml(language)}"` : '';
-        return `<figure class="code">${caption}<pre${label}><code class="hljs">${body}</code></pre></figure>\n`;
+        // `tabindex`: a block that scrolls sideways has to be reachable by keyboard.
+        return `<figure class="code">${caption}<pre tabindex="0"${label}><code class="hljs">${body}</code></pre></figure>\n`;
+      },
+      codespan({ text }: Tokens.Codespan) {
+        return `<code>${breakable(escapeHtml(text))}</code>`;
       },
       blockquote({ tokens }: Tokens.Blockquote) {
         const body = this.parser.parse(tokens);
