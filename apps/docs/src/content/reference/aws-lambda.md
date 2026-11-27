@@ -43,7 +43,7 @@ export const handler = createStreamingLambda({
   config,
   eventDispatchContract,
   templatePath: join(import.meta.dirname, '../client/index.html'),
-  allowedHosts: ['localhost', '*.lambda-url.eu-central-1.on.aws'],
+  allowedHosts: ['localhost', `*.lambda-url.${process.env['AWS_REGION']}.on.aws`],
 });
 ```
 
@@ -70,6 +70,18 @@ For each event, the handler:
 If the render fails after the first chunk, the handler rejects. The runtime
 then ends the stream with error trailers, so the client gets a cut-off page.
 Before the first chunk, the core falls back to a buffered render as usual.
+
+If the response stream closes before the response is written, which happens
+when the runtime's connection to the Lambda Runtime API drops, the handler
+stops the render and rejects, so the invocation fails instead of running until
+it times out.
+
+A client that disconnects doesn't close the response stream. AWS: "streamed
+responses are not interrupted or stopped when the invoking client connection
+is broken"
+([response streaming](https://docs.aws.amazon.com/lambda/latest/dg/configuration-response-streaming.html)).
+The function isn't told, so the `Request` has no abort signal: the render runs
+to the end, and the whole invocation is billed.
 
 ## `StreamingLambdaHandler`
 

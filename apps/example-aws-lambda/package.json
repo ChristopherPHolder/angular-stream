@@ -28,6 +28,13 @@
     "vite-plus": "1.8.0"
   },
   "nx": {
+    "targets": {
+      "serve": {
+        "dependsOn": [
+          "build"
+        ]
+      }
+    },
     "tags": [
       "type:app",
       "runtime:aws-lambda"

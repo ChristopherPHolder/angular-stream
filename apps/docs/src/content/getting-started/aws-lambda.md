@@ -73,7 +73,7 @@ export const handler = createStreamingLambda({
   eventDispatchContract,
   // The built client sits next to the server bundle in the deployment package.
   templatePath: join(import.meta.dirname, '../client/index.html'),
-  allowedHosts: ['localhost', '*.lambda-url.eu-central-1.on.aws'],
+  allowedHosts: ['localhost', `*.lambda-url.${process.env['AWS_REGION']}.on.aws`],
 });
 ```
 
@@ -88,8 +88,10 @@ execution environment lives.
 
 `allowedHosts` must list the Function URL's hostname. Behind CloudFront too:
 CloudFront sends the Function URL its own hostname as `Host`, so that is the
-host the request is rendered for. A pattern such as
-`*.lambda-url.eu-central-1.on.aws` matches any Function URL in that region.
+host the request is rendered for. Function URLs look like
+`<url-id>.lambda-url.<region>.on.aws`, and Lambda always sets `AWS_REGION` to
+the function's region, so the pattern above matches any Function URL in the
+region the function is deployed to, whichever that is.
 
 `eventDispatchContract` is for `withEventReplay()`, as on
 [Cloudflare Workers](cloudflare-workers.md#3-the-worker).
@@ -219,8 +221,7 @@ JSON metadata prelude and eight null bytes. A Function URL in front reads the
 prelude for the status and headers, and forwards the rest as it arrives.
 
 ```bash
-pnpm nx build example-aws-lambda
-pnpm nx serve example-aws-lambda   # http://localhost:3000/
+pnpm nx serve example-aws-lambda   # builds it first; http://localhost:3000/
 curl -sN http://localhost:3000/
 ```
 
@@ -270,6 +271,12 @@ Also from
   2 MBps." A streamed response can be up to 200 MB.
 - Response streaming is available on the Node.js managed runtimes, which define
   the `awslambda` global the handler needs.
+- "Streaming responses incur cost and streamed responses are not interrupted or
+  stopped when the invoking client connection is broken." A client that leaves
+  early doesn't stop the function: the render runs to the end, and you pay for
+  all of it. The function isn't told about the disconnect either, so the
+  adapter gives the request no abort signal. Keep the function's timeout close
+  to your slowest page.
 
 ## Not checked against AWS
 
@@ -283,3 +290,6 @@ Also from
 - The `nodejs24.x` runtime itself. The stand-in's response stream is checked
   against the runtime client's own code: with that code driving the same
   handler, the bytes and timings match.
+- What the client gets when the handler fails before it writes anything.
+  Locally there is no prelude to read a status from, so the stand-in drops the
+  connection. A real Function URL probably answers 502, but AWS doesn't say.

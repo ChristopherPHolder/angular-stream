@@ -29,7 +29,7 @@ export const handler = createStreamingLambda({
   config, // the server ApplicationConfig
   eventDispatchContract, // for withEventReplay()
   templatePath: join(import.meta.dirname, '../client/index.html'),
-  allowedHosts: ['localhost', '*.lambda-url.eu-central-1.on.aws'],
+  allowedHosts: ['localhost', `*.lambda-url.${process.env['AWS_REGION']}.on.aws`],
 });
 ```
 

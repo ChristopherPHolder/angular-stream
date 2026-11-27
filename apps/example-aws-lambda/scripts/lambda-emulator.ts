@@ -21,8 +21,14 @@
  *   template.yaml's cache behaviors, served from `dist/client`.
  *
  * What it doesn't model: separate execution environments (concurrent
- * requests share one process and its module state), timeouts, the 2 MB/s cap after the first 6 MB, and whatever AWS's own
- * network does between the Function URL and the client.
+ * requests share one process and its module state), timeouts, the 2 MB/s cap
+ * after the first 6 MB, and whatever AWS's own network does between the
+ * Function URL and the client.
+ *
+ * Where it differs: when the handler fails before it writes anything, there
+ * is no prelude, so this Function URL has no status to send and destroys the
+ * client's socket. A real Function URL probably answers 502; AWS doesn't
+ * document it.
  */
 import { randomUUID } from 'node:crypto';
 import { createReadStream, existsSync, statSync } from 'node:fs';
@@ -36,7 +42,7 @@ import {
   request as httpRequest,
 } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { extname, join, normalize } from 'node:path';
+import { extname, join, normalize, sep } from 'node:path';
 
 const HANDLER_STREAMING = Symbol.for('aws.lambda.runtime.handler.streaming');
 const HANDLER_HIGHWATERMARK = Symbol.for('aws.lambda.runtime.handler.streaming.highWaterMark');
@@ -363,7 +369,8 @@ function forwardResponse(fromRuntime: IncomingMessage, client: ServerResponse): 
 
   fromRuntime.on('end', () => {
     if (fromRuntime.trailers[TRAILER_NAME_ERROR_TYPE.toLowerCase()] !== undefined) {
-      // The function failed mid-stream: the client gets a cut-off response.
+      // The function failed: the client gets a cut-off response, or, before
+      // the prelude, a dropped connection (see the note at the top).
       client.destroy();
     } else if (pending !== undefined) {
       client.writeHead(502, { 'content-type': 'text/plain' });
@@ -388,8 +395,17 @@ const MIME_TYPES: Record<string, string> = {
 };
 
 function serveStatic(staticDir: string, pathname: string, client: ServerResponse): void {
-  const file = normalize(join(staticDir, decodeURIComponent(pathname)));
-  if (!file.startsWith(staticDir) || !existsSync(file) || !statSync(file).isFile()) {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    client.writeHead(400, { 'content-type': 'text/plain' }).end('Bad request.');
+    return;
+  }
+  const file = normalize(join(staticDir, decoded));
+  // With the separator, so `/../client-x/` can't pass as inside `client`.
+  const inside = file.startsWith(join(staticDir, sep));
+  if (!inside || !existsSync(file) || !statSync(file).isFile()) {
     client.writeHead(404, { 'content-type': 'text/plain' }).end('Not found.');
     return;
   }
