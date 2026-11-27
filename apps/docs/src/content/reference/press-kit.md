@@ -92,7 +92,7 @@ The symbol is filled with one gradient, from red at its left edge through
 magenta to violet at its right, rising slightly. The name is set in ink on
 light backgrounds and in white on dark ones.
 
-|                                                         | Name    | Hex       | Where                        |
+| Swatch                                                  | Name    | Hex       | Where                        |
 | ------------------------------------------------------- | ------- | --------- | ---------------------------- |
 | <span class="swatch" style="background:#FF0F4D"></span> | Red     | `#FF0F4D` | The gradient's start         |
 | <span class="swatch" style="background:#C4089A"></span> | Magenta | `#C4089A` | Its middle                   |

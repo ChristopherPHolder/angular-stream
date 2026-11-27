@@ -400,7 +400,7 @@ server expects the new file names.
 What the example used in Viceroy, against
 [Compute's limits](https://docs.fastly.com/products/compute-resource-limits):
 
-|                       | The example                                         | Compute's limit                     |
+| Resource              | The example                                         | Compute's limit                     |
 | --------------------- | --------------------------------------------------- | ----------------------------------- |
 | Package               | 52 MB Wasm, 15 MB compressed                        | 100 MB                              |
 | Heap per request      | 25 MiB                                              | 128 MB                              |

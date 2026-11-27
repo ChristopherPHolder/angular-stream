@@ -418,9 +418,13 @@ details[open] > summary.sidebar-title::after {
   line-height: 1.25rem;
 }
 
+/*
+ * On the tinted panel --color-text-muted is 4.47:1, under AA's 4.5:1 (it only
+ * passes on white). --color-neutral-600 is 7.2:1 there.
+ */
 .facts dt {
   margin-bottom: var(--space-1);
-  color: var(--color-text-muted);
+  color: var(--color-neutral-600);
   font-size: 0.75rem;
   line-height: 1rem;
 }
@@ -437,7 +441,7 @@ details[open] > summary.sidebar-title::after {
 }
 
 .facts-note {
-  color: var(--color-text-muted);
+  color: var(--color-neutral-600);
 }
 
 /* A long identifier in a heading wraps instead of widening the page. */
@@ -763,9 +767,10 @@ pre.mermaid:focus-visible {
   color: var(--color-neutral-800);
 }
 
+/* Not --color-neutral-500: on the panel's tint it is under AA, like the muted text above. */
 .hljs-comment,
 .hljs-quote {
-  color: var(--color-neutral-500);
+  color: var(--color-neutral-600);
   font-style: italic;
 }
 
