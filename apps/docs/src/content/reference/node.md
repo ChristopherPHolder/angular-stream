@@ -104,6 +104,8 @@ interface AngularStreamNodeOptions {
   entry?: string;
   /** The template, relative to Vite's root. Default: 'index.html'. */
   template?: string;
+  /** Requests other than pages for the server entry: path prefixes, or a function. Default: none. */
+  routes?: readonly string[] | ((pathname: string, req: IncomingMessage) => boolean);
 }
 ```
 
@@ -119,6 +121,32 @@ not start a server in dev; `if (import.meta.env.PROD)` around `listen()` does
 that. The handler `createNodeHandler()` returns is one. For a server built on
 another framework, see
 [What the server entry default-exports](#what-the-server-entry-default-exports).
+
+Page requests are `GET`s and `HEAD`s that ask for HTML and that Vite doesn't
+serve itself; Vite answers everything else. `routes` sends the server entry
+more than pages, such as the app's API, so that it answers in dev as it does
+in production:
+
+```ts
+angularStreamNode({ entry: 'src/server.ts', routes: ['/api'] });
+```
+
+- A prefix matches that path and everything under it: `'/api'` matches `/api`
+  and `/api/hello`, not `/api.json` or `/apis`. A prefix must start with `/`.
+- A function is given the path, without the query and not decoded, and the
+  request, and returns whether the server entry gets it:
+  `routes: (path) => path.startsWith('/api/') || path === '/health'`.
+- A matching request goes to the server entry before Vite's own middleware
+  sees it, whatever its method and `Accept` header, with its URL as the
+  browser sent it. It comes after Vite's CORS and host check, but before
+  `server.proxy`, before `base` is stripped and before `public/`: a route
+  shadows a proxied path or a file there with the same path.
+- The dev template is read only if the app renders the request as a page, as
+  a catch-all does for a URL under `/api` that no route answers.
+- When the server entry passes the request on to `next`, Vite answers it,
+  except a page request (`GET` with `Accept: text/html`), which gets a `404`,
+  as it would from a production server with nothing after the app.
+- `'/'` isn't allowed: it would send Vite's own requests to the app too.
 
 List the plugin before ngp. ngp's own dev SSR would otherwise answer page
 requests first, calling the default export as `(url, document)`, so the dev
@@ -232,8 +260,8 @@ type StaticHandler = (req: IncomingMessage, res: ServerResponse) => Promise<bool
 
 Serves `GET` and `HEAD` requests for files in `dir`, and resolves `false` for
 everything else: other methods, folders, paths that leave `dir`, files that
-don't exist, and every `.html` file, so `/` and `/index.html` reach the
-renderer. It reads the path as `toWebRequest()` does, so `//x/favicon.svg` is
+don't exist, and every `.html` file, in any case and percent-encoded or not,
+so `/`, `/index.html`, `/INDEX.HTML` and `/index%2Ehtml` reach the renderer. It reads the path as `toWebRequest()` does, so `//x/favicon.svg` is
 `x/favicon.svg`. It sets `Content-Type`, `Content-Length`, `ETag` and
 `Last-Modified`, and answers `304` to an `If-None-Match` of `*` or a list that
 holds the file's ETag. Files under
@@ -292,9 +320,9 @@ if (import.meta.env.PROD) {
 }
 ```
 
-The plugin sends the app page requests only, so in dev an API route on the
-same app isn't reached; [Express](../getting-started/express.md#4-vite) shows
-a few lines of Vite config that send it the API's requests as well.
+On its own, the plugin sends the app page requests only, so in dev an API
+route on the same app isn't reached. List the API's prefixes in
+[`routes`](#angularstreamnode), and those requests reach it too.
 
 Koa's is `app.callback()`. Fastify and NestJS build their own request handling
 on top of `node:http`: export a function that passes `req` and `res` to the app

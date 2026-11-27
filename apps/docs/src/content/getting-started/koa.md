@@ -266,7 +266,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   optimizeDeps: { entries: ['index.html'] },
   plugins: [
-    angularStreamNode({ entry: 'src/server.ts' }),
+    angularStreamNode({ entry: 'src/server.ts', routes: ['/api'] }),
     ngp({ ssr: { entry: 'src/server.ts' } }),
   ],
 });
@@ -284,6 +284,13 @@ shape, and the loader from `createTemplateLoader()` finds the template on
 server refuses to start. See
 [What the server entry default-exports](../reference/node.md#what-the-server-entry-default-exports).
 
+On its own, the plugin sends the app page requests only, `GET`s and `HEAD`s
+that ask for HTML, and Vite answers everything else. `routes: ['/api']` sends
+everything under `/api` to the app as well, whatever its method and `Accept`
+header, before Vite sees it, so `/api/hello` answers in dev as it does in
+production. It matches `/api` and `/api/hello`, not `/api.json`; list one
+prefix for each your API uses.
+
 ## 5. Develop
 
 ```bash
@@ -291,14 +298,9 @@ vite dev   # http://localhost:5173
 ```
 
 Every page is rendered by your Koa app and streamed, through `koa-compress`
-and any other middleware in front of `page`. `import.meta.env.PROD` is `false`
-there, so `src/server.ts` neither mounts `koa-static` nor starts a server of
-its own.
-
-The plugin only sends page requests to the app: `GET`s and `HEAD`s that ask
-for HTML. Vite answers everything else, so `/api/hello` isn't served by Koa in
-`vite dev`; call the API on the built server, or run it separately while you
-develop.
+and any other middleware in front of `page`, and `/api/hello` is answered by
+the same app. `import.meta.env.PROD` is `false` there, so `src/server.ts`
+neither mounts `koa-static` nor starts a server of its own.
 
 ## 6. Build and run
 

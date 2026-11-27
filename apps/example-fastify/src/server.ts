@@ -54,8 +54,8 @@ app.register(angularStream, {
 
 /**
  * `vite dev` calls this for each page request, with the dev template on `req`
- * and `req.url` rewritten to `/index.html`; Fastify routes the URL the browser
- * asked for.
+ * and `req.url` rewritten to `/index.html`, and for each request under `/api`;
+ * Fastify routes the URL the browser asked for.
  */
 export default function handle(
   req: IncomingMessage & { originalUrl?: string },

@@ -6,6 +6,9 @@ import type { IncomingMessage } from 'node:http';
  * server's template on the Node request. `Symbol.for`, because the plugin and
  * the handler are different copies of this module in dev: Vite's config loader
  * loads one, the server environment's module runner the other.
+ *
+ * It holds the template, or, for a request forwarded for the plugin's
+ * `routes`, a function that reads it.
  */
 export const DEV_TEMPLATE = Symbol.for('@push-based/angular-stream-node:template');
 
@@ -36,6 +39,10 @@ export function createTemplateLoader(file: string | URL): TemplateLoader {
     ];
     if (typeof devTemplate === 'string') {
       return htmlResponse(devTemplate);
+    }
+    // A request the plugin forwards for `routes`: read only when a page needs it.
+    if (typeof devTemplate === 'function') {
+      return htmlResponse(await (devTemplate as () => Promise<string>)());
     }
 
     text ??= readFile(file, 'utf8').catch((error: unknown) => {

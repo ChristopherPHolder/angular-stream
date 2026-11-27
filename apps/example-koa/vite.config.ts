@@ -5,7 +5,8 @@ import { defineConfig, lazyPlugins } from 'vite-plus';
 export default defineConfig({
   optimizeDeps: { entries: ['index.html'] },
   plugins: lazyPlugins(() => [
-    angularStreamNode({ entry: 'src/server.ts' }),
+    // `routes`: in `vite dev`, the API goes to the app as well as the pages.
+    angularStreamNode({ entry: 'src/server.ts', routes: ['/api'] }),
     ngp({ ssr: { entry: 'src/server.ts' } }),
   ]),
 });
