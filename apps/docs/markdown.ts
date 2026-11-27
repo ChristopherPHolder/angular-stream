@@ -80,8 +80,11 @@ export function markdown(options: MarkdownOptions): Plugin {
       }
       const entries: SearchEntry[] = [];
       for (const file of contentFiles(options.contentDir)) {
-        this.addWatchFile(file);
-        const { html } = renderPage(readFileSync(file, 'utf8'), file, options);
+        const { source, included } = withIncludes(readFileSync(file, 'utf8'), file, options);
+        for (const watched of [file, ...included]) {
+          this.addWatchFile(watched);
+        }
+        const { html } = renderPage(source, file, options);
         entries.push(...searchEntries(routeOf(file, options.contentDir), html));
       }
       return { code: `export default ${JSON.stringify(entries)};`, map: null };
@@ -91,8 +94,11 @@ export function markdown(options: MarkdownOptions): Plugin {
       if (!file.endsWith('.md')) {
         return null;
       }
-      this.addWatchFile(file);
-      const page = renderPage(source, file, options);
+      const whole = withIncludes(source, file, options);
+      for (const watched of [file, ...whole.included]) {
+        this.addWatchFile(watched);
+      }
+      const page = renderPage(whole.source, file, options);
       return { code: `export default ${JSON.stringify(page)};`, map: null };
     },
   };
@@ -112,10 +118,43 @@ export interface SearchEntry {
   text: string;
 }
 
-/** Every page: the `.md` files one folder down from `contentDir`, in a stable order. */
+/**
+ * A line that is replaced by another file's Markdown: a step several pages
+ * share, written once. The path is relative to the page, like a link.
+ */
+const INCLUDE = /^<!-- include (\S+) -->$/gm;
+
+/**
+ * Puts each included file in the place of its `<!-- include … -->` line. The
+ * text is inlined before it is rendered, so its links resolve from the page
+ * that includes it: keep included files one folder down from `contentDir`,
+ * like the pages, and the same relative link works from both. An included file
+ * cannot include another.
+ */
+export function withIncludes(
+  source: string,
+  file: string,
+  options: MarkdownOptions,
+): { source: string; included: string[] } {
+  const included: string[] = [];
+  const whole = source.replace(INCLUDE, (_, target: string) => {
+    const absolute = path.resolve(path.dirname(file), target);
+    if (!existsSync(absolute)) {
+      throw new Error(`${path.relative(options.repoRoot, file)}: nothing to include at ${target}`);
+    }
+    included.push(absolute);
+    return readFileSync(absolute, 'utf8').trim();
+  });
+  return { source: whole, included };
+}
+
+/**
+ * Every page: the `.md` files one folder down from `contentDir`, in a stable
+ * order. A folder that starts with `_` holds included files, not pages.
+ */
 function contentFiles(contentDir: string): string[] {
   return readdirSync(contentDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
+    .filter((entry) => entry.isDirectory() && !entry.name.startsWith('_'))
     .flatMap((dir) =>
       readdirSync(path.join(contentDir, dir.name))
         .filter((file) => file.endsWith('.md'))

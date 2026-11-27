@@ -12,6 +12,11 @@
  * lose those clicks without an error.
  * `404` becomes 404.html, Pages' page for every unknown path.
  *
+ * It then checks every link to a heading (`docs/guides/debugging#quick-checks`)
+ * against the ids of the page it points at, and fails on one that is not there.
+ * `markdown.ts` already fails on a link to a missing file; a heading is only
+ * known once the page is rendered.
+ *
  * Last, it writes sitemap.xml: every page at its public address.
  *
  * `DOCS_BASE` must match the one the build ran with.
@@ -40,12 +45,37 @@ const entry = (await import(path.join(serverDir, entryFile))) as ServerEntry;
 
 const template = await readFile(path.join(serverDir, 'index.server.html'), 'utf8');
 
+/** Each page's HTML by its route, for the check of links to headings below. */
+const rendered = new Map<string, string>();
+
 for (const route of entry.PRERENDERED_ROUTES) {
   const html = await entry.default(base + route, template);
+  rendered.set(route, html);
   const file = path.join(client, route === '' ? 'index.html' : `${route}.html`);
   await mkdir(path.dirname(file), { recursive: true });
   await writeFile(file, html);
   console.log(`prerendered /${route} → ${path.relative(client, file)}`);
+}
+
+// A link to a heading must find it. Links in the Markdown are relative to the
+// base href (`docs/…#id`); the app's own, such as "On this page", start with it.
+const ids = new Map(
+  [...rendered].map(([route, html]) => [
+    route,
+    new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1])),
+  ]),
+);
+const linkToHeading = new RegExp(`href="(?:${escapeRegExp(base)})?(docs/[^"#?]+)#([^"]+)"`, 'g');
+const broken: string[] = [];
+for (const [route, html] of rendered) {
+  for (const [, target, id] of html.matchAll(linkToHeading)) {
+    if (!ids.get(target)?.has(decodeURIComponent(id))) {
+      broken.push(`/${route}: no #${id} on /${target}`);
+    }
+  }
+}
+if (broken.length > 0) {
+  throw new Error(`Links to headings that do not exist:\n  ${[...new Set(broken)].join('\n  ')}`);
 }
 
 // Every page but the not-found one, for crawlers. The addresses are the
@@ -61,6 +91,10 @@ await writeFile(
     '\n</urlset>\n',
 );
 console.log(`wrote sitemap.xml: ${urls.length} pages`);
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 // Pages would otherwise skip files and folders that start with an underscore.
 await writeFile(path.join(client, '.nojekyll'), '');

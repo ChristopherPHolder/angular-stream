@@ -71,7 +71,23 @@ highlighter ships to the browser:
 - Link with relative paths, as you would on GitHub: to another page
   (`../guides/debugging.md#quick-checks`) or to any file in the repository
   (`../../../../../packages/core/src/server/handler.ts`), which becomes a link
-  to it on GitHub. A link to a file that does not exist fails the build.
+  to it on GitHub. A link to a file that does not exist fails the build, and so
+  does a link to a heading that does not exist (`scripts/prerender.ts`).
+
+A step several pages share is written once, in `src/content/_shared/`, and
+pulled into each page by a line of its own:
+
+```md
+## 2. The server config
+
+<!-- include ../_shared/server-config.md -->
+```
+
+The heading stays in the page, since its number differs from page to page; the
+included file is the text under it. The reader gets the whole step on every
+page, and there is one copy to keep right. An included file's links resolve from
+the page that includes it, so keep it in a folder next to the pages'. A missing
+file fails the build.
 
 The same plugin builds the search index (`virtual:docs-search`): the text of
 every page, cut at its `##` and `###` headings, code included. A new page is

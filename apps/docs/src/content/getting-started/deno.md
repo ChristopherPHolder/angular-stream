@@ -10,39 +10,11 @@ taken from it; its server is
 
 ## 1. The browser config
 
-The same as on any other runtime: the interceptor and the stream's providers
-next to Angular's hydration.
-
-```ts title="src/app/app.config.ts"
-import { provideStreamHydration, streamHttpInterceptor } from '@push-based/angular-stream-core';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import type { ApplicationConfig } from '@angular/core';
-import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideHttpClient(withInterceptors([streamHttpInterceptor])),
-    provideClientHydration(withEventReplay()),
-    // After provideClientHydration(): it replaces a provider from there.
-    provideStreamHydration(),
-  ],
-};
-```
-
-[Cloudflare Workers](cloudflare-workers.md#1-the-browser-config) explains what
-each provider does.
+<!-- include ../_shared/browser-config.md -->
 
 ## 2. The server config
 
-```ts title="src/app/app.config.server.ts"
-import { mergeApplicationConfig } from '@angular/core';
-import { provideServerRendering } from '@angular/platform-server';
-import { appConfig } from './app.config';
-
-export const config = mergeApplicationConfig(appConfig, {
-  providers: [provideServerRendering()],
-});
-```
+<!-- include ../_shared/server-config.md -->
 
 ## 3. The server
 
@@ -277,5 +249,4 @@ been checked against Supabase.
 
 ## 8. Stream something
 
-Nothing streams until a template has a `@defer` block with a `hydrate`
-trigger: read [Making something stream](../guides/making-something-stream.md).
+<!-- include ../_shared/stream-something.md -->
