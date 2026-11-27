@@ -16,6 +16,8 @@ type FlushableResponse = ServerResponse & { flush?: () => void };
  *
  * - When the client goes away, the body is cancelled. For a streamed render,
  *   that stops the render and tears the application down.
+ * - When the body fails before its first chunk, nothing has been sent yet, so
+ *   the response becomes a plain `500`.
  * - When the body fails part-way, the connection is cut without the closing
  *   chunk, so the client sees a broken response and not a complete one.
  *
@@ -28,14 +30,17 @@ export async function sendWebResponse(res: ServerResponse, response: Response): 
   if (response.statusText) {
     res.statusMessage = response.statusText;
   }
+  const names = new Set<string>();
   for (const [name, value] of response.headers) {
     if (name !== 'set-cookie') {
       res.setHeader(name, value);
+      names.add(name);
     }
   }
   const cookies = response.headers.getSetCookie();
   if (cookies.length > 0) {
     res.setHeader('set-cookie', cookies);
+    names.add('set-cookie');
   }
 
   const body = response.body;
@@ -71,10 +76,23 @@ export async function sendWebResponse(res: ServerResponse, response: Response): 
     } else {
       res.end();
     }
-  } catch {
-    // The body failed after the headers went out. Ending normally would pass a
-    // partial page off as a whole one; a cut connection says what happened.
-    res.destroy();
+  } catch (error) {
+    console.error('[ssr] response body failed', error);
+    if (!res.headersSent) {
+      // Nothing has gone out: the response can still say what happened.
+      for (const name of names) {
+        res.removeHeader(name);
+      }
+      res.statusCode = 500;
+      res.statusMessage = 'Internal Server Error';
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.end('Internal server error.');
+    } else {
+      // The headers, and maybe part of the page, are out. Ending normally would
+      // pass a partial page off as a whole one; a cut connection says what
+      // happened.
+      res.destroy();
+    }
   } finally {
     res.off('close', onClose);
   }

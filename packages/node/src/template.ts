@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises';
+import type { IncomingMessage } from 'node:http';
 
 /**
  * Where the Vite plugin (`@push-based/angular-stream-node/vite`) leaves the dev
@@ -9,23 +10,43 @@ import { readFile } from 'node:fs/promises';
 export const DEV_TEMPLATE = Symbol.for('@push-based/angular-stream-node:template');
 
 /**
+ * Loads a template for the core's `loadTemplate`: `(request, req)`, with `req`
+ * the Node request the page is rendered for.
+ */
+export type TemplateLoader = (request: Request, req?: IncomingMessage) => Promise<Response>;
+
+/**
  * Loads the built template from disk, the first time it is asked for, and
- * keeps it in memory from then on. The result fits the core's `loadTemplate`.
+ * keeps it in memory from then on. The result fits the core's `loadTemplate`;
+ * pass it the Node request as the second argument.
+ *
+ * In `vite dev`, the plugin from `@push-based/angular-stream-node/vite` leaves
+ * the dev server's template on the Node request, and that is used instead: the
+ * built file doesn't exist there.
  *
  * Nothing is read until the first request, so creating it never fails. A read
  * that fails rejects, and is tried again on the next request.
  */
-export function createTemplateLoader(file: string | URL): () => Promise<Response> {
+export function createTemplateLoader(file: string | URL): TemplateLoader {
   let text: Promise<string> | undefined;
 
-  return async () => {
+  return async (_request, req) => {
+    const devTemplate = (req as (IncomingMessage & { [DEV_TEMPLATE]?: unknown }) | undefined)?.[
+      DEV_TEMPLATE
+    ];
+    if (typeof devTemplate === 'string') {
+      return htmlResponse(devTemplate);
+    }
+
     text ??= readFile(file, 'utf8').catch((error: unknown) => {
       text = undefined;
       throw error;
     });
 
-    return new Response(await text, {
-      headers: { 'content-type': 'text/html; charset=utf-8' },
-    });
+    return htmlResponse(await text);
   };
+}
+
+function htmlResponse(html: string): Response {
+  return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8' } });
 }

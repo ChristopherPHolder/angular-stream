@@ -4,6 +4,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { fileURLToPath } from 'node:url';
+import { requestPath } from './request';
 
 /**
  * Serves one request from a folder, if it names a file there. Resolves `true`
@@ -79,7 +80,7 @@ export function createStaticHandler(dir: string | URL): StaticHandler {
     res.setHeader('ETag', etag);
     res.setHeader('Last-Modified', stats.mtime.toUTCString());
 
-    if (req.headers['if-none-match'] === etag) {
+    if (matchesEtag(req.headers['if-none-match'], etag)) {
       res.statusCode = 304;
       res.end();
       return true;
@@ -98,11 +99,24 @@ export function createStaticHandler(dir: string | URL): StaticHandler {
   };
 }
 
+/**
+ * Whether `If-None-Match` names the file's ETag: `*`, or a list that holds it.
+ * The comparison is weak, as it is for `GET` and `HEAD`: `W/` is ignored.
+ */
+function matchesEtag(header: string | undefined, etag: string): boolean {
+  if (header === undefined) {
+    return false;
+  }
+  const opaque = (tag: string) => tag.trim().replace(/^W\//, '');
+  return header.trim() === '*' || header.split(',').some((tag) => opaque(tag) === opaque(etag));
+}
+
 /** The file a URL names inside `root`, or `null` when it names nothing inside it. */
 function resolveFile(root: string, url: string): string | null {
   let pathname: string;
   try {
-    pathname = decodeURIComponent(new URL(url, 'http://localhost').pathname);
+    // The path the renderer would see: `//x/favicon.svg` is `/x/favicon.svg`, not `favicon.svg` on host `x`.
+    pathname = decodeURIComponent(new URL(requestPath(url), 'http://localhost').pathname);
   } catch {
     return null;
   }

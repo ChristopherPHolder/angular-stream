@@ -3,10 +3,10 @@ import {
   type StreamingAppOptions,
   createStreamingHandler,
 } from '@push-based/angular-stream-core/server';
-import { type NodeRequest, toWebRequest } from './request';
+import { BadRequestError, type NodeRequest, toWebRequest } from './request';
 import { sendWebResponse } from './response';
 import { createStaticHandler } from './static';
-import { DEV_TEMPLATE, createTemplateLoader } from './template';
+import { createTemplateLoader } from './template';
 
 export interface NodeHandlerOptions extends StreamingAppOptions {
   /**
@@ -30,7 +30,8 @@ export interface NodeHandlerOptions extends StreamingAppOptions {
 
 /**
  * `(req, res, next?)`: a `node:http` request listener, and Connect and Express
- * middleware.
+ * middleware. As middleware, it passes requests other than `GET` and `HEAD` on
+ * to `next`.
  */
 export type NodeHandler = (
   req: NodeRequest,
@@ -44,25 +45,22 @@ export type NodeHandler = (
  * build served from `staticDir`, and the response written to the socket chunk
  * by chunk.
  *
+ * Pages are `GET` and `HEAD` requests. Given `next`, as middleware, the handler
+ * passes every other method on to it, so routes mounted after it still get
+ * their `POST`s; without `next`, it renders them as pages too.
+ *
  * When the client goes away mid-render, the render stops. An error is passed
- * to `next` when there is one; otherwise the handler answers 500, or cuts the
- * connection when the response has already started.
+ * to `next` when there is one; otherwise the handler answers 500 (400 for a
+ * `BadRequestError`), or cuts the connection when the response has already
+ * started.
  */
 export function createNodeHandler(options: NodeHandlerOptions): NodeHandler {
   const { template, staticDir, trustProxy, ...app } = options;
-  const loadTemplate = createTemplateLoader(template);
   const serveStatic = staticDir === undefined ? null : createStaticHandler(staticDir);
   const render = createStreamingHandler<NodeRequest>({
     ...app,
-    loadTemplate: (_request, req) => {
-      // In `vite dev`, the plugin from `/vite` hands over the dev server's template.
-      const devTemplate = (req as NodeRequest & { [DEV_TEMPLATE]?: string })[DEV_TEMPLATE];
-      return devTemplate === undefined
-        ? loadTemplate()
-        : Promise.resolve(
-            new Response(devTemplate, { headers: { 'content-type': 'text/html; charset=utf-8' } }),
-          );
-    },
+    // In `vite dev`, it takes the dev server's template from the request.
+    loadTemplate: createTemplateLoader(template),
   });
 
   const handle = async (
@@ -70,6 +68,10 @@ export function createNodeHandler(options: NodeHandlerOptions): NodeHandler {
     res: ServerResponse,
     next?: (error?: unknown) => void,
   ): Promise<void> => {
+    if (next && req.method !== 'GET' && req.method !== 'HEAD') {
+      next();
+      return;
+    }
     try {
       if (serveStatic !== null && (await serveStatic(req, res))) {
         return;
@@ -86,10 +88,15 @@ export function createNodeHandler(options: NodeHandlerOptions): NodeHandler {
         next(error);
         return;
       }
-      console.error('[ssr] request failed', error);
       if (res.headersSent) {
+        console.error('[ssr] request failed', error);
         res.destroy();
+      } else if (error instanceof BadRequestError) {
+        res.statusCode = error.status;
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.end(error.message);
       } else {
+        console.error('[ssr] request failed', error);
         res.statusCode = 500;
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
         res.end('Internal server error.');
@@ -98,6 +105,12 @@ export function createNodeHandler(options: NodeHandlerOptions): NodeHandler {
   };
 
   return (req, res, next) => {
-    void handle(req, res, next);
+    handle(req, res, next).catch((error: unknown) => {
+      // Only reached when the error path itself fails, for instance when the
+      // handler is called with something other than `(req, res, next?)`.
+      // Logged, so that it never becomes an unhandled rejection that stops
+      // the process.
+      console.error('[ssr] request failed, and so did answering it', error);
+    });
   };
 }
