@@ -76,6 +76,13 @@ export const DOCS: DocSection[] = [
           'Stream an Angular app from a Nitro server, deployed with any of its presets: Node, Vercel, Netlify and more.',
         load: () => import('../../content/getting-started/nitro.md'),
       },
+      {
+        slug: 'hono',
+        title: 'Hono',
+        description:
+          'Stream an Angular app from Hono on Node, Bun, Deno or Cloudflare Workers, next to your API routes.',
+        load: () => import('../../content/getting-started/hono.md'),
+      },
     ],
   },
   {

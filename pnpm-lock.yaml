@@ -485,6 +485,125 @@ importers:
         specifier: 1.8.0
         version: 1.8.0(@types/node@20.19.43)(@vitest/browser-preview@5.1.1)(@vitest/ui@5.1.1)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(vitest@5.1.1)(yaml@2.9.0)
 
+  apps/example-hono:
+    dependencies:
+      '@angular-stream/stream-example':
+        specifier: workspace:*
+        version: link:../../libs/stream-example
+      '@angular/common':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@angular/compiler':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0
+      '@angular/core':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2)
+      '@angular/platform-browser':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/common@22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))
+      '@angular/platform-server':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/common@22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.3.0-rc.0)(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(@angular/platform-browser@22.3.0-rc.0(@angular/common@22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@hono/node-server':
+        specifier: ^2.1.11
+        version: 2.1.11(hono@4.13.22)
+      '@push-based/angular-stream-core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      hono:
+        specifier: ^4.13.22
+        version: 4.13.22
+      rxjs:
+        specifier: ~7.8.0
+        version: 7.8.2
+      tslib:
+        specifier: ^2.3.0
+        version: 2.9.1
+    devDependencies:
+      '@angular/compiler-cli':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3)
+      '@hono/vite-dev-server':
+        specifier: ^0.26.1
+        version: 0.26.1(hono@4.13.22)(wrangler@4.158.0(@types/node@20.19.43))
+      '@push-based/vite-plugin-ngp':
+        specifier: ^0.4.3
+        version: 0.4.3(@angular/compiler-cli@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3))(@angular/compiler@22.3.0-rc.0)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(typescript@7.0.2)
+      '@types/node':
+        specifier: ^20.19.43
+        version: 20.19.43
+      typescript:
+        specifier: ~6.0.2
+        version: 6.0.3
+      vite:
+        specifier: npm:@voidzero-dev/vite-plus-core@8.3.8001
+        version: '@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0)'
+      vite-plus:
+        specifier: 1.8.0
+        version: 1.8.0(@types/node@20.19.43)(@vitest/browser-preview@5.1.1)(@vitest/ui@5.1.1)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(vitest@5.1.1)(yaml@2.9.0)
+
+  apps/example-hono-workers:
+    dependencies:
+      '@angular-stream/stream-example':
+        specifier: workspace:*
+        version: link:../../libs/stream-example
+      '@angular/common':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@angular/compiler':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0
+      '@angular/core':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2)
+      '@angular/platform-browser':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/common@22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))
+      '@angular/platform-server':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/common@22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.3.0-rc.0)(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(@angular/platform-browser@22.3.0-rc.0(@angular/common@22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@push-based/angular-stream-cloudflare':
+        specifier: workspace:*
+        version: link:../../packages/cloudflare
+      '@push-based/angular-stream-core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      hono:
+        specifier: ^4.13.22
+        version: 4.13.22
+      rxjs:
+        specifier: ~7.8.0
+        version: 7.8.2
+      tslib:
+        specifier: ^2.3.0
+        version: 2.9.1
+    devDependencies:
+      '@angular/compiler-cli':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3)
+      '@cloudflare/vite-plugin':
+        specifier: ^1.67.0
+        version: 1.67.0(@types/node@20.19.43)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(workerd@1.20261104.1)(wrangler@4.158.0(@types/node@20.19.43))
+      '@push-based/vite-plugin-ngp':
+        specifier: ^0.4.3
+        version: 0.4.3(@angular/compiler-cli@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3))(@angular/compiler@22.3.0-rc.0)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(typescript@7.0.2)
+      '@types/node':
+        specifier: ^20.19.43
+        version: 20.19.43
+      typescript:
+        specifier: ~6.0.2
+        version: 6.0.3
+      vite:
+        specifier: npm:@voidzero-dev/vite-plus-core@8.3.8001
+        version: '@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0)'
+      vite-plus:
+        specifier: 1.8.0
+        version: 1.8.0(@types/node@20.19.43)(@vitest/browser-preview@5.1.1)(@vitest/ui@5.1.1)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(vitest@5.1.1)(yaml@2.9.0)
+      wrangler:
+        specifier: ^4.156.1
+        version: 4.158.0(@types/node@20.19.43)
+
   apps/example-nitro:
     dependencies:
       '@angular-stream/stream-example':
@@ -1835,6 +1954,31 @@ packages:
   '@eslint/plugin-kit@0.7.3':
     resolution: {integrity: sha512-IkO+/KEUvwbVpiURZg+P7zF74z5Jxe0UgJxVni+RtoHQ6IZieXaO02kmadomap/q+l6bc/jdPGGqTjhuZnuz1Q==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
+
+  '@hono/node-server@1.19.19':
+    resolution: {integrity: sha512-Fy9R7PACOzHU9LDpfnuzVyuVYevKQRcEG2mZhmfc+DRdmayEd3RVfa2XOt2IgGcPNgA77Yk63KBszepcMFK5Ng==}
+    engines: {node: '>=18.14.1'}
+    peerDependencies:
+      hono: ^4
+
+  '@hono/node-server@2.1.11':
+    resolution: {integrity: sha512-KzKz9vl4vvr1vgLHamj+g5uonbrj5NwAdO3yzOS6cd2HjALVeOgTgeZOyAzNxejbkfOOPIcvuf/Tg8l1pEFLog==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      hono: ^4 || ^5.0.0-0
+
+  '@hono/vite-dev-server@0.26.1':
+    resolution: {integrity: sha512-OlcWoXjNogKiJhVwV/ftMK87UcsJmIBfmImSdI4e8to/ZdwNHrW9ddKw2OGHjXI5/uS2RaZr+2y+l8T9VFbCmw==}
+    engines: {node: '>=18.14.1'}
+    peerDependencies:
+      hono: '*'
+      miniflare: '*'
+      wrangler: '*'
+    peerDependenciesMeta:
+      miniflare:
+        optional: true
+      wrangler:
+        optional: true
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -3933,6 +4077,10 @@ packages:
     resolution: {integrity: sha512-nbfWpyRMcMrPMmDwJB+dhX/eiaPKtc2RB+0QZskqJ3WjRA/FDS0e9hZrx8EC/lbEv8gXy98FcDbNa/dspAaJMg==}
     engines: {node: '>=12.0.0'}
 
+  hono@4.13.22:
+    resolution: {integrity: sha512-wncKd5/40Pj8grx0RZ2fgNIicFEmVFwIHT5UFLTnphR8I6AQWFf9c2JoM6ZJ9g8y4pMzg3sNlCVNe0m2Yclg0Q==}
+    engines: {node: '>=16.9.0'}
+
   hookified@1.15.1:
     resolution: {integrity: sha512-MvG/clsADq1GPM2KGo2nyfaWVyn9naPiXrqIe4jYjXNZQt238kWyOGrsyc/DmRAQ+Re6yeo6yX/yoNCG5KAEVg==}
 
@@ -5970,7 +6118,7 @@ snapshots:
   '@emnapi/core@1.4.5':
     dependencies:
       '@emnapi/wasi-threads': 1.0.4
-      tslib: 2.9.1
+      tslib: 2.8.1
 
   '@emnapi/runtime@1.11.3':
     dependencies:
@@ -5979,11 +6127,11 @@ snapshots:
 
   '@emnapi/runtime@1.4.5':
     dependencies:
-      tslib: 2.9.1
+      tslib: 2.8.1
 
   '@emnapi/wasi-threads@1.0.4':
     dependencies:
-      tslib: 2.9.1
+      tslib: 2.8.1
 
   '@esbuild/aix-ppc64@0.28.2':
     optional: true
@@ -6092,6 +6240,22 @@ snapshots:
     dependencies:
       '@eslint/core': 1.2.1
       levn: 0.4.1
+
+  '@hono/node-server@1.19.19(hono@4.13.22)':
+    dependencies:
+      hono: 4.13.22
+
+  '@hono/node-server@2.1.11(hono@4.13.22)':
+    dependencies:
+      hono: 4.13.22
+
+  '@hono/vite-dev-server@0.26.1(hono@4.13.22)(wrangler@4.158.0(@types/node@20.19.43))':
+    dependencies:
+      '@hono/node-server': 1.19.19(hono@4.13.22)
+      hono: 4.13.22
+      minimatch: 9.0.9
+    optionalDependencies:
+      wrangler: 4.158.0(@types/node@20.19.43)
 
   '@humanfs/core@0.19.2':
     dependencies:
@@ -6733,7 +6897,7 @@ snapshots:
 
   '@tybys/wasm-util@0.9.0':
     dependencies:
-      tslib: 2.9.1
+      tslib: 2.8.1
 
   '@types/aria-query@5.0.4': {}
 
@@ -7919,6 +8083,8 @@ snapshots:
       function-bind: 1.1.2
 
   highlight.js@11.12.0: {}
+
+  hono@4.13.22: {}
 
   hookified@1.15.1: {}
 

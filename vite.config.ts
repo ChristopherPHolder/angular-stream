@@ -29,6 +29,7 @@ export default defineConfig({
               sourceTag: 'runtime:bun',
               onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:bun'],
             },
+            // Hono on Workers sits in front of the Cloudflare adapter.
             {
               sourceTag: 'runtime:deno',
               onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:deno'],
@@ -44,6 +45,10 @@ export default defineConfig({
             {
               sourceTag: 'runtime:nitro',
               onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:nitro'],
+            },
+            {
+              sourceTag: 'runtime:hono',
+              onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:hono', 'runtime:cloudflare'],
             },
           ],
         },
