@@ -149,11 +149,17 @@ export function angularStreamNode(options: AngularStreamNodeOptions = {}): Plugi
           if (
             (req.method !== 'GET' && req.method !== 'HEAD') ||
             !pathname.endsWith('.html') ||
-            !accept.includes('text/html') ||
-            // A route the app passed on: Vite answers it.
-            forwarded.has(req)
+            !accept.includes('text/html')
           ) {
             next();
+            return;
+          }
+          // A route the app passed on, rewritten to `/index.html` by Vite's
+          // HTML fallback. Nothing after the app answers it in production, so
+          // it's a 404 here too, rather than going on to ngp's own dev SSR.
+          if (forwarded.has(req)) {
+            res.statusCode = 404;
+            res.end();
             return;
           }
 
@@ -177,7 +183,13 @@ function routeMatcher(
     if (!route.startsWith('/')) {
       throw new Error(`[${PLUGIN_NAME}] routes are paths that start with "/": "${route}" isn't`);
     }
-    return route.replace(/\/+$/, '');
+    const prefix = route.replace(/\/+$/, '');
+    if (prefix === '') {
+      throw new Error(
+        `[${PLUGIN_NAME}] routes can't include "/": it would send every request, Vite's own included, to the app`,
+      );
+    }
+    return prefix;
   });
   return (pathname) =>
     prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));

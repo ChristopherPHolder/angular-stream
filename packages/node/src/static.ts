@@ -65,7 +65,8 @@ export function createStaticHandler(dir: string | URL): StaticHandler {
     // Any case: on a case-insensitive disk, `/INDEX.HTML` is `index.html`.
     // `resolveFile()` has decoded the path, so `/index%2Ehtml` is too.
     const extension = file === null ? '' : path.extname(file).toLowerCase();
-    if (file === null || extension === '.html') {
+    // `.htm` too: NTFS can give `index.html` the short name `INDEX~1.HTM`.
+    if (file === null || extension === '.html' || extension === '.htm') {
       return false;
     }
 
@@ -75,7 +76,7 @@ export function createStaticHandler(dir: string | URL): StaticHandler {
     }
 
     const etag = `W/"${stats.size.toString(16)}-${Math.floor(stats.mtimeMs).toString(16)}"`;
-    const immutable = path.relative(root, file).split(path.sep)[0] === 'assets';
+    const immutable = path.relative(root, file).split(path.sep)[0]?.toLowerCase() === 'assets';
     res.setHeader('Content-Type', CONTENT_TYPES[extension] ?? 'application/octet-stream');
     res.setHeader(
       'Cache-Control',

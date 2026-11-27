@@ -143,7 +143,10 @@ angularStreamNode({ entry: 'src/server.ts', routes: ['/api'] });
   shadows a proxied path or a file there with the same path.
 - The dev template is read only if the app renders the request as a page, as
   a catch-all does for a URL under `/api` that no route answers.
-- When the server entry passes the request on to `next`, Vite answers it.
+- When the server entry passes the request on to `next`, Vite answers it,
+  except a page request (`GET` with `Accept: text/html`), which gets a `404`,
+  as it would from a production server with nothing after the app.
+- `'/'` isn't allowed: it would send Vite's own requests to the app too.
 
 List the plugin before ngp. ngp's own dev SSR would otherwise answer page
 requests first, calling the default export as `(url, document)`, so the dev
