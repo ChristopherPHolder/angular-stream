@@ -54,6 +54,8 @@ export const DOCS: DocSection[] = [
         description:
           'Stream an Angular app from Bun.serve(), or from Elysia, from the app config to production.',
         load: () => import('../../content/getting-started/bun.md'),
+      },
+      {
         slug: 'deno',
         title: 'Deno',
         description:
