@@ -17,6 +17,54 @@
       <p class="text-subtitle eyebrow">{{ doc().page.section.title }}</p>
       <h1 class="text-section-title">{{ doc().page.title }}</h1>
       <p class="text-lead lede">{{ doc().page.description }}</p>
+      <!-- A setup page and its API page point at each other, and at the app that is the setup. -->
+      @if (doc().page.runtime; as runtime) {
+        <dl class="facts">
+          <div>
+            <dt class="text-subtitle">Packages</dt>
+            <dd>
+              <code>&#64;push-based/angular-stream-core</code>
+              @if (runtime.adapter) {
+                <code>&#64;push-based/angular-stream-{{ runtime.adapter }}</code>
+              } @else {
+                <span class="facts-note">and no adapter</span>
+              }
+            </dd>
+          </div>
+          <div>
+            <dt class="text-subtitle">Example</dt>
+            <dd>
+              @for (example of runtime.examples; track example) {
+                <a [href]="repo + '/tree/main/apps/' + example"
+                  ><code>apps/{{ example }}</code></a
+                >
+              }
+            </dd>
+          </div>
+          @if (reference(); as reference) {
+            <div>
+              <dt class="text-subtitle">API</dt>
+              <dd>
+                <a [routerLink]="'/' + reference.path">{{ reference.title }}</a>
+              </dd>
+            </div>
+          }
+        </dl>
+      }
+      @if (setups().length > 0) {
+        <dl class="facts">
+          <div>
+            <dt class="text-subtitle">
+              {{ doc().page.slug === 'core' ? 'Setup without an adapter' : 'Setup' }}
+            </dt>
+            <dd>
+              @for (setup of setups(); track setup.path) {
+                <a [routerLink]="'/' + setup.path">{{ setup.title }}</a>
+              }
+            </dd>
+          </div>
+        </dl>
+      }
     </header>
     @if (doc().toc.length > 1) {
       <details class="toc toc--inline" (click)="closeOnLink($event, inline)" #inline>

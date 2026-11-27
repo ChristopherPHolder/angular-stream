@@ -36,11 +36,23 @@ an unknown path with the home page rather than `404.html`.
 
 ## Write content
 
-Pages are Markdown files at `src/content/<section>/<page>.md`, served at
-`docs/<section>/<page>`. Add the page to `DOCS` in `src/app/docs/nav.ts` to give
-it a title, a description and a place in the sidebar; the home page,
+Pages are Markdown files at `src/content/<dir>/<page>.md`, served at
+`docs/<dir>/<page>`. Add the page to `DOCS` in `src/app/docs/nav.ts` to give it
+a title, a description and a place in the contents; the sidebar, the home page,
 previous/next links and prerendering all read that list. The page's title comes
 from there, so the Markdown starts with its first paragraph, not a `#` heading.
+
+Where a page sits in the contents is its place in `DOCS`, not its folder: the
+runtimes' setup pages are in `content/getting-started/` and listed under
+"Runtimes", so moving a page in the contents never changes its URL. A section
+may be `collapsed` (folded in the sidebar until the reader is in it) and its
+pages `alternatives` (previous/next skip them, and the home page shows them as
+a choice).
+
+A runtime's setup page also carries `runtime`: the adapter it installs, if any,
+and its `apps/example-*`. The page shows those under its title with a link to
+the adapter's API page, the API page links back to every setup that uses it,
+and the home page lists the runtime. Set it when adding a runtime.
 
 `markdown.ts` renders each page at build time, so neither the parser nor the
 highlighter ships to the browser:

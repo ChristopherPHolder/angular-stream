@@ -14,7 +14,7 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { filter } from 'rxjs';
 // `?no-inline`: Vite would inline an asset this small as a data: URI, which NgOptimizedImage rejects.
 import logo from '@angular-stream/press-kit/symbol/angular-stream-symbol.svg?no-inline';
-import { DOCS } from './docs/nav';
+import { ALL_PAGES, DOCS, type DocSection } from './docs/nav';
 import { DEMO, MOVIES, REPO } from './links';
 
 @Component({
@@ -58,29 +58,41 @@ import { DEMO, MOVIES, REPO } from './links';
         [class.sidebar--open]="menuOpen()"
         #sidebar
       >
-        @for (section of docs; track section.slug) {
-          <p class="sidebar-section text-subtitle" [id]="'nav-' + section.slug">
-            {{ section.title }}
-          </p>
-          <ul [attr.aria-labelledby]="'nav-' + section.slug">
-            @for (page of section.pages; track page.slug) {
-              <li>
-                <a
-                  [routerLink]="['/docs', section.slug, page.slug]"
-                  routerLinkActive="active"
-                  ariaCurrentWhenActive="page"
-                  >{{ page.title }}</a
-                >
-              </li>
+        <!-- A section folds: the one the reader is in is open, the long ones start closed. -->
+        @for (section of docs; track section.id) {
+          <details
+            class="sidebar-section"
+            [open]="isOpen(section)"
+            (toggle)="toggled(section, $event)"
+          >
+            <summary class="sidebar-title text-subtitle">{{ section.title }}</summary>
+            @for (group of section.groups; track $index) {
+              @if (group.title) {
+                <p class="sidebar-group">{{ group.title }}</p>
+              }
+              <ul [attr.aria-label]="group.title ?? section.title">
+                @for (page of group.pages; track page.dir + '/' + page.slug) {
+                  <li>
+                    <a
+                      [routerLink]="['/docs', page.dir, page.slug]"
+                      routerLinkActive="active"
+                      ariaCurrentWhenActive="page"
+                      >{{ page.title }}</a
+                    >
+                  </li>
+                }
+              </ul>
             }
-          </ul>
+          </details>
         }
         <!-- The header's links, which have no room next to the menu button. -->
-        <p class="sidebar-section sidebar-elsewhere text-subtitle" id="nav-elsewhere">Elsewhere</p>
-        <ul class="sidebar-elsewhere" aria-labelledby="nav-elsewhere">
-          <li><a [href]="demo">Demo</a></li>
-          <li><a [href]="repo">GitHub</a></li>
-        </ul>
+        <div class="sidebar-section sidebar-elsewhere">
+          <p class="sidebar-title text-subtitle" id="nav-elsewhere">Elsewhere</p>
+          <ul aria-labelledby="nav-elsewhere">
+            <li><a [href]="demo">Demo</a></li>
+            <li><a [href]="repo">GitHub</a></li>
+          </ul>
+        </div>
       </nav>
       <!-- Inert under the open menu, so Tab stays in the menu and the header. -->
       <main id="content" tabindex="-1" [attr.inert]="menuOpen() ? '' : null" #main>
@@ -122,8 +134,19 @@ export class App {
   /** `<current path>#content`, relative to the base href like every other link. */
   protected readonly skipLink = signal('#content');
 
+  /**
+   * The section of the page being read. Read from the address on creation, not
+   * only once the router has navigated, so the prerendered sidebar isn't folded
+   * and unfolded again while the page hydrates.
+   */
+  private readonly currentSection = signal<DocSection | undefined>(undefined);
+
+  /** Sections the reader opened or closed by hand, until the next page. */
+  private readonly toggledSections = signal<Record<string, boolean>>({});
+
   constructor() {
     const location = inject(Location);
+    this.currentSection.set(sectionOf(location.path()));
     inject(Router)
       .events.pipe(
         filter((event) => event instanceof NavigationEnd),
@@ -137,6 +160,8 @@ export class App {
         }
         // The path in the address bar, which an unknown page keeps.
         this.skipLink.set(location.path().replace(/^\//, '') + '#content');
+        this.currentSection.set(sectionOf(location.path()));
+        this.toggledSections.set({});
       });
 
     // A heading the router scrolls to lands below the sticky header, not under it.
@@ -165,12 +190,25 @@ export class App {
     afterNextRender(
       () => {
         const links = this.sidebar().nativeElement;
-        const link = links.querySelector<HTMLElement>('a.active') ?? links.querySelector('a');
+        // The current page; on a page that isn't listed, the first section's heading.
+        const link = links.querySelector<HTMLElement>('a.active') ?? links.querySelector('summary');
         link?.focus();
         link?.scrollIntoView({ block: 'center' });
       },
       { injector: this.injector },
     );
+  }
+
+  protected isOpen(section: DocSection): boolean {
+    return (
+      this.toggledSections()[section.id] ??
+      (!section.collapsed || section === this.currentSection())
+    );
+  }
+
+  protected toggled(section: DocSection, event: Event): void {
+    const open = (event.target as HTMLDetailsElement).open;
+    this.toggledSections.update((sections) => ({ ...sections, [section.id]: open }));
   }
 
   protected closeMenu(): void {
@@ -182,6 +220,12 @@ export class App {
   private focusNext(element: () => ElementRef<HTMLElement>): void {
     afterNextRender(() => element().nativeElement.focus(), { injector: this.injector });
   }
+}
+
+/** The section of the page at a path such as `/docs/guides/debugging#quick-checks`. */
+function sectionOf(path: string): DocSection | undefined {
+  const page = path.replace(/^\//, '').split(/[?#]/)[0];
+  return ALL_PAGES.find((other) => other.path === page)?.section;
 }
 
 /** Up to this width the sidebar is a menu; `styles.css` uses the same number. */

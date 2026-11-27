@@ -13,6 +13,7 @@ import { DomSanitizer, Meta } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { REPO } from '../links';
 import type { ResolvedDoc } from './doc.resolver';
+import { referenceOf, setupsOf } from './nav';
 
 @Component({
   selector: 'docs-page',
@@ -32,8 +33,19 @@ export class DocPage {
 
   protected readonly editUrl = computed(
     () =>
-      `${REPO}/edit/main/apps/docs/src/content/${this.doc().page.section.slug}/${this.doc().page.slug}.md`,
+      `${REPO}/edit/main/apps/docs/src/content/${this.doc().page.dir}/${this.doc().page.slug}.md`,
   );
+
+  protected readonly repo = REPO;
+
+  /** On a runtime's setup page: the API page of what it installs. */
+  protected readonly reference = computed(() => {
+    const runtime = this.doc().page.runtime;
+    return runtime === undefined ? undefined : referenceOf(runtime);
+  });
+
+  /** On an API page: the setup pages that use the package. */
+  protected readonly setups = computed(() => setupsOf(this.doc().page));
 
   constructor() {
     const meta = inject(Meta);
