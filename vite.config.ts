@@ -29,6 +29,10 @@ export default defineConfig({
               sourceTag: 'runtime:bun',
               onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:bun'],
             },
+            {
+              sourceTag: 'runtime:deno',
+              onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:deno'],
+            },
           ],
         },
       ],
