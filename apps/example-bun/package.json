@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "vp dev",
     "build": "vp build",
     "start": "bun dist/server/server.js"
   },

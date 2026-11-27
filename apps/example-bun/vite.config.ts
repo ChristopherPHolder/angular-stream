@@ -13,7 +13,7 @@ export default defineConfig({
   environments: {
     client: { build: { outDir: 'dist/client' } },
     ssr: {
-      // Everything in one file, so dist/ is all a server needs: no node_modules.
+      // Every dependency bundled, so dist/ is all a server needs: no node_modules.
       resolve: { noExternal: true },
       build: { outDir: 'dist/server', rolldownOptions: { input: 'src/server.ts' } },
     },

@@ -17,11 +17,18 @@ const handle = createStreamingHandler({
   loadTemplate: async () => new Response(template),
 });
 
-/** Every built file but the template, each as its own route, so it's served before the renderer. */
-const routes: Record<string, Bun.BunFile> = {};
-for await (const path of new Bun.Glob('**/*').scan(client)) {
+/**
+ * Every built file but the template, each as its own route, so it's served
+ * before the renderer. Route keys are URL paths, so file names are encoded.
+ * `/assets/*` catches a hashed file that no longer exists (an old chunk after
+ * a deploy) with a 404, instead of rendering a page in its place.
+ */
+const routes: Record<string, Bun.BunFile | Response> = {
+  '/assets/*': new Response('Not found', { status: 404 }),
+};
+for await (const path of new Bun.Glob('**/*').scan({ cwd: client, dot: true })) {
   if (path !== 'index.html') {
-    routes[`/${path}`] = Bun.file(`${client}/${path}`);
+    routes[encodeURI(`/${path}`)] = Bun.file(`${client}/${path}`);
   }
 }
 

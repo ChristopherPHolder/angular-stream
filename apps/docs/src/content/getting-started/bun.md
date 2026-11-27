@@ -79,11 +79,18 @@ const handle = createStreamingHandler({
   loadTemplate: async () => new Response(template),
 });
 
-/** Every built file but the template, each as its own route, so it's served before the renderer. */
-const routes: Record<string, Bun.BunFile> = {};
-for await (const path of new Bun.Glob('**/*').scan(client)) {
+/**
+ * Every built file but the template, each as its own route, so it's served
+ * before the renderer. Route keys are URL paths, so file names are encoded.
+ * `/assets/*` catches a hashed file that no longer exists (an old chunk after
+ * a deploy) with a 404, instead of rendering a page in its place.
+ */
+const routes: Record<string, Bun.BunFile | Response> = {
+  '/assets/*': new Response('Not found', { status: 404 }),
+};
+for await (const path of new Bun.Glob('**/*').scan({ cwd: client, dot: true })) {
   if (path !== 'index.html') {
-    routes[`/${path}`] = Bun.file(`${client}/${path}`);
+    routes[encodeURI(`/${path}`)] = Bun.file(`${client}/${path}`);
   }
 }
 
@@ -105,6 +112,8 @@ startup, and Bun matches those before it calls `fetch`. So `/assets/*` and
 `/favicon.ico` are served from disk, and anything else, `/` included, falls
 through to the renderer. A path that isn't a built file never reaches the
 disk, so there's nothing to guard against `..` in it.
+A missing file under `/assets/`, such as an old hashed chunk after a deploy,
+gets a `404` rather than a page.
 
 `allowedHosts` must list every hostname the server answers for: Angular's SSR
 host guard rejects any other `host` header, and the server answers `403`.
@@ -129,7 +138,7 @@ export default defineConfig({
   environments: {
     client: { build: { outDir: 'dist/client' } },
     ssr: {
-      // Everything in one file, so dist/ is all a server needs: no node_modules.
+      // Every dependency bundled, so dist/ is all a server needs: no node_modules.
       resolve: { noExternal: true },
       build: { outDir: 'dist/server', rolldownOptions: { input: 'src/server.ts' } },
     },
@@ -190,12 +199,15 @@ import { Elysia } from 'elysia';
 new Elysia()
   .use(staticPlugin({ assets: 'dist/client', prefix: '/', alwaysStatic: true, indexHTML: false }))
   .get('/*', ({ request }) => handle(request))
-  .listen(3000);
+  .listen(Number(process.env['PORT'] ?? 3000));
 ```
 
 `alwaysStatic: true` gives each built file a route of its own, the way
-`routes` does above. Without it the plugin mounts a wildcard of its own, and
-`/` answers `404`. `assets` is relative to the working directory, so start the
+`routes` does above. Without it the plugin mounts a wildcard of its own: `/`
+answers `404`, and the app's `/*` route answers every static file with the
+page. The plugin turns it on by itself only when `NODE_ENV` is `production`,
+and turns it off again past `staticLimit` (1024 files), so set both
+explicitly if the build has more files than that. `assets` is relative to the working directory, so start the
 server from the app's folder.
 
 Unlike the `Bun.serve()` version above, this serves `/index.html` itself as a
