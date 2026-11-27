@@ -14,8 +14,18 @@ const render = createStreamingHandler({
   loadTemplate: async () => new Response(template),
 });
 
-/** Static files from the browser build; every other request is a page, rendered as a stream. */
+/**
+ * Static files from the browser build; every other request is a page, rendered as a stream.
+ * `/index.html` is the template, so it's rendered too, never served as a file. A missing
+ * file under `/assets/` (an old hashed chunk after a deploy) stays a 404.
+ */
 Deno.serve(async (request) => {
-  const file = await serveDir(request, { fsRoot: clientDir, showIndex: false, quiet: true });
-  return file.status === 404 ? render(request) : file;
+  const { pathname } = new URL(request.url);
+  if (pathname !== '/index.html') {
+    const file = await serveDir(request, { fsRoot: clientDir, showIndex: false, quiet: true });
+    if (file.status !== 404 || pathname.startsWith('/assets/')) {
+      return file;
+    }
+  }
+  return render(request);
 });

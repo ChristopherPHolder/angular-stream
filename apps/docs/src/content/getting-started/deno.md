@@ -72,17 +72,29 @@ const render = createStreamingHandler({
   loadTemplate: async () => new Response(template),
 });
 
-/** Static files from the browser build; every other request is a page, rendered as a stream. */
+/**
+ * Static files from the browser build; every other request is a page, rendered as a stream.
+ * `/index.html` is the template, so it's rendered too, never served as a file. A missing
+ * file under `/assets/` (an old hashed chunk after a deploy) stays a 404.
+ */
 Deno.serve(async (request) => {
-  const file = await serveDir(request, { fsRoot: clientDir, showIndex: false, quiet: true });
-  return file.status === 404 ? render(request) : file;
+  const { pathname } = new URL(request.url);
+  if (pathname !== '/index.html') {
+    const file = await serveDir(request, { fsRoot: clientDir, showIndex: false, quiet: true });
+    if (file.status !== 404 || pathname.startsWith('/assets/')) {
+      return file;
+    }
+  }
+  return render(request);
 });
 ```
 
 `serveDir` answers every request for a file in `dist/client`. Anything it
-doesn't find is a page, and goes to the handler. `showIndex: false` matters:
-without it, `/` would be answered with `dist/client/index.html`, the template
-with nothing rendered into it.
+doesn't find is a page, and goes to the handler. `showIndex: false` and the
+`/index.html` check matter: without them, `/` and `/index.html` would be
+answered with `dist/client/index.html`, the template with nothing rendered
+into it. A missing file under `/assets/` keeps its `404`, so a browser asking
+for an old chunk after a deploy gets an error, not a page.
 
 The template is `index.server.html`, which ngp writes next to the server
 bundle: the built `index.html` with the event dispatch contract already in it,
@@ -92,8 +104,10 @@ and every request gets a fresh `Response` of it.
 `allowedHosts` must list every hostname the server answers for: Angular's SSR
 host guard rejects any other `host` header, and the server answers `403`.
 
-Paths are relative to `import.meta.dirname`, the bundle's folder, not to the
-working directory, so the server can be started from anywhere.
+Paths in the server are relative to `import.meta.dirname`, the bundle's
+folder, not to the working directory. Deno's `--allow-read` path is resolved
+against the working directory, though, so it has to point at `dist` from
+wherever the server is started.
 
 ## 4. Vite
 
@@ -105,7 +119,7 @@ export default defineConfig({
   optimizeDeps: { entries: ['index.html'] },
   environments: {
     ssr: {
-      // One self-contained server bundle: Deno runs it with no node_modules and no import map.
+      // Every dependency bundled: Deno runs it with no node_modules and no import map.
       resolve: { noExternal: true },
       // The bundle is Deno's main module, so `import.meta.main` would be true in every module in it,
       // and `@std/http/file-server` would start its own file server on the working directory.
@@ -118,9 +132,10 @@ export default defineConfig({
 ```
 
 ngp's `ssr` option builds the browser app into `dist/client` and
-`src/server.ts` into `dist/server/server.js`. The server bundle holds
-everything, Angular, `@std/http` and the core included, so Deno needs neither
-`node_modules` nor a `deno.json` to run it.
+`src/server.ts` into `dist/server/server.js`, with a few chunks beside it in
+`dist/server/assets/`. Every dependency is bundled, Angular, `@std/http` and
+the core included, so Deno needs neither `node_modules` nor a `deno.json` to
+run it; ship the whole `dist/server` folder.
 
 > [!WARNING]
 > Keep the `import.meta.main` line. `@std/http/file-server` is also a CLI and
@@ -180,9 +195,8 @@ build is a production build, so Angular's dev-mode hydration checks are off.
 
 > [!WARNING]
 > Deno Deploy shuts down in April 2027; see
-> [the notice in Deno's docs](https://docs.deno.com/deploy/). Deploy Classic
-> and `deployctl` are already gone. What follows is for the current Deno
-> Deploy and its `deno deploy` command.
+> [the notice in Deno's docs](https://docs.deno.com/deploy/). What follows is
+> for the current Deno Deploy and its `deno deploy` command.
 
 Deno Deploy runs the same Deno, with full file system access to the files of
 the deployment, so the server above runs there unchanged:
@@ -207,7 +221,7 @@ directory, not a glob; a glob such as `dist/**` does not override
     "app": "my-app",
     "include": ["dist"],
     "runtime": {
-      "mode": "dynamic",
+      "type": "dynamic",
       "entrypoint": "dist/server/server.js",
     },
   },
@@ -219,7 +233,7 @@ vite build
 deno deploy --prod
 ```
 
-With `include`, only `dist` is uploaded: the server bundle is self-contained,
+With `include`, only `dist` is uploaded: every dependency is in the bundle,
 so the deployment needs no `package.json` and no install step. `org` and `app`
 are filled in by `deno deploy` the first time it runs.
 
@@ -251,8 +265,10 @@ pages, and in practice they can't serve this app:
   prefix.
 - **Functions ask for a JWT by default.** A public page needs
   `verify_jwt = false` for the function in `supabase/config.toml`.
-- **The limits are tight for rendering.** Each request gets 2 s of CPU time,
-  and the bundle has to stay under 20 MB.
+- **The limits are tight for rendering.** Each worker gets
+  [2 s of CPU time](https://supabase.com/docs/guides/functions/limits), and
+  the bundle has to stay under 20 MB when the CLI bundles it, 5 MB when
+  Supabase does.
 
 Each of these has a workaround, but together they make Supabase a poor host
 for a server-rendered app. Serve the pages from Deno Deploy or any host that
