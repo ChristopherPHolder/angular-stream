@@ -14,7 +14,8 @@ plugin built on
 [`@push-based/angular-stream-node`](https://www.npmjs.com/package/@push-based/angular-stream-node):
 `angularStream` renders every `GET` and `HEAD` no other route answers, and
 streams the page through Fastify's reply, so `@fastify/compress`, `onSend`
-hooks and request logging still apply.
+hooks and request logging still apply. `createFastifyHandler(options)` is the
+same page route's handler, for a route of your own.
 
 ```bash
 npm install @push-based/angular-stream-core@next @push-based/angular-stream-node@next @push-based/angular-stream-fastify@next fastify
