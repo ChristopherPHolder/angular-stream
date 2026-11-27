@@ -83,6 +83,13 @@ export const DOCS: DocSection[] = [
           'Stream an Angular app from Hono on Node, Bun, Deno or Cloudflare Workers, next to your API routes.',
         load: () => import('../../content/getting-started/hono.md'),
       },
+      {
+        slug: 'node',
+        title: 'Node',
+        description:
+          'Stream an Angular app from Node with node:http, Express or Connect, from the app config to running it in production.',
+        load: () => import('../../content/getting-started/node.md'),
+      },
     ],
   },
   {
@@ -109,6 +116,13 @@ export const DOCS: DocSection[] = [
         description:
           'Render and stream every navigation from a Service Worker in the browser, offline included, and what that costs.',
         load: () => import('../../content/guides/service-worker.md'),
+      },
+      {
+        slug: 'streaming-through-proxies',
+        title: 'Streaming through proxies',
+        description:
+          'Compression, Nginx, CDNs and timeouts: what holds a streamed response back, and how to check that it does not.',
+        load: () => import('../../content/guides/streaming-through-proxies.md'),
       },
     ],
   },
@@ -163,6 +177,13 @@ export const DOCS: DocSection[] = [
         description:
           'The API of @push-based/angular-stream-nitro: an h3 handler, and a Vite plugin that gives it the template.',
         load: () => import('../../content/reference/nitro.md'),
+      },
+      {
+        slug: 'node',
+        title: 'angular-stream-node',
+        description:
+          'The API of @push-based/angular-stream-node: a Node request handler, the pieces it is made of, and a Vite plugin for dev.',
+        load: () => import('../../content/reference/node.md'),
       },
       {
         slug: 'limitations',
