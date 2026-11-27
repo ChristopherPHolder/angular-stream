@@ -54,6 +54,11 @@ export const DOCS: DocSection[] = [
         description:
           'Stream an Angular app from Bun.serve(), or from Elysia, from the app config to production.',
         load: () => import('../../content/getting-started/bun.md'),
+        slug: 'deno',
+        title: 'Deno',
+        description:
+          'Stream an Angular app from Deno with Deno.serve, deploy it to Deno Deploy, and what Supabase Edge Functions allow.',
+        load: () => import('../../content/getting-started/deno.md'),
       },
     ],
   },
