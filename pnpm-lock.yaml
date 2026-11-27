@@ -1022,6 +1022,76 @@ importers:
         specifier: 1.8.0
         version: 1.8.0(@types/node@20.19.43)(@vitest/browser-preview@5.1.1)(@vitest/ui@5.1.1)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(vitest@5.1.1)(yaml@2.9.0)
 
+  apps/example-nestjs-fastify:
+    dependencies:
+      '@angular-stream/stream-example':
+        specifier: workspace:*
+        version: link:../../libs/stream-example
+      '@angular/common':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@angular/compiler':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0
+      '@angular/core':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2)
+      '@angular/platform-browser':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/common@22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))
+      '@angular/platform-server':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/common@22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.3.0-rc.0)(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(@angular/platform-browser@22.3.0-rc.0(@angular/common@22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@fastify/compress':
+        specifier: 9.3.0
+        version: 9.3.0
+      '@nestjs/common':
+        specifier: ^12.6.0
+        version: 12.6.3(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@10.2.2)
+      '@nestjs/core':
+        specifier: ^12.6.0
+        version: 12.6.3(@nestjs/common@12.6.3(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@10.2.2))(@nestjs/platform-express@12.6.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/platform-fastify':
+        specifier: ^12.6.0
+        version: 12.6.3(@fastify/static@10.1.10)(@nestjs/common@12.6.3(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@10.2.2))(@nestjs/core@12.6.3)(rxjs@7.8.2)
+      '@push-based/angular-stream-core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@push-based/angular-stream-nestjs':
+        specifier: workspace:*
+        version: link:../../packages/nestjs
+      fastify:
+        specifier: 5.12.8
+        version: 5.12.8
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
+      rxjs:
+        specifier: ~7.8.0
+        version: 7.8.2
+      tslib:
+        specifier: ^2.3.0
+        version: 2.9.1
+    devDependencies:
+      '@angular/compiler-cli':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3)
+      '@push-based/vite-plugin-ngp':
+        specifier: ^0.4.3
+        version: 0.4.3(@angular/compiler-cli@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3))(@angular/compiler@22.3.0-rc.0)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(typescript@7.0.2)
+      '@types/node':
+        specifier: ^20.19.43
+        version: 20.19.43
+      typescript:
+        specifier: ~6.0.2
+        version: 6.0.3
+      vite:
+        specifier: npm:@voidzero-dev/vite-plus-core@8.3.8001
+        version: '@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0)'
+      vite-plus:
+        specifier: 1.8.0
+        version: 1.8.0(@types/node@20.19.43)(@vitest/browser-preview@5.1.1)(@vitest/ui@5.1.1)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(vitest@5.1.1)(yaml@2.9.0)
+
   apps/example-netlify:
     dependencies:
       '@angular-stream/stream-example':
@@ -1506,6 +1576,9 @@ importers:
       '@push-based/angular-stream-core':
         specifier: workspace:*
         version: link:../core
+      '@push-based/angular-stream-fastify':
+        specifier: workspace:*
+        version: link:../fastify
       '@push-based/angular-stream-node':
         specifier: workspace:*
         version: link:../node
@@ -1531,9 +1604,15 @@ importers:
       '@nestjs/platform-express':
         specifier: ^12.6.0
         version: 12.6.3(@nestjs/common@12.6.3(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@10.2.2))(@nestjs/core@12.6.3)(rxjs@7.8.2)(supports-color@10.2.2)
+      '@nestjs/platform-fastify':
+        specifier: ^12.6.0
+        version: 12.6.3(@fastify/static@10.1.10)(@nestjs/common@12.6.3(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@10.2.2))(@nestjs/core@12.6.3)(rxjs@7.8.2)
       '@types/node':
         specifier: ^20.19.43
         version: 20.19.43
+      fastify:
+        specifier: 5.12.8
+        version: 5.12.8
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -2924,6 +3003,9 @@ packages:
   '@fastify/compress@9.3.0':
     resolution: {integrity: sha512-vvm+933zsfsnw7nKsy2GWyix54k7aq3j+9EkwfH6ncngt+DUt5tgVQ/uH07/JrbOWXt1mjADjZ5MbKKwu1xhmA==}
 
+  '@fastify/cors@11.4.3':
+    resolution: {integrity: sha512-6NNFNR1i9t1oG1WlQftwc2ugElFm4cG75ylYyGNiKKiyxlVGueneup9MQ9Nd3eI4lT6kVOJaxV1Jqa727/E4jg==}
+
   '@fastify/deepmerge@3.2.4':
     resolution: {integrity: sha512-kc8GQq5gX9RRhw0rov3DMrN8wS8yRlxJRdDzsYwwdBV/wazuVgc/1K7CKL90tlvu3RlHan6Y0R0aE3nJtBz2eQ==}
 
@@ -2933,11 +3015,17 @@ packages:
   '@fastify/fast-json-stringify-compiler@5.2.0':
     resolution: {integrity: sha512-LPTVA0w4oPITWHAvox9NgI1rDSrjUnjxX6QN5MCb9FY+HqvDsUmgLucbj9eQakqC8lYwO7UgkDPHEQLJNl9vtg==}
 
+  '@fastify/formbody@9.0.2':
+    resolution: {integrity: sha512-VJdbcbFlsp7xTAY5/Qrc8SZPyuke0YymWCe11INALPTQfRh2+0y1lnaosJwWIN7GtFfcBa+RBo4VnhxjW2kDNQ==}
+
   '@fastify/forwarded@3.1.2':
     resolution: {integrity: sha512-89WiRG+hW3VQSfCwg4Hb8b43PeyEX15K5+lEfsZ4EUth/FyOjS/lv8HsVuswUNXWiSnxMGNouE/fq/0w3VumHQ==}
 
   '@fastify/merge-json-schemas@0.2.2':
     resolution: {integrity: sha512-d/gx9sRbUCVgGRGzma46wLcwiY8noTqO2Nmjg/vbTARxHRE5bdh5PIL8s97Lt1X7ScRWRW52eVYxwIoPwIdVUA==}
+
+  '@fastify/middie@9.3.9':
+    resolution: {integrity: sha512-rQurVm1gDVF+k5H0I+hpk7UEtldJ2SeHPyNnhuVcDjsAxla1vbQKCQjgqnmHUk9shqswZC7vZdx0gNMjF5YKeA==}
 
   '@fastify/proxy-addr@5.1.3':
     resolution: {integrity: sha512-ptgIgB+abBNTs5lsKNvFaKMCauPaTOE6ZIjxJr3FxCLehmYQQKYGg4srwwNICR9QQlFrYw59jWAo+i9GalVCaw==}
@@ -3439,6 +3527,23 @@ packages:
       '@nestjs/common': ^12.0.0
       '@nestjs/core': ^12.0.0
       rxjs: ^7.1.0
+
+  '@nestjs/platform-fastify@12.6.3':
+    resolution: {integrity: sha512-CeKhUR/L5yk/bsw66Nfw8sWRRh2ynl+erYzun4Wydl0oOoD9+OUls5noaeMaEiuhgnvK/CMr/GdNXCy0KKSyRw==}
+    peerDependencies:
+      '@fastify/multipart': ^10.1.0
+      '@fastify/static': ^10.1.10
+      '@fastify/view': ^10.0.0 || ^11.0.0 || ^12.0.0
+      '@nestjs/common': ^12.0.0
+      '@nestjs/core': ^12.0.0
+      rxjs: ^7.1.0
+    peerDependenciesMeta:
+      '@fastify/multipart':
+        optional: true
+      '@fastify/static':
+        optional: true
+      '@fastify/view':
+        optional: true
 
   '@netlify/cache@4.2.2':
     resolution: {integrity: sha512-465pszTiI4m5b+K92Akg3F2Bh59FQWWV5jPEOwDdwcWdsCRwWkYlzhFD5kJc9mFGj8snaQ0SShFEK+BVJxM3bw==}
@@ -6684,6 +6789,9 @@ packages:
   path-to-regexp@8.4.2:
     resolution: {integrity: sha512-qRcuIdP69NPm4qbACK+aDogI5CBDMi1jKe0ry5rSQJz8JVLsC7jV8XpiJjGRLLol3N+R5ihGYcrPLTno6pAdBA==}
 
+  path-to-regexp@9.0.0:
+    resolution: {integrity: sha512-kfo5HIFCfEH24bcHSWEFIfrwiCsm/DXR+j1fc0696VIdWkICdAcKH2LxRClvz5HQcG4iCQpb4qBZ7pttGPG/dA==}
+
   path-type@4.0.0:
     resolution: {integrity: sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==}
     engines: {node: '>=8'}
@@ -8981,6 +9089,11 @@ snapshots:
       fastify-plugin: 6.0.1
       mime-db: 1.54.0
 
+  '@fastify/cors@11.4.3':
+    dependencies:
+      fastify-plugin: 6.0.1
+      toad-cache: 3.7.4
+
   '@fastify/deepmerge@3.2.4': {}
 
   '@fastify/error@4.3.0': {}
@@ -8989,11 +9102,24 @@ snapshots:
     dependencies:
       fast-json-stringify: 7.3.10
 
+  '@fastify/formbody@9.0.2':
+    dependencies:
+      fast-querystring: 1.1.2
+      fastify-plugin: 6.0.1
+
   '@fastify/forwarded@3.1.2': {}
 
   '@fastify/merge-json-schemas@0.2.2':
     dependencies:
       dequal: 2.0.3
+
+  '@fastify/middie@9.3.9':
+    dependencies:
+      '@fastify/error': 4.3.0
+      fastify-plugin: 6.0.1
+      find-my-way: 9.10.2
+      path-to-regexp: 9.0.0
+      reusify: 1.1.0
 
   '@fastify/proxy-addr@5.1.3':
     dependencies:
@@ -9427,6 +9553,23 @@ snapshots:
       tslib: 2.9.1
     transitivePeerDependencies:
       - supports-color
+
+  '@nestjs/platform-fastify@12.6.3(@fastify/static@10.1.10)(@nestjs/common@12.6.3(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@10.2.2))(@nestjs/core@12.6.3)(rxjs@7.8.2)':
+    dependencies:
+      '@fastify/cors': 11.4.3
+      '@fastify/formbody': 9.0.2
+      '@fastify/middie': 9.3.9
+      '@nestjs/common': 12.6.3(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@10.2.2)
+      '@nestjs/core': 12.6.3(@nestjs/common@12.6.3(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@10.2.2))(@nestjs/platform-express@12.6.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      fast-querystring: 1.1.2
+      fastify: 5.12.8
+      find-my-way: 9.10.2
+      light-my-request: 6.8.1
+      path-to-regexp: 8.4.2
+      rxjs: 7.8.2
+      tslib: 2.9.1
+    optionalDependencies:
+      '@fastify/static': 10.1.10
 
   '@netlify/cache@4.2.2':
     dependencies:
@@ -12467,6 +12610,8 @@ snapshots:
   path-to-regexp@6.3.0: {}
 
   path-to-regexp@8.4.2: {}
+
+  path-to-regexp@9.0.0: {}
 
   path-type@4.0.0: {}
 
