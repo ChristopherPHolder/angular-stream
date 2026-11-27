@@ -1,0 +1,56 @@
+{
+  "name": "@push-based/angular-stream-aws-lambda",
+  "version": "0.0.0",
+  "description": "Streamed SSR for Angular on AWS Lambda: a response-streaming handler for a Lambda Function URL.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/push-based/angular-stream.git",
+    "directory": "packages/aws-lambda"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vp pack",
+    "typecheck": "tsc --noEmit"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "next",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./package.json": "./package.json"
+    }
+  },
+  "dependencies": {
+    "@push-based/angular-stream-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@angular/core": "~22.3.0-rc.0"
+  },
+  "devDependencies": {
+    "@angular/common": "22.3.0-rc.0",
+    "@angular/core": "22.3.0-rc.0",
+    "@angular/platform-browser": "22.3.0-rc.0",
+    "@angular/platform-server": "22.3.0-rc.0",
+    "@types/node": "^20.19.43",
+    "rxjs": "~7.8.0",
+    "typescript": "~6.0.2",
+    "vite-plus": "1.8.0"
+  },
+  "nx": {
+    "tags": [
+      "type:package",
+      "runtime:aws-lambda"
+    ]
+  }
+}

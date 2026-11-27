@@ -1,0 +1,124 @@
+# The AWS Lambda example, as an AWS SAM template. Not deployed: it's what the
+# docs' AWS Lambda page walks through.
+#
+#   CloudFront ─┬─ /assets/*, *.ico, *.svg, *.png ──> S3 (dist/client)
+#               └─ everything else ─────────────────> Function URL, RESPONSE_STREAM
+#                                                     └─> Lambda (dist/server/lambda.mjs)
+#
+# `pnpm nx build example-aws-lambda` first: CodeUri is the build's `dist/`,
+# so `sam deploy` zips the handler with the `index.html` it renders into.
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: angular-stream, streamed from AWS Lambda through CloudFront.
+
+Resources:
+  RenderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: server/lambda.handler
+      Runtime: nodejs24.x
+      Architectures: [arm64]
+      MemorySize: 1024
+      Timeout: 30
+      FunctionUrlConfig:
+        AuthType: NONE
+        # BUFFERED, the default, holds the whole response until the handler
+        # returns: the page arrives in one piece.
+        InvokeMode: RESPONSE_STREAM
+
+  AssetsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  AssetsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref AssetsBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub '${AssetsBucket.Arn}/*'
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub 'arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${Distribution}'
+
+  AssetsOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub '${AWS::StackName}-assets'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        HttpVersion: http2and3
+        Origins:
+          - Id: render
+            # The Function URL is https://<id>.lambda-url.<region>.on.aws/;
+            # CloudFront wants the hostname alone.
+            DomainName: !Select [2, !Split ['/', !GetAtt RenderFunctionUrl.FunctionUrl]]
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only
+          - Id: assets
+            DomainName: !GetAtt AssetsBucket.RegionalDomainName
+            OriginAccessControlId: !Ref AssetsOriginAccessControl
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+        # Navigations: never cached, every viewer header but Host forwarded
+        # (a Function URL only answers to its own hostname), and not
+        # compressed, which leaves the stream alone.
+        DefaultCacheBehavior:
+          TargetOriginId: render
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
+          Compress: false
+          CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # Managed-CachingDisabled
+          OriginRequestPolicyId: b689b0a8-53d0-40ab-baf2-68738e2966ac # Managed-AllViewerExceptHostHeader
+        # The built client: Vite's hashed files under assets/, and public/.
+        CacheBehaviors:
+          - PathPattern: assets/*
+            TargetOriginId: assets
+            ViewerProtocolPolicy: redirect-to-https
+            Compress: true
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # Managed-CachingOptimized
+          - PathPattern: '*.ico'
+            TargetOriginId: assets
+            ViewerProtocolPolicy: redirect-to-https
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          - PathPattern: '*.svg'
+            TargetOriginId: assets
+            ViewerProtocolPolicy: redirect-to-https
+            Compress: true
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          - PathPattern: '*.png'
+            TargetOriginId: assets
+            ViewerProtocolPolicy: redirect-to-https
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+
+Outputs:
+  SiteUrl:
+    Description: The site, through CloudFront.
+    Value: !Sub 'https://${Distribution.DomainName}/'
+  FunctionUrl:
+    Description: The function on its own, for checking that it streams without CloudFront.
+    Value: !GetAtt RenderFunctionUrl.FunctionUrl
+  AssetsBucketName:
+    Description: Upload dist/client here.
+    Value: !Ref AssetsBucket

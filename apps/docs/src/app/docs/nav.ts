@@ -97,6 +97,13 @@ export const DOCS: DocSection[] = [
           'Stream an Angular app from Azure Functions, from the app config to the deploy.',
         load: () => import('../../content/getting-started/azure-functions.md'),
       },
+      {
+        slug: 'aws-lambda',
+        title: 'AWS Lambda',
+        description:
+          'Stream an Angular app from AWS Lambda through a streaming Function URL and CloudFront.',
+        load: () => import('../../content/getting-started/aws-lambda.md'),
+      },
     ],
   },
   {
@@ -191,6 +198,13 @@ export const DOCS: DocSection[] = [
         description:
           'The API of @push-based/angular-stream-node: a Node request handler, the pieces it is made of, and a Vite plugin for dev.',
         load: () => import('../../content/reference/node.md'),
+      },
+      {
+        slug: 'aws-lambda',
+        title: 'angular-stream-aws-lambda',
+        description:
+          'The API of @push-based/angular-stream-aws-lambda: a response-streaming handler for a Lambda Function URL.',
+        load: () => import('../../content/reference/aws-lambda.md'),
       },
       {
         slug: 'limitations',
