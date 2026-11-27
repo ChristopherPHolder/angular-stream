@@ -15,8 +15,12 @@ export default createStreamingHandler<Context>({
   loadTemplate: async () => new Response(template),
 });
 
-/** Every path, unless a file in the publish directory matches it. */
+/**
+ * Every path, unless a file in the publish directory matches it. A missing
+ * file under `/assets/` is a 404, not a page.
+ */
 export const config: Config = {
   path: '/*',
+  excludedPath: ['/assets/*'],
   preferStatic: true,
 };

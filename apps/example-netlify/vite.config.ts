@@ -1,4 +1,4 @@
-import { readFile, rm } from 'node:fs/promises';
+import { readFile, readdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { ngp } from '@push-based/vite-plugin-ngp';
 import {
@@ -10,27 +10,28 @@ import {
 } from 'vite-plus';
 
 /**
- * `vp build` builds the browser app into `dist/client`, Netlify's publish
- * directory, then the Netlify Function into `dist/netlify/functions/ssr/`.
- * `vp build --mode edge` builds an Edge Function into
- * `dist/netlify/edge-functions/ssr/` instead. Either is one self-contained
- * module that Netlify deploys as it is.
+ * `vp build` builds the Netlify Function: the browser app into
+ * `dist/function/client`, Netlify's publish directory, and the function into
+ * `dist/function/netlify/functions/ssr/`. `vp build --mode edge` builds the
+ * Edge Function into `dist/edge/` the same way. Either function is one
+ * self-contained module that Netlify deploys as it is.
  */
 export default defineConfig(({ command, mode }) => {
-  const kind = mode === 'edge' ? 'edge-functions' : 'functions';
-  const entry = mode === 'edge' ? 'src/edge-function.ts' : 'src/function.ts';
+  const edge = mode === 'edge';
+  const out = edge ? 'dist/edge' : 'dist/function';
+  const entry = edge ? 'src/edge-function.ts' : 'src/function.ts';
 
   return {
     optimizeDeps: { entries: ['index.html'] },
     builder: {},
     environments: {
-      client: { build: { outDir: 'dist/client' } },
+      client: { build: { outDir: `${out}/client` } },
       ssr: {
         // Netlify doesn't install the app's dependencies for the function. The
         // dev server leaves them to Node, as for any server environment.
         resolve: { noExternal: command === 'build' || undefined },
         build: {
-          outDir: `dist/netlify/${kind}/ssr`,
+          outDir: `${out}/netlify/${edge ? 'edge-functions' : 'functions'}/ssr`,
           copyPublicDir: false,
           rolldownOptions: {
             input: { ssr: entry },
@@ -50,13 +51,14 @@ export default defineConfig(({ command, mode }) => {
  *   is the browser build's `index.html`, which is then deleted from the publish
  *   directory: Netlify would serve it for `/` instead of calling the function.
  *   In dev it is `index.html` as Vite serves it.
- * - The build leaves only one function behind: an Edge Function on `/*` runs
- *   before, and instead of, the Netlify Function.
+ * - `virtual:public-paths` lists the files in `public/` as URL paths, for an
+ *   Edge Function to leave out.
  * - The dev server hands each page request to the function, through the `ssr`
  *   environment, and streams its `Response` back as it arrives.
  */
 function netlifyFunction(entry: string): Plugin {
   let root = '';
+  let publicDir = '';
   let clientOutDir = '';
   let server: ViteDevServer | undefined;
 
@@ -64,15 +66,28 @@ function netlifyFunction(entry: string): Plugin {
     name: 'example-netlify:function',
     configResolved(config) {
       root = config.root;
+      publicDir = config.publicDir;
       clientOutDir = path.resolve(root, config.environments['client']?.build.outDir ?? 'dist');
     },
     resolveId: {
-      filter: { id: /^virtual:template$/ },
+      filter: { id: /^virtual:(template|public-paths)$/ },
       handler: (id) => `\0${id}`,
     },
     load: {
-      filter: { id: /^\0virtual:template$/ },
-      async handler() {
+      filter: { id: /^\0virtual:(template|public-paths)$/ },
+      async handler(id) {
+        if (id === '\0virtual:public-paths') {
+          const files = publicDir
+            ? await readdir(publicDir, { recursive: true, withFileTypes: true })
+            : [];
+          const paths = files
+            .filter((file) => file.isFile())
+            .map(
+              (file) =>
+                `/${path.relative(publicDir, path.join(file.parentPath, file.name)).split(path.sep).join('/')}`,
+            );
+          return `export default ${JSON.stringify(paths.sort())};`;
+        }
         const html = server
           ? await server.transformIndexHtml(
               '/',
@@ -81,11 +96,6 @@ function netlifyFunction(entry: string): Plugin {
           : await readFile(path.join(clientOutDir, 'index.html'), 'utf8');
         return `export default ${JSON.stringify(html)};`;
       },
-    },
-    async buildStart() {
-      if (this.environment.name === 'ssr') {
-        await rm(path.join(root, 'dist/netlify'), { recursive: true, force: true });
-      }
     },
     async writeBundle() {
       if (this.environment.name === 'ssr') {
@@ -97,7 +107,10 @@ function netlifyFunction(entry: string): Plugin {
       // After Vite's own middlewares, so modules and the files in `public/` are served first.
       return () => {
         devServer.middlewares.use((req, res, next) => {
-          if (req.method !== 'GET' || !req.headers.accept?.includes('text/html')) {
+          if (
+            (req.method !== 'GET' && req.method !== 'HEAD') ||
+            !req.headers.accept?.includes('text/html')
+          ) {
             return next();
           }
           void (async () => {
@@ -115,11 +128,19 @@ function netlifyFunction(entry: string): Plugin {
               }
             }
             const url = new URL(req.originalUrl ?? req.url ?? '/', `http://${req.headers.host}`);
-            const response = await handle(new Request(url, { headers }), {});
+            const response = await handle(new Request(url, { method: req.method, headers }), {});
             res.writeHead(response.status, [...response.headers].flat());
-            // Each chunk is written as soon as the function sends it.
-            for await (const chunk of response.body ?? []) {
-              res.write(chunk);
+            if (req.method === 'HEAD' || !response.body) {
+              await response.body?.cancel();
+              res.end();
+              return;
+            }
+            // Each chunk is written as soon as the function sends it, and the
+            // render stops when the browser goes away.
+            const reader = response.body.getReader();
+            res.on('close', () => void reader.cancel().catch(() => {}));
+            for (let chunk = await reader.read(); !chunk.done; chunk = await reader.read()) {
+              res.write(chunk.value);
             }
             res.end();
           })().catch((error: unknown) => {

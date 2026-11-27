@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vp dev",
-    "build": "vp build",
-    "build:edge": "vp build --mode edge"
+    "build": "vp build && vp build --mode edge"
   },
   "dependencies": {
     "@angular-stream/stream-example": "workspace:*",

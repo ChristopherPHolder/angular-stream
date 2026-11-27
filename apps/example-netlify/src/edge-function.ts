@@ -2,6 +2,7 @@ import type { Config, Context } from '@netlify/edge-functions';
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
 import { ExamplePage } from '@angular-stream/stream-example';
 import { createStreamingHandler } from '@push-based/angular-stream-core/server';
+import publicPaths from 'virtual:public-paths';
 import template from 'virtual:template';
 import { config as appConfig } from './app/app.config.server';
 
@@ -16,9 +17,9 @@ export default createStreamingHandler<Context>({
 
 /**
  * Edge Functions have no `preferStatic`: the build's assets and the files in
- * `public/` are left out by name.
+ * `public/`, listed at build time by vite.config.ts, are left out by path.
  */
 export const config: Config = {
   path: '/*',
-  excludedPath: ['/assets/*', '/favicon.ico', '/favicon.svg', '/apple-touch-icon.png'],
+  excludedPath: ['/assets/*', ...publicPaths],
 };
