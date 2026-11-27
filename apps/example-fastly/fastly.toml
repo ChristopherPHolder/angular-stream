@@ -1,0 +1,14 @@
+# The Fastly Compute example. Not deployed: `fastly compute serve` runs it locally, in Viceroy.
+# https://www.fastly.com/documentation/reference/compute/fastly-toml/
+
+language = "javascript"
+manifest_version = 3
+name = "angular-stream-example"
+
+[scripts]
+build = "pnpm run build && pnpm run compile"
+
+[local_server.kv_stores]
+example-content = { file = "./static-publisher/kvstore.json", format = "json" }
+
+[setup.kv_stores.example-content]
