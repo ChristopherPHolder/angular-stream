@@ -70,6 +70,11 @@ export default defineConfig({
               sourceTag: 'runtime:netlify',
               onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:netlify'],
             },
+            // The Fastify plugin is built on the Node adapter.
+            {
+              sourceTag: 'runtime:fastify',
+              onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:node', 'runtime:fastify'],
+            },
           ],
         },
       ],
