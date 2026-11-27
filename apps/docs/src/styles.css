@@ -11,6 +11,19 @@
   color-scheme: light;
   /* Wide enough for a 96-character line of code, which most of the samples stay under. */
   --content-width: 50rem;
+  /* The sticky header: what sticks below it, and headings scrolled to, start under this. */
+  --header-height: 4rem;
+}
+
+html {
+  /* iOS would otherwise enlarge the text in landscape. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* The page behind the open menu stays where it is. */
+html.menu-open {
+  overflow: hidden;
 }
 
 /* White on --color-primary-500 is under AA for 14px labels; the README says use 600. */
@@ -105,9 +118,12 @@ pre.mermaid {
   color: var(--color-text-muted);
 }
 
-/* Header: brand and the site's links. */
+/* Header: brand and the site's links, in one row that stays in view. */
 
 .top {
+  position: sticky;
+  top: 0;
+  z-index: 3;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
 }
@@ -124,13 +140,13 @@ pre.mermaid {
   align-items: stretch;
   justify-content: space-between;
   gap: var(--space-6);
+  height: var(--header-height);
 }
 
 .brand {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding-block: var(--space-4);
   white-space: nowrap;
   color: var(--color-text-heading);
   text-decoration: none;
@@ -160,23 +176,10 @@ pre.mermaid {
   color: var(--color-neutral-900);
 }
 
-/* On a phone the links get a row of their own. */
-@media (max-width: 560px) {
-  .top-inner {
-    flex-wrap: wrap;
-    row-gap: 0;
-  }
-
-  .brand {
-    padding-block: var(--space-3);
-  }
-
-  .top-nav {
-    width: 100%;
-    justify-content: space-between;
-    padding-block: var(--space-3);
-    border-top: 1px solid var(--color-border);
-  }
+/* Shown below 900px, where it opens the sidebar as a menu. */
+.menu-toggle {
+  display: none;
+  align-self: center;
 }
 
 /* Sidebar, then the page. */
@@ -188,16 +191,13 @@ pre.mermaid {
   padding-block: var(--space-10) var(--space-16);
 }
 
-.sidebar {
+.sidebar,
+.toc--aside {
   position: sticky;
-  top: var(--space-6);
+  top: calc(var(--header-height) + var(--space-6));
   align-self: start;
-  max-height: calc(100vh - 2 * var(--space-6));
+  max-height: calc(100vh - var(--header-height) - 2 * var(--space-6));
   overflow-y: auto;
-}
-
-.sidebar-toggle {
-  display: none;
 }
 
 .sidebar-section {
@@ -236,32 +236,97 @@ pre.mermaid {
   font-weight: 500;
 }
 
+/* The header's own links, repeated in the menu. */
+.sidebar-elsewhere {
+  display: none;
+}
+
+/*
+ * Below 900px (MENU_BREAKPOINT in app.ts) the sidebar is a menu: a panel over
+ * the page's right side, under the header, opened by the header's button.
+ */
 @media (max-width: 900px) {
-  .shell {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-6);
-    padding-top: var(--space-4);
+  :root {
+    --header-height: 3.5rem;
   }
 
-  .sidebar {
-    position: static;
-    max-height: none;
+  /* The brand and the button fit a 320px screen with this between them. */
+  .top-inner {
+    gap: var(--space-3);
   }
 
-  .sidebar-toggle {
+  .top-nav {
+    display: none;
+  }
+
+  .menu-toggle {
     display: inline-flex;
   }
 
-  .sidebar-list {
-    display: none;
-    margin-top: var(--space-3);
-    padding: var(--space-4);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
+    padding-block: var(--space-6) var(--space-12);
   }
 
-  .sidebar-list--open {
+  .backdrop {
+    position: fixed;
+    inset: var(--header-height) 0 0;
+    z-index: 1;
+    background: color-mix(in srgb, var(--color-neutral-950) 40%, transparent);
+  }
+
+  .sidebar {
+    position: fixed;
+    inset: var(--header-height) 0 0 auto;
+    z-index: 2;
+    width: min(100%, 22rem);
+    max-height: none;
+    padding: var(--space-5) var(--space-5) var(--space-10);
+    border-left: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-md);
+    overscroll-behavior: contain;
+    /* Hidden from the keyboard and from screen readers too, not only from view. */
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--space-2)));
+    transition:
+      opacity 0.15s ease-out,
+      transform 0.15s ease-out,
+      visibility 0s linear 0.15s;
+  }
+
+  .sidebar--open {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.15s ease-out,
+      transform 0.15s ease-out;
+  }
+
+  /* A finger needs more to aim at than a pointer: 44px a link. */
+  .sidebar a {
+    padding-block: var(--space-3);
+    font-size: 1rem;
+  }
+
+  .sidebar-elsewhere {
     display: block;
+  }
+}
+
+@media (max-width: 560px) {
+  .sidebar {
+    width: 100%;
+    border-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .sidebar--open {
+    transition: none;
   }
 }
 
@@ -289,11 +354,6 @@ pre.mermaid {
 }
 
 .toc {
-  position: sticky;
-  top: var(--space-6);
-  align-self: start;
-  max-height: calc(100vh - 2 * var(--space-6));
-  overflow-y: auto;
   font-size: 0.8125rem;
   line-height: 1.25rem;
 }
@@ -326,13 +386,46 @@ pre.mermaid {
   color: var(--color-primary-700);
 }
 
+/* The same outline, folded above the article where there is no room beside it. */
+.toc--inline {
+  display: none;
+  margin-bottom: var(--space-8);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+}
+
+.toc--inline summary {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.toc--inline ul {
+  padding: 0 var(--space-4) var(--space-2);
+}
+
+.toc--inline li {
+  margin: 0;
+}
+
+.toc--inline a {
+  display: block;
+  padding-block: var(--space-2-5);
+}
+
 @media (max-width: 1200px) {
   .doc {
     grid-template-columns: minmax(0, var(--content-width));
   }
 
-  .toc {
+  .toc--aside {
     display: none;
+  }
+
+  .toc--inline {
+    display: block;
   }
 }
 
@@ -409,7 +502,25 @@ pre.mermaid {
 .prose h2,
 .prose h3,
 .prose h4 {
-  scroll-margin-top: var(--space-6);
+  scroll-margin-top: calc(var(--header-height) + var(--space-6));
+}
+
+/* On a phone the page's own type steps down, so more of it is on screen. */
+@media (max-width: 560px) {
+  .lede {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  .doc-header {
+    margin-bottom: var(--space-6);
+  }
+
+  .prose h2 {
+    margin-top: var(--space-10);
+    font-size: 1.375rem;
+    line-height: 1.75rem;
+  }
 }
 
 .prose .anchor {
@@ -758,6 +869,17 @@ pre.mermaid[data-processed] svg {
 
 .bottom a:hover {
   color: var(--color-primary-700);
+}
+
+@media (max-width: 900px) {
+  .bottom nav {
+    row-gap: 0;
+  }
+
+  .bottom a {
+    display: block;
+    padding-block: var(--space-3);
+  }
 }
 
 /* Press kit: each version of the logo on the background it is made for. */
