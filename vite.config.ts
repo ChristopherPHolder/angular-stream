@@ -62,6 +62,10 @@ export default defineConfig({
               sourceTag: 'runtime:azure',
               onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:azure'],
             },
+            {
+              sourceTag: 'runtime:fastly',
+              onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:fastly'],
+            },
           ],
         },
       ],

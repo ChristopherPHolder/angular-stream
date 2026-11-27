@@ -1,0 +1,39 @@
+{
+  "name": "example-fastly",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vp build",
+    "compile": "js-compute-runtime dist/server/server.js bin/main.wasm",
+    "content:local": "compute-js-static-publish publish-content --local",
+    "start": "fastly compute serve --skip-build"
+  },
+  "dependencies": {
+    "@angular-stream/stream-example": "workspace:*",
+    "@angular/common": "22.3.0-rc.0",
+    "@angular/compiler": "22.3.0-rc.0",
+    "@angular/core": "22.3.0-rc.0",
+    "@angular/platform-browser": "22.3.0-rc.0",
+    "@angular/platform-server": "22.3.0-rc.0",
+    "@fastly/compute-js-static-publish": "^8.0.2",
+    "@push-based/angular-stream-core": "workspace:*",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/compiler-cli": "22.3.0-rc.0",
+    "@fastly/js-compute": "^4.4.0",
+    "@push-based/vite-plugin-ngp": "^0.4.3",
+    "@types/node": "^20.19.43",
+    "typescript": "~6.0.2",
+    "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8001",
+    "vite-plus": "1.8.0"
+  },
+  "nx": {
+    "tags": [
+      "type:app",
+      "runtime:fastly"
+    ]
+  }
+}
