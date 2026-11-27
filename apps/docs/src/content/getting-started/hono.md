@@ -96,9 +96,12 @@ const page = (c: Context<Env>) => handle(c.req.raw, c.env);
 const app = new Hono<Env>();
 
 if (!import.meta.env.DEV) {
-  // `/` first: serveStatic would answer it with dist/client/index.html, the bare template.
+  // Before serveStatic, which would answer both with dist/client/index.html, the bare template.
   app.get('/', page);
+  app.get('/index.html', page);
   app.use(serveStatic({ root: client }));
+  // A missing hashed file (an old chunk after a deploy) is a 404, not a page.
+  app.get('/assets/*', (c) => c.notFound());
 }
 app.get('*', page);
 
@@ -118,9 +121,14 @@ before it: the browser build's files through `serveStatic`, and your own routes
 (`app.get('/api/...', ...)`) in the same place.
 
 `loadTemplate` gives the handler the `index.html` to render into: the built
-one, read from disk. `index.html` is the template, not the page, so `/` is
-routed to `page` before `serveStatic`, which would otherwise answer it with
-that file as it is.
+one, read from disk. `index.html` is the template, not the page, so `/` and
+`/index.html` are routed to `page` before `serveStatic`, which would otherwise
+answer both with that file as it is.
+
+A request under `/assets/` that `serveStatic` doesn't find gets a `404`
+instead of a page. Vite puts the build's hashed files there, so after a deploy
+a browser still holding the old page asks for chunks that are gone; a page in
+their place would fail to load as a script.
 
 `allowedHosts` must list every hostname the server answers for: Angular's SSR
 host guard rejects any other `host` header, and the server answers `403`.
@@ -278,9 +286,12 @@ the end, and load `serveStatic` where it's used:
 if (!import.meta.env.DEV) {
   // Imported here: @hono/bun doesn't load on Node, where `vite dev` runs the app.
   const { serveStatic } = await import('@hono/bun');
-  // `/` first: serveStatic would answer it with dist/client/index.html, the bare template.
+  // Before serveStatic, which would answer both with dist/client/index.html, the bare template.
   app.get('/', page);
+  app.get('/index.html', page);
   app.use(serveStatic({ root: client }));
+  // A missing hashed file (an old chunk after a deploy) is a 404, not a page.
+  app.get('/assets/*', (c) => c.notFound());
 }
 app.get('*', page);
 
@@ -307,9 +318,12 @@ default export:
 if (!import.meta.env.DEV) {
   // Imported here: @hono/deno doesn't load on Node, where `vite dev` runs the app.
   const { serveStatic } = await import('@hono/deno');
-  // `/` first: serveStatic would answer it with dist/client/index.html, the bare template.
+  // Before serveStatic, which would answer both with dist/client/index.html, the bare template.
   app.get('/', page);
+  app.get('/index.html', page);
   app.use(serveStatic({ root: client }));
+  // A missing hashed file (an old chunk after a deploy) is a 404, not a page.
+  app.get('/assets/*', (c) => c.notFound());
 }
 app.get('*', page);
 

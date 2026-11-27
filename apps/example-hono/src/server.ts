@@ -37,9 +37,12 @@ const page = (c: Context<Env>) => handle(c.req.raw, c.env);
 const app = new Hono<Env>();
 
 if (!import.meta.env.DEV) {
-  // `/` first: serveStatic would answer it with dist/client/index.html, the bare template.
+  // Before serveStatic, which would answer both with dist/client/index.html, the bare template.
   app.get('/', page);
+  app.get('/index.html', page);
   app.use(serveStatic({ root: client }));
+  // A missing hashed file (an old chunk after a deploy) is a 404, not a page.
+  app.get('/assets/*', (c) => c.notFound());
 }
 app.get('*', page);
 
