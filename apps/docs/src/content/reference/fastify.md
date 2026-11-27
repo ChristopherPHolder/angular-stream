@@ -152,13 +152,15 @@ app.register(fastifyStatic, {
   build's copy of the template. Served as a file, `/` and `/index.html` would
   answer with the unrendered template.
 
-A request for a file that isn't there, such as an old script name after a
-deploy, has no route of its own, and is rendered as a page.
+A request for a file that isn't there has no route of its own, and is
+rendered as a page, unless something answers it first: the example adds
+`app.get('/assets/*', (_request, reply) => reply.callNotFound())`, so an old
+script name after a deploy gets a `404`.
 
 ## `@fastify/compress`
 
 `@fastify/compress` streams a page only with `flushOnIdle: true`, which
-flushes the compressor each time the page pauses. Without it, the compressed
+flushes the compressor each time the page pauses, after each burst of chunks. Without it, the compressed
 page arrives in one piece once the render is done. Register it before the
 plugin; it only applies to routes added after it has loaded.
 

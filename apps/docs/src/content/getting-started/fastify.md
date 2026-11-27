@@ -48,6 +48,7 @@ export const config = mergeApplicationConfig(appConfig, {
 ## 3. The server
 
 ```bash
+npm install @push-based/angular-stream-core@next @push-based/angular-stream-node@next @push-based/angular-stream-fastify@next
 npm install fastify @fastify/static @fastify/compress
 ```
 
@@ -72,6 +73,8 @@ app.register(fastifyCompress, { flushOnIdle: true });
 app.register(
   async (api) => {
     api.get('/health', async () => ({ status: 'ok' }));
+    // Any other URL under /api is a 404, not a page.
+    api.get('/*', (_request, reply) => reply.callNotFound());
   },
   { prefix: '/api' },
 );
@@ -85,6 +88,9 @@ if (import.meta.env.PROD) {
     // `index.html` is the template, not a page: `/` is rendered.
     globIgnore: ['**/*.html'],
   });
+  // A hashed file that no longer exists (an old chunk after a deploy) is a 404,
+  // not a page. Each real file's own route is more specific, so it still wins.
+  app.get('/assets/*', (_request, reply) => reply.callNotFound());
 }
 
 // Every other `GET` and `HEAD` is a page.
@@ -126,8 +132,10 @@ the browser build in `dist/client`.
 The plugin registers one route, `GET` and `HEAD` on `/*`. Fastify picks the
 most specific route for a URL whatever order they were registered in, so
 `/api/health` and every file of the browser build are answered by their own
-routes, and everything else is rendered as a page. A `POST` or a `PUT` to a
-path no route has gets Fastify's `404`.
+routes, and everything else is rendered as a page. `/api/*` and `/assets/*`
+call `reply.callNotFound()`, so a mistyped API URL or an old script name after
+a deploy gets Fastify's `404` rather than a page. A `POST` or a `PUT` to a
+path no route has gets the same `404`.
 
 `@fastify/static` needs `wildcard: false`. With its default, it registers a
 `GET /*` route of its own, and Fastify refuses to start with two. Without the
@@ -265,7 +273,8 @@ curl -sN --compressed http://localhost:3000/ | perl -MTime::HiRes=time -ne '
 ```
 
 `flushOnIdle: true` flushes the compressor whenever the page pauses, which is
-after each chunk, without resetting the compression state. With it, the same
+after each burst of chunks (chunks written in the same tick go out together),
+without resetting the compression state. With it, the same
 request streams, for gzip, Brotli, deflate and zstd alike:
 
 ```text

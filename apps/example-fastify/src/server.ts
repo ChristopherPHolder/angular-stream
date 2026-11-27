@@ -23,6 +23,8 @@ app.register(fastifyCompress, { flushOnIdle: true });
 app.register(
   async (api) => {
     api.get('/health', async () => ({ status: 'ok' }));
+    // Any other URL under /api is a 404, not a page.
+    api.get('/*', (_request, reply) => reply.callNotFound());
   },
   { prefix: '/api' },
 );
@@ -36,6 +38,9 @@ if (import.meta.env.PROD) {
     // `index.html` is the template, not a page: `/` is rendered.
     globIgnore: ['**/*.html'],
   });
+  // A hashed file that no longer exists (an old chunk after a deploy) is a 404,
+  // not a page. Each real file's own route is more specific, so it still wins.
+  app.get('/assets/*', (_request, reply) => reply.callNotFound());
 }
 
 // Every other `GET` and `HEAD` is a page.
