@@ -15,14 +15,17 @@ function api(entry: string): Plugin {
     name: 'example-express-api',
     apply: 'serve',
     configureServer(server) {
-      server.middlewares.use('/api', (req, res, next) => {
+      server.middlewares.use((req, res, next) => {
+        const path = (req.url ?? '/').split('?')[0];
+        if (path !== '/api' && !path?.startsWith('/api/')) {
+          next();
+          return;
+        }
         const ssr = server.environments['ssr'];
         if (ssr === undefined || !isRunnableDevEnvironment(ssr)) {
           next(new Error('the ssr environment has no module runner'));
           return;
         }
-        // Connect stripped `/api` from `req.url`; Express routes on the full path.
-        req.url = req.originalUrl ?? req.url;
         ssr.runner.import<{ default: App }>(entry).then(
           (module) => module.default(req, res, next),
           (error: unknown) => next(error),

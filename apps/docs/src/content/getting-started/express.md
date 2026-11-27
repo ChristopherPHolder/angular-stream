@@ -62,6 +62,11 @@ import express from 'express';
 import { App } from './app/app';
 import { config } from './app/app.config.server';
 
+/**
+ * The Express server entry. Built to dist/server/server.js, next to the
+ * template (dist/server/index.server.html) and one folder away from the
+ * browser build (dist/client), which is where these URLs point.
+ */
 const handler = createNodeHandler({
   rootComponent: App,
   config,
@@ -74,6 +79,7 @@ const handler = createNodeHandler({
 const client = fileURLToPath(new URL('../client/', import.meta.url));
 
 const app = express();
+app.disable('x-powered-by');
 
 // First, so that it wraps every response after it. The handler calls
 // `res.flush()` after each chunk, so pages still stream.
@@ -81,7 +87,13 @@ app.use(compression());
 
 // The browser build. Vite names the files in `assets/` by their content hash.
 // `index: false`: `/` is a page, rendered by the handler, not the built index.html.
+// `/index.html` is the template, so it's a page too, never served as the raw file.
+app.get('/index.html', handler);
 app.use('/assets', express.static(`${client}assets`, { immutable: true, maxAge: '1y' }));
+// A hashed file that no longer exists (an old chunk after a deploy) is a 404, not a page.
+app.use('/assets', (_req, res) => {
+  res.sendStatus(404);
+});
 app.use(express.static(client, { index: false }));
 
 // Before the handler, which renders every `GET` that reaches it as a page.
@@ -94,6 +106,28 @@ app.use('/api', (_req, res) => {
 
 // Everything else is a page.
 app.get('/{*splat}', handler);
+
+// Last: errors the handler passes on, such as a bad `Host` (400), answered with
+// their status and a plain message instead of Express's default page, which
+// shows the stack trace whenever NODE_ENV isn't `production`.
+app.use(
+  (
+    error: { status?: number },
+    _req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    if (res.headersSent) {
+      next(error);
+      return;
+    }
+    const status = error.status ?? 500;
+    res
+      .status(status)
+      .type('text/plain')
+      .send(status === 400 ? 'Bad request' : 'Server error');
+  },
+);
 
 // `vite dev` imports this module for its default export, and serves it itself.
 export default app;
@@ -136,7 +170,9 @@ every `GET` and `HEAD` that reaches it. So, from first to last:
    exist and passes every other request on. Give it `index: false`:
    otherwise it answers `/` with `dist/client/index.html`, the built page
    without anything rendered into it, and `/` never streams. `/index.html`
-   itself is still served as that file; nothing links to it.
+   gets the handler before `express.static()` sees it, so it's a page too.
+   A missing file under `/assets/`, such as an old hashed chunk after a
+   deploy, gets a `404` rather than a page.
 3. **API routes**, and anything else that answers a `GET`. Mounted after the
    handler, they are never reached: their URLs are rendered as pages. The
    `app.use('/api', …)` after them answers `404` for an API URL that doesn't
@@ -146,8 +182,10 @@ every `GET` and `HEAD` that reaches it. So, from first to last:
    `app.use(handler)` works as well: the handler passes methods other than
    `GET` and `HEAD` on to `next()`, which ends in Express's `404`.
 
-An error in the handler is passed to `next()`, so an error-handling middleware
-(`(error, req, res, next) => …`) added after it answers it. An error after the
+An error in the handler is passed to `next()`, and the error-handling
+middleware at the end answers it with its status (`400` for a bad `Host`) and
+a plain message. Without it, Express's default error page shows the stack
+trace whenever `NODE_ENV` isn't `production`. An error after the
 first byte can't change the response any more: the handler cuts the
 connection, and the error doesn't reach `next()`.
 
@@ -171,14 +209,17 @@ function api(entry: string): Plugin {
     name: 'example-express-api',
     apply: 'serve',
     configureServer(server) {
-      server.middlewares.use('/api', (req, res, next) => {
+      server.middlewares.use((req, res, next) => {
+        const path = (req.url ?? '/').split('?')[0];
+        if (path !== '/api' && !path?.startsWith('/api/')) {
+          next();
+          return;
+        }
         const ssr = server.environments['ssr'];
         if (ssr === undefined || !isRunnableDevEnvironment(ssr)) {
           next(new Error('the ssr environment has no module runner'));
           return;
         }
-        // Connect stripped `/api` from `req.url`; Express routes on the full path.
-        req.url = req.originalUrl ?? req.url;
         ssr.runner.import<{ default: App }>(entry).then(
           (module) => module.default(req, res, next),
           (error: unknown) => next(error),
@@ -238,14 +279,14 @@ can be mounted without a path and read `req.originalUrl`.
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "start": "node dist/server/server.js"
+    "start": "NODE_ENV=production node dist/server/server.js"
   }
 }
 ```
 
 ```bash
 vite build                      # client to dist/client, server to dist/server
-node dist/server/server.js      # http://localhost:3000, or $PORT
+NODE_ENV=production node dist/server/server.js      # http://localhost:3000, or $PORT
 ```
 
 `dist/server/server.js` imports Express, `compression` and the other packages
