@@ -244,11 +244,9 @@ buffered it; see
 
 `staticDir` serves the browser build from the render route: a file in
 `dist/client` is sent from disk, anything else is rendered. A path that
-ends in `.html` is left to the renderer, so `/index.html` renders too. The
-check is case-sensitive: on a case-insensitive disk, such as macOS's default,
-`/INDEX.HTML` can still be sent as the raw template. A missing file under
-`/assets/`, such as a chunk from before a deploy, is a `404` rather than a
-page. Keep `staticDir` unless something else serves the files.
+ends in `.html`, in any case, is left to the renderer, so `/index.html` and
+`/INDEX.HTML` render too. A missing file under `/assets/`, such as a chunk
+from before a deploy, is a `404` rather than a page. Keep `staticDir` unless something else serves the files.
 
 If you'd rather use Express's static middleware, leave `staticDir` out and
 register it in `src/server.ts`, before `listen()`:

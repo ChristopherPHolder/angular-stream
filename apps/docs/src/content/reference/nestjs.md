@@ -62,13 +62,14 @@ order:
 2. A method other than `GET` and `HEAD` is passed on, and ends in a 404
    unless something after the module takes it.
 3. Under `/assets/`, a file in `staticDir` is served from disk, and anything
-   else is a `NotFoundException` (`404`), not a page: Vite names those files
-   by their content hash, so a missing one is an old or mistyped URL, such as
-   a chunk from before a deploy.
+   else is a `404`, not a page: Vite names those files by their content hash,
+   so a missing one is an old or mistyped URL, such as a chunk from before a
+   deploy. With `staticDir`, the Node adapter's static handler answers it
+   (`Not found`, in plain text); without it, the module throws a
+   `NotFoundException`, which Nest's filters answer.
 4. With `staticDir`, any other file in it is served from disk. A path that
-   ends in `.html` is left to the renderer, so `/` and `/index.html` render.
-   The check is case-sensitive, so on a case-insensitive disk `/INDEX.HTML`
-   can still be sent as the raw template.
+   ends in `.html`, in any case, is left to the renderer, so `/`,
+   `/index.html` and `/INDEX.HTML` render.
 5. Everything else is rendered as a streamed page.
 
 A controller, or a route or middleware another module adds, always answers
@@ -87,8 +88,9 @@ error handlers.
 
 The steps are the ones above, with Fastify's means:
 
-- Under the global prefix, and for a missing file under `/assets/`, the route
-  calls `reply.callNotFound()`, which is Nest's `404`.
+- Under the global prefix, and for a missing file under `/assets/` without
+  `staticDir`, the route calls `reply.callNotFound()`, which is Nest's `404`.
+  With `staticDir`, the static handler answers a missing asset, as above.
 - A method other than `GET` and `HEAD` has no route, and gets Nest's `404`.
 - A file in `staticDir` is written to the socket by the Node adapter's static
   handler, and the reply is hijacked: `onSend` hooks (so
