@@ -1,0 +1,70 @@
+name: Release
+
+# Versions, changelogs and publishes every package under packages/ as one
+# group, by hand. Run it with `dry-run` first.
+on:
+  workflow_dispatch:
+    inputs:
+      specifier:
+        description: 'Version or bump (major, minor, patch, prerelease…). Empty: derive it from conventional commits.'
+        required: false
+        default: ''
+      first-release:
+        description: 'No release tag exists yet.'
+        type: boolean
+        default: false
+      dry-run:
+        description: 'Show what would happen; change and publish nothing.'
+        type: boolean
+        default: true
+
+permissions:
+  # Push the release commit and tag, and create the GitHub release.
+  contents: write
+  # npm provenance.
+  id-token: write
+
+concurrency:
+  group: release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      # Builds the packages (`preVersionCommand`), bumps their versions,
+      # writes the changelogs, commits, tags and creates the GitHub release.
+      - run: >-
+          pnpm exec nx release ${{ inputs.specifier }} --skip-publish --yes
+          ${{ inputs.first-release && '--first-release' || '' }}
+          ${{ inputs.dry-run && '--dry-run' || '' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Angular is pinned to a release candidate, so everything goes out on
+      # the `next` dist-tag until the packages support a stable Angular.
+      - run: >-
+          pnpm exec nx release publish --tag next
+          ${{ inputs.first-release && '--first-release' || '' }}
+          ${{ inputs.dry-run && '--dry-run' || '' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true

@@ -7,7 +7,7 @@ a real response taken apart flush by flush.
 
 To watch these steps happen in a browser, open
 [the demo](https://angular-stream-demo.chris-holder.workers.dev/), or run it
-locally with `npm run dev:demo`:
+locally with `pnpm dev:demo`:
 
 - `/` is the place to start. It explains why, with the same page sent three
   ways on one clock, and how, with one response stepped through piece by piece.
@@ -182,7 +182,7 @@ In the mockups below, each region is labelled with its state:
 
 The server bootstrapped the app and waited for `whenStable()` with HTTP left
 out of it, then rendered the `@defer` blocks (see
-[`defer-blocks.ts`](../packages/streaming/src/server/defer-blocks.ts)). No TMDB request
+[`defer-blocks.ts`](../packages/core/src/server/defer-blocks.ts)). No TMDB request
 has answered yet, so every block holds its loading state.
 
 ```html
@@ -438,7 +438,7 @@ hydration errors.
 
 ## The wire format
 
-Defined in [`stream-protocol.ts`](../packages/streaming/src/client/stream-protocol.ts).
+Defined in [`stream-protocol.ts`](../packages/core/src/client/stream-protocol.ts).
 Field names are short because every chunk repeats them.
 
 A chunk is the stylesheets of any components new to the page, then one
@@ -481,12 +481,12 @@ The shell carries `StreamInit` (`n`, `p`) inline in the runtime script.
 
 ## What the server does on each flush
 
-[`streaming-angular-renderer.ts`](../packages/streaming/src/server/streaming-angular-renderer.ts)
+[`streaming-angular-renderer.ts`](../packages/core/src/server/streaming-angular-renderer.ts)
 loops: wait for the next tracked request to finish, wait for the app to
 settle (stable, a task, stable again, so near-simultaneous responses share a
 flush), render any new `@defer` blocks, then flush.
 
-[`hydration-stream.ts`](../packages/streaming/src/server/hydration-stream.ts) builds
+[`hydration-stream.ts`](../packages/core/src/server/hydration-stream.ts) builds
 the flush. Angular's hydration annotation only works on a whole app, so every
 flush:
 
@@ -506,7 +506,7 @@ pending list, and not done.
 ## What the browser does with a chunk
 
 **The inline runtime**
-([`stream-runtime.ts`](../packages/streaming/src/server/stream-runtime.ts)) is a
+([`stream-runtime.ts`](../packages/core/src/server/stream-runtime.ts)) is a
 classic script, so it exists before Angular does, and each chunk's script
 calls it while the parser is still running. For each block it:
 
@@ -521,7 +521,7 @@ Before Angular attaches, chunks are queued in `__ngs.log`. After that they go
 straight to the app.
 
 **`StreamHydrationClient`**
-([`stream-hydration.ts`](../packages/streaming/src/client/stream-hydration.ts)) keeps
+([`stream-hydration.ts`](../packages/core/src/client/stream-hydration.ts)) keeps
 Angular in step:
 
 - **Hydration data.** It rewrites the view Angular holds for a replaced block
@@ -574,8 +574,8 @@ consequences that are easy to miss:
 
 - **Before the first flush:** the Worker catches the error, logs
   `[ssr] streaming render failed before commit, falling back`, and renders the
-  page with a buffered `renderApplication` instead (`createStreamingWorker()`
-  in [`worker.ts`](../packages/streaming/src/server/worker.ts)). That render has
+  page with a buffered `renderApplication` instead (`createStreamingHandler()`
+  in [`handler.ts`](../packages/core/src/server/handler.ts)). That render has
   incremental hydration switched off, so `@defer` blocks are left for the
   client. A page with no `window.__ngs` came from this path.
 - **After the first flush:** the status is already sent. The server logs
@@ -593,7 +593,7 @@ partial response would be worse than none.
 
 `curl` shows only the server half. To check hydration you need a browser:
 
-1. **Use `npm run dev`, not a production build.** Angular only checks that
+1. **Use `pnpm dev`, not a production build.** Angular only checks that
    hydrated nodes match in dev mode. There, a claimed node has
    `node.__ngDebugHydrationInfo__.status === 'hydrated'`, and
    `ngDevMode.hydratedNodes` gives a running total. No console errors in a
@@ -609,7 +609,7 @@ partial response would be worse than none.
    happen. To see a block hydrate after its chunk arrives, add a temporary
    `delay()` in the server branch of `streamHttpInterceptor`, a different one
    per URL. Remove it afterwards.
-5. **Do not run `npm run dev` and `npm run preview` at the same time.** Both
+5. **Do not run `pnpm dev` and `pnpm nx preview <app>` at the same time.** Both
    start workerd's inspector on port 9232, and the second one fails silently.
 
 To log when chunks land relative to Angular, wrap `__ngs.push` and watch for

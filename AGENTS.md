@@ -59,57 +59,77 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 ## This project
 
-Streamed SSR for Angular 22 on Cloudflare Workers, as a Vite+ monorepo. Read
-`README.md` for how the pieces fit together; the short version:
+Streamed SSR for Angular 22, as an Nx workspace over pnpm, published as
+`@push-based/angular-stream-*` packages. Read `README.md` for how the pieces fit
+together; the short version:
 
-- **Layout**: `apps/movies` (the TMDB movie browser), `apps/demo` (streamed
-  hydration shown step by step, with an in-process fake API) and
-  `packages/streaming` (`@angular-stream/streaming`, the renderer, inline
-  runtime and client both apps use). npm workspaces.
-- **Toolchain**: Vite+ (`vp`), with Angular compiled by
+- **Layout**: `apps/movies` (the TMDB movie browser) and
+  `apps/cloudflare-demo` (streamed hydration shown step by step, with an
+  in-process fake API) are private apps, each deployed as a Cloudflare Worker.
+  `packages/core` (`@push-based/angular-stream-core`: the renderer, inline
+  runtime and client, runtime-agnostic) and `packages/cloudflare`
+  (`@push-based/angular-stream-cloudflare`: `createStreamingWorker()`) are
+  published to npm.
+- **Toolchain**: Nx runs the tasks (`pnpm nx <target> <project>`,
+  `run-many`, `affected`); targets are inferred from each `package.json`'s
+  scripts, which call Vite+ (`vp`). Angular is compiled by
   `@push-based/vite-plugin-ngp`. There is no `angular.json` and no Angular CLI;
-  `ng` commands do not apply here. At the root: `npm run dev` / `dev:demo` /
-  `build` / `ready`. In an app: `vp -C apps/<app> dev|build|preview`. Run
-  `vp check` before committing; it formats with Oxfmt (not Prettier) and lints
-  with Oxlint. Import from `vite-plus`, not `vite`.
-- **Shared code**: `@angular-stream/streaming` ships TypeScript source that ngp
-  compiles with each app. Code there must not import from an app; take what it
-  needs as options, the way `createStreamingWorker()` takes the root component
-  and config.
-- **SSR**: streamed by `packages/streaming/src/server/`; the browser hydrates
-  the shell while the response is still open. `createStreamingWorker()` falls
-  back to a buffered `renderApplication` if streaming fails before its first
-  byte. `@angular/ssr` is **not** used, so `AngularAppEngine`, `serverRoutes`,
+  `ng` commands and `@nx/angular` do not apply here. At the root: `pnpm dev` /
+  `dev:demo` / `build` / `ready`. Run `vp check` before committing; it formats
+  with Oxfmt (not Prettier), lints with Oxlint and enforces module boundaries.
+  Import from `vite-plus`, not `vite`. Use pnpm, never npm.
+- **Packages**: in this repo the apps import the packages' TypeScript source,
+  and ngp compiles it with each app; `vp pack` builds `dist/` only for
+  publishing. Packages must not import from an app, the core must not import
+  an adapter or any runtime-specific API (only web `Request`, `Response` and
+  streams), and an adapter imports only the core. The Nx tags in each
+  `package.json` enforce this. Take what a package needs as options, the way
+  `createStreamingHandler()` takes the root component, config and
+  `loadTemplate`. Packages carry no Angular decorators (they are not compiled
+  by Angular when published): provide services through an `InjectionToken`
+  with a factory, as `STREAM_HYDRATION_CLIENT` does.
+- **New runtime adapter**: a new `packages/<runtime>` named
+  `@push-based/angular-stream-<runtime>`, tagged `type:package` and
+  `runtime:<runtime>`, depending on the core with `workspace:*`, wrapping
+  `createStreamingHandler()`. Add its tag to the boundary rules in
+  `vite.config.ts`. Everything under `packages/` is released together.
+- **Releases**: `nx release`, one fixed group, versions from conventional
+  commits, run by `.github/workflows/release.yml`. Commit messages are
+  therefore conventional (`feat(core): …`, `fix(cloudflare): …`).
+- **SSR**: streamed by `packages/core/src/server/`; the browser hydrates the
+  shell while the response is still open. `createStreamingHandler()` falls back
+  to a buffered `renderApplication` if streaming fails before its first byte.
+  `@angular/ssr` is **not** used, so `AngularAppEngine`, `serverRoutes`,
   per-route render modes and SSR status codes are unavailable.
 - **Streaming**: content that depends on HTTP data belongs in a `@defer` block
   with a `hydrate` trigger, placed directly inside an element; prefer
   `hydrate when <its data is there>`. Read "Streamed hydration" in `README.md`
-  and `docs/streamed-hydration.md` before changing `packages/streaming/`, and
+  and `docs/streamed-hydration.md` before changing `packages/core/`, and
   verify such changes the way the latter's "Verifying a change" section
   describes, in both apps. `docs/out-of-order-streaming/` is the
   pre-implementation research, not a description of the current code.
 - **Demo**: four pages, from the idea to the detail. `/`
-  (`apps/demo/src/app/home/`) is the landing page: why, shown as the same page
+  (`apps/cloudflare-demo/src/app/home/`) is the landing page: why, shown as the same page
   sent three ways, then how, as one response stepped through, then where the
   idea comes from. Both visuals are drawings with fixed times and made-up
   content. `/example` is the real thing with one widget, and the least code
   that streams it. `/walkthrough` and `/inspect` hold everything more involved.
-  Keep the first two simple. Every box in `apps/demo` states what is happening
-  at that step. If a change to `packages/streaming` changes what happens, its
+  Keep the first two simple. Every box in `apps/cloudflare-demo` states what is happening
+  at that step. If a change to `packages/` changes what happens, its
   API or its wire format, update the demo's text, the hand-written code in
   `example/samples.ts` and `home/response-player.ts`, and
   `docs/streamed-hydration.md` with it. Quotes on the landing page and in the
   docs' "Why stream out of order" are verbatim from the linked sources; do not
   reword them.
-- **Demo styles**: `apps/demo` uses the PushBased design system in
-  `apps/demo/src/design-system/` (read its `README.md`). Use its tokens and the
+- **Demo styles**: `apps/cloudflare-demo` uses the PushBased design system in
+  `apps/cloudflare-demo/src/design-system/` (read its `README.md`). Use its tokens and the
   `.pb-*` component classes and `.text-*` type styles; never hard-code colours,
-  spacing or radii. `apps/demo/src/styles.css` maps the demo's meaning colours
+  spacing or radii. `apps/cloudflare-demo/src/styles.css` maps the demo's meaning colours
   (`--server`, `--placeholder`, `--chunk`, `--hydrated`) onto its state scales.
 - **Server entry**: each app's `src/worker.ts`, a Workers `fetch` handler. It
   runs in workerd: no `node:fs`, no `window`, no Node globals. Check any new
   server-side dependency against that before reaching for it.
-- **Angular version is pinned to exactly `22.3.0-rc.0`** in every workspace.
+- **Angular version is pinned to exactly `22.3.0-rc.0`** in every project.
   Do not bump any `@angular/*` package on its own; ngp imports private
   `@angular/compiler-cli` APIs and only works against that exact release.
 - **Styles**: component `styleUrl` files go through Vite's Sass pipeline. Inline

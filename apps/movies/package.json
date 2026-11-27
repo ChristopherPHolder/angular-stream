@@ -7,11 +7,10 @@
     "dev": "vp dev",
     "build": "vp build",
     "preview": "vp preview",
-    "deploy": "vp build && wrangler deploy",
+    "deploy": "wrangler deploy",
     "cf-typegen": "wrangler types"
   },
   "dependencies": {
-    "@angular-stream/streaming": "*",
     "@angular/common": "22.3.0-rc.0",
     "@angular/compiler": "22.3.0-rc.0",
     "@angular/core": "22.3.0-rc.0",
@@ -19,6 +18,8 @@
     "@angular/platform-browser": "22.3.0-rc.0",
     "@angular/platform-server": "22.3.0-rc.0",
     "@angular/router": "22.3.0-rc.0",
+    "@push-based/angular-stream-cloudflare": "workspace:*",
+    "@push-based/angular-stream-core": "workspace:*",
     "@push-based/ngx-fast-svg": "^22.0.0",
     "@rx-angular/cdk": "^22.0.0",
     "@rx-angular/state": "^22.0.0",
@@ -33,7 +34,13 @@
     "sass": "^1.95.0",
     "typescript": "~6.0.2",
     "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8001",
-    "wrangler": "^4.156.1",
-    "vite-plus": "1.8.0"
+    "vite-plus": "1.8.0",
+    "wrangler": "^4.156.1"
+  },
+  "nx": {
+    "tags": [
+      "type:app",
+      "runtime:cloudflare"
+    ]
   }
 }

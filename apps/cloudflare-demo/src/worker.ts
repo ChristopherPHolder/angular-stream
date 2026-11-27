@@ -1,4 +1,4 @@
-import { createStreamingWorker } from '@angular-stream/streaming/server';
+import { createStreamingWorker } from '@push-based/angular-stream-cloudflare';
 import { App } from './app/app';
 import { config } from './app/app.config.server';
 

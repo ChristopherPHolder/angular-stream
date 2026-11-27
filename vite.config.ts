@@ -4,8 +4,29 @@ import { defineConfig } from 'vite-plus';
 // Each app keeps its own vite.config.ts for building and serving it.
 export default defineConfig({
   lint: {
-    jsPlugins: [{ name: 'vite-plus', specifier: 'vite-plus/oxlint-plugin' }],
-    rules: { 'vite-plus/prefer-vite-plus-imports': 'error' },
+    jsPlugins: [
+      { name: 'vite-plus', specifier: 'vite-plus/oxlint-plugin' },
+      { name: 'nx', specifier: '@nx/eslint-plugin' },
+    ],
+    rules: {
+      'vite-plus/prefer-vite-plus-imports': 'error',
+      // Which project may import which, by the tags in each package.json.
+      'nx/enforce-module-boundaries': [
+        'error',
+        {
+          depConstraints: [
+            { sourceTag: 'type:app', onlyDependOnLibsWithTags: ['type:package'] },
+            { sourceTag: 'type:package', onlyDependOnLibsWithTags: ['type:package'] },
+            // The core runs anywhere: it never imports an adapter.
+            { sourceTag: 'runtime:agnostic', onlyDependOnLibsWithTags: ['runtime:agnostic'] },
+            {
+              sourceTag: 'runtime:cloudflare',
+              onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:cloudflare'],
+            },
+          ],
+        },
+      ],
+    },
     options: { typeAware: true, typeCheck: true },
     ignorePatterns: ['**/worker-configuration.d.ts'],
   },

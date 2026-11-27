@@ -1,8 +1,8 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import {
   EnvironmentProviders,
+  InjectionToken,
   Provider,
-  Service,
   TransferState,
   inject,
   makeEnvironmentProviders,
@@ -77,8 +77,10 @@ interface BlockRegistry {
  *
  * Without a runtime on the page — the buffered fallback, the server itself —
  * all of it is inert.
+ *
+ * It carries no decorator, so the package needs no Angular compilation: it is
+ * reached through `STREAM_HYDRATION_CLIENT`, a root-provided token.
  */
-@Service()
 export class StreamHydrationClient implements StreamSink {
   private readonly transferState = inject(TransferState);
   private readonly runtime: StreamRuntime | null =
@@ -378,6 +380,12 @@ function usesViewportTrigger(info: SerializedDeferBlock): boolean {
   );
 }
 
+/** The application's one `StreamHydrationClient`. */
+export const STREAM_HYDRATION_CLIENT = new InjectionToken<StreamHydrationClient>(
+  'STREAM_HYDRATION_CLIENT',
+  { providedIn: 'root', factory: () => new StreamHydrationClient() },
+);
+
 /**
  * On the server, reports each request to the streaming renderer. In the
  * browser, parks a request the server is already making until its response
@@ -393,7 +401,7 @@ export const streamHttpInterceptor: HttpInterceptorFn = (req, next) => {
     });
   }
 
-  const released = inject(StreamHydrationClient).released(key);
+  const released = inject(STREAM_HYDRATION_CLIENT).released(key);
   return released === null ? next(req) : released.pipe(switchMap(() => next(req)));
 };
 
@@ -425,14 +433,14 @@ function findRegistryFactory(): (() => unknown) | null {
  */
 export function provideStreamHydration(): EnvironmentProviders {
   const providers: Array<Provider | EnvironmentProviders> = [
-    provideEnvironmentInitializer(() => inject(StreamHydrationClient).attach()),
+    provideEnvironmentInitializer(() => inject(STREAM_HYDRATION_CLIENT).attach()),
   ];
 
   const createRegistry = findRegistryFactory();
   if (createRegistry !== null) {
     providers.push({
       provide: ɵDEHYDRATED_BLOCK_REGISTRY,
-      useFactory: () => inject(StreamHydrationClient).gate(createRegistry()),
+      useFactory: () => inject(STREAM_HYDRATION_CLIENT).gate(createRegistry()),
     });
   }
 

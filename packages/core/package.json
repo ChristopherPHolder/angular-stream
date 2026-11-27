@@ -1,0 +1,61 @@
+{
+  "name": "@push-based/angular-stream-core",
+  "version": "0.0.0",
+  "description": "Streamed SSR for Angular: the browser hydrates the shell while the response is still open. Runtime-agnostic core.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChristopherPHolder/angular-stream.git",
+    "directory": "packages/core"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/client/index.ts",
+    "./server": "./src/server/index.ts",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vp pack",
+    "typecheck": "tsc --noEmit"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "next",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./server": {
+        "types": "./dist/server.d.ts",
+        "default": "./dist/server.js"
+      },
+      "./package.json": "./package.json"
+    }
+  },
+  "peerDependencies": {
+    "@angular/common": "~22.3.0-rc.0",
+    "@angular/core": "~22.3.0-rc.0",
+    "@angular/platform-browser": "~22.3.0-rc.0",
+    "@angular/platform-server": "~22.3.0-rc.0",
+    "rxjs": "^7.8.0"
+  },
+  "devDependencies": {
+    "@angular/common": "22.3.0-rc.0",
+    "@angular/core": "22.3.0-rc.0",
+    "@angular/platform-browser": "22.3.0-rc.0",
+    "@angular/platform-server": "22.3.0-rc.0",
+    "rxjs": "~7.8.0",
+    "typescript": "~6.0.2",
+    "vite-plus": "1.8.0"
+  },
+  "nx": {
+    "tags": [
+      "type:package",
+      "runtime:agnostic"
+    ]
+  }
+}

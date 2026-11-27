@@ -38,7 +38,7 @@ export const CONFIG: Sample = {
   code: `import {
   provideStreamHydration,
   streamHttpInterceptor,
-} from '@angular-stream/streaming';
+} from '@push-based/angular-stream-core';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -53,7 +53,7 @@ export const appConfig: ApplicationConfig = {
 export const WORKER: Sample = {
   file: 'worker.ts',
   key: ['createStreamingWorker({'],
-  code: `import { createStreamingWorker } from '@angular-stream/streaming/server';
+  code: `import { createStreamingWorker } from '@push-based/angular-stream-cloudflare';
 
 // config is appConfig plus provideServerRendering().
 export default createStreamingWorker({

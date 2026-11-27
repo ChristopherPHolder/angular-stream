@@ -1,4 +1,4 @@
-import type { StreamChunk, StreamInit } from '@angular-stream/streaming';
+import type { StreamChunk, StreamInit } from '@push-based/angular-stream-core';
 
 /** A block a chunk replaces. */
 export interface FlushBlock {

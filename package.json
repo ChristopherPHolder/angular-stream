@@ -3,31 +3,20 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
-    "dev": "vp run movies#dev",
-    "dev:demo": "vp run demo#dev",
-    "build": "vp run -r build",
-    "ready": "vp check && vp run -r build"
+    "dev": "nx run movies:dev",
+    "dev:demo": "nx run cloudflare-demo:dev",
+    "build": "nx run-many -t build",
+    "ready": "vp check && nx run-many -t build"
   },
-  "packageManager": "npm@11.13.0",
+  "packageManager": "pnpm@12.23.0",
   "devDependencies": {
+    "@nx/eslint-plugin": "24.0.7",
+    "@nx/js": "24.0.7",
+    "nx": "24.0.7",
     "vite-plus": "1.8.0"
   },
   "engines": {
     "node": ">=26"
-  },
-  "allowScripts": {
-    "esbuild@0.28.2": true,
-    "workerd@1.20261101.1": true,
-    "workerd@1.20261104.1": true,
-    "@parcel/watcher@2.6.0": true,
-    "fsevents@2.3.3": true
-  },
-  "overrides": {
-    "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8001"
   }
 }

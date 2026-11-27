@@ -1,4 +1,5 @@
 export {
+  STREAM_HYDRATION_CLIENT,
   StreamHydrationClient,
   provideStreamHydration,
   streamHttpInterceptor,
