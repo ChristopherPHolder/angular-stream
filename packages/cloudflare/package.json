@@ -4,7 +4,7 @@
   "description": "Streamed SSR for Angular on Cloudflare Workers: a Worker fetch handler over the ASSETS binding.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ChristopherPHolder/angular-stream.git",
+    "url": "git+https://github.com/push-based/angular-stream.git",
     "directory": "packages/cloudflare"
   },
   "type": "module",

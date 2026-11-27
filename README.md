@@ -5,7 +5,7 @@ page while the response is still arriving. The repo holds the packages, their
 docs, and two apps that use them: a demo that shows each step of streamed
 hydration as it happens, and a real TMDB-backed movie browser.
 
-- **[The docs](https://christopherpholder.github.io/angular-stream/)** explain
+- **[The docs](https://push-based.github.io/angular-stream/)** explain
   how to use it and how it works: getting started, guides, a real response
   taken apart flush by flush, and the API.
 - **[The demo](https://angular-stream-demo.chris-holder.workers.dev/)** shows
@@ -264,9 +264,9 @@ structure exists, then a chunk per `@defer` block as its data arrives. The
 browser hydrates each piece as it lands, and nothing is fetched twice.
 
 The docs cover it for users:
-[the introduction](https://christopherpholder.github.io/angular-stream/docs/getting-started/introduction),
-[how to make something stream](https://christopherpholder.github.io/angular-stream/docs/guides/making-something-stream),
-[debugging and verifying](https://christopherpholder.github.io/angular-stream/docs/guides/debugging),
+[the introduction](https://push-based.github.io/angular-stream/docs/getting-started/introduction),
+[how to make something stream](https://push-based.github.io/angular-stream/docs/guides/making-something-stream),
+[debugging and verifying](https://push-based.github.io/angular-stream/docs/guides/debugging),
 and, under "How it works", why it streams out of order, a real response taken
 apart flush by flush, and the wire format. Their source is Markdown under
 [`apps/docs/src/content/`](apps/docs/src/content/).
@@ -289,7 +289,7 @@ is `packages/cloudflare/src/index.ts`: the handler, with the template read from
 
 ### Caveats and limitations
 
-See [Caveats and limitations](https://christopherpholder.github.io/angular-stream/docs/reference/limitations)
+See [Caveats and limitations](https://push-based.github.io/angular-stream/docs/reference/limitations)
 in the docs.
 
 ## Analytics

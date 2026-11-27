@@ -5,8 +5,8 @@ import { RouterOutlet } from '@angular/router';
 import logo from '@angular-stream/design-system/pushbased-logo.svg?no-inline';
 import { EventLog } from './event-log';
 
-const REPO = 'https://github.com/ChristopherPHolder/angular-stream';
-const DOCS = 'https://christopherpholder.github.io/angular-stream/';
+const REPO = 'https://github.com/push-based/angular-stream';
+const DOCS = 'https://push-based.github.io/angular-stream/';
 
 /** The pages, in the order to read them: from the idea to the detail. */
 const PAGES = [

@@ -18,7 +18,7 @@ export default defineConfig({
     markdown({
       contentDir,
       repoRoot: repoRoot.replace(/\/$/, ''),
-      repoBlobUrl: 'https://github.com/ChristopherPHolder/angular-stream/blob/main',
+      repoBlobUrl: 'https://github.com/push-based/angular-stream/blob/main',
     }),
     ngp({
       ssr: true,

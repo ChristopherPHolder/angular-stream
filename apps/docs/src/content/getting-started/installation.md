@@ -31,7 +31,7 @@ so they need no Angular compilation of their own.
 
 > [!NOTE]
 > Until the first release is out, the packages are only available as source in
-> [the repository](https://github.com/ChristopherPHolder/angular-stream), where
+> [the repository](https://github.com/push-based/angular-stream), where
 > both apps use them.
 
 Next: [set up a Cloudflare Worker](cloudflare-workers.md).
