@@ -1,0 +1,40 @@
+<div class="doc">
+  <article class="doc-article">
+    <header class="doc-header">
+      <p class="text-subtitle eyebrow">{{ doc().page.section.title }}</p>
+      <h1 class="text-section-title">{{ doc().page.title }}</h1>
+      <p class="text-lead lede">{{ doc().page.description }}</p>
+    </header>
+    <!-- Clicks are handled on the container: the links are part of the HTML below. -->
+    <div class="prose" [innerHTML]="html()" (click)="followLink($event)"></div>
+    <nav class="pager" aria-label="Previous and next page">
+      @if (doc().previous; as previous) {
+        <a class="pager-link" [routerLink]="'/' + previous.path">
+          <span class="text-subtitle">Previous</span>
+          {{ previous.title }}
+        </a>
+      }
+      @if (doc().next; as next) {
+        <a class="pager-link pager-link--next" [routerLink]="'/' + next.path">
+          <span class="text-subtitle">Next</span>
+          {{ next.title }}
+        </a>
+      }
+    </nav>
+    <p class="edit"><a [href]="editUrl()">Edit this page on GitHub</a></p>
+  </article>
+  @if (doc().toc.length > 1) {
+    <nav class="toc" aria-labelledby="toc-title">
+      <p class="text-subtitle" id="toc-title">On this page</p>
+      <ul>
+        @for (entry of doc().toc; track entry.id) {
+          <li [class.toc-sub]="entry.level === 3">
+            <a [href]="doc().page.path + '#' + entry.id" (click)="followLink($event)">{{
+              entry.text
+            }}</a>
+          </li>
+        }
+      </ul>
+    </nav>
+  }
+</div>

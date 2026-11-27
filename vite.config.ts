@@ -15,8 +15,10 @@ export default defineConfig({
         'error',
         {
           depConstraints: [
-            { sourceTag: 'type:app', onlyDependOnLibsWithTags: ['type:package'] },
+            { sourceTag: 'type:app', onlyDependOnLibsWithTags: ['type:package', 'type:lib'] },
+            // Published packages can't reach into the private libs.
             { sourceTag: 'type:package', onlyDependOnLibsWithTags: ['type:package'] },
+            { sourceTag: 'type:lib', onlyDependOnLibsWithTags: ['type:lib'] },
             // The core runs anywhere: it never imports an adapter.
             { sourceTag: 'runtime:agnostic', onlyDependOnLibsWithTags: ['runtime:agnostic'] },
             {

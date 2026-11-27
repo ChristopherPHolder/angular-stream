@@ -5,7 +5,8 @@
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
-      "!{projectRoot}/**/*.md",
+      "!{projectRoot}/**/README.md",
+      "!{projectRoot}/CHANGELOG.md",
       "!{projectRoot}/dist/**/*",
       "!{projectRoot}/.wrangler/**/*"
     ],

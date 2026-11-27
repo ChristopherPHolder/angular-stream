@@ -10,7 +10,7 @@
 > a `streamDefer` directive, and the browser hydrates the shell before the response
 > ends. Approach A, reordering a finished render, was not built; the
 > [baseline](baseline/README.md) found it saves no round trip on the list page. For
-> how rendering works now, read [`docs/streamed-hydration.md`](../streamed-hydration.md).
+> how rendering works now, read [How it works](../../apps/docs/src/content/concepts/walkthrough.md) in the docs.
 
 Research notes and candidate approaches, kept for the reasoning behind them.
 

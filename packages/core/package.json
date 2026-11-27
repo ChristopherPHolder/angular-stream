@@ -4,7 +4,7 @@
   "description": "Streamed SSR for Angular: the browser hydrates the shell while the response is still open. Runtime-agnostic core.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ChristopherPHolder/angular-stream.git",
+    "url": "git+https://github.com/push-based/angular-stream.git",
     "directory": "packages/core"
   },
   "type": "module",

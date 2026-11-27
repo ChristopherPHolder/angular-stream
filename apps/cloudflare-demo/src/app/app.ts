@@ -1,9 +1,12 @@
 import { NgOptimizedImage, PlatformLocation } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+// `?no-inline`: Vite would inline an asset this small as a data: URI, which NgOptimizedImage rejects.
+import logo from '@angular-stream/design-system/pushbased-logo.svg?no-inline';
 import { EventLog } from './event-log';
 
-const REPO = 'https://github.com/ChristopherPHolder/angular-stream';
+const REPO = 'https://github.com/push-based/angular-stream';
+const DOCS = 'https://push-based.github.io/angular-stream/';
 
 /** The pages, in the order to read them: from the idea to the detail. */
 const PAGES = [
@@ -30,7 +33,7 @@ function currentPage(path: string): string | null {
     <header class="top">
       <div class="top-inner">
         <a class="brand text-card-title" href="/">
-          <img ngSrc="pushbased-logo.svg" alt="PushBased" width="86" height="32" priority />
+          <img [ngSrc]="logo" alt="PushBased" width="86" height="32" priority />
           angular-stream <span>demo</span>
         </a>
         <!-- Plain links: every page load should be a fresh streamed response. -->
@@ -68,7 +71,7 @@ function currentPage(path: string): string | null {
         <nav aria-label="Elsewhere">
           <a href="https://angular-stream.chris-holder.workers.dev/">Angular Movies, a real app</a>
           <a [href]="repo">Source on GitHub</a>
-          <a [href]="repo + '/blob/main/docs/streamed-hydration.md'">How it works, in depth</a>
+          <a [href]="docs">The docs</a>
           <a href="https://push-based.io/">PushBased</a>
         </nav>
       </div>
@@ -78,6 +81,8 @@ function currentPage(path: string): string | null {
 })
 export class App {
   protected readonly repo = REPO;
+  protected readonly docs = DOCS;
+  protected readonly logo = logo;
   protected readonly pages = PAGES;
 
   /**

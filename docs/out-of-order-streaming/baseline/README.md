@@ -2,7 +2,7 @@
 
 > **Historical.** Captured from the buffered renderer, before streamed hydration
 > landed. Each route was then one document sent in one piece. Responses are now a
-> shell followed by chunks (see [`docs/streamed-hydration.md`](../../streamed-hydration.md)),
+> shell followed by chunks (see [How it works](../../../apps/docs/src/content/concepts/walkthrough.md) in the docs),
 > so the offsets and sizes below no longer describe what the Worker sends. They
 > stay here as the "before".
 

@@ -1,0 +1,677 @@
+/*
+ * The docs use the PushBased design system (libs/design-system): its tokens,
+ * its .pb-* components and .text-* type styles, Geist (loaded in index.html).
+ * Use those tokens here; don't hard-code colours, spacing or radii.
+ */
+@import '@angular-stream/design-system/tokens.css';
+@import '@angular-stream/design-system/components.css';
+
+:root {
+  /* The design system has one light theme. */
+  color-scheme: light;
+  --content-width: 46rem;
+}
+
+/* White on --color-primary-500 is under AA for 14px labels; the README says use 600. */
+.pb-btn-primary {
+  --btn-bg: var(--color-primary-600);
+  --btn-bg-hover: var(--color-primary-700);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--color-text-heading);
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+}
+
+a {
+  color: var(--color-brand-hover);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: 2px;
+}
+
+.pb-btn:focus-visible {
+  outline: none;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-4);
+  top: -100px;
+  z-index: 10;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.skip-link:focus {
+  top: var(--space-4);
+}
+
+main:focus {
+  outline: none;
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-2);
+  color: var(--color-primary-700);
+}
+
+.lede {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-muted);
+}
+
+/* Header: brand and the site's links. */
+
+.top {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.top-inner,
+.shell,
+.bottom-inner {
+  width: min(80rem, 100% - 2 * var(--space-5));
+  margin: 0 auto;
+}
+
+.top-inner {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: var(--space-6);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-block: var(--space-4);
+  white-space: nowrap;
+  color: var(--color-text-heading);
+  text-decoration: none;
+}
+
+.brand img {
+  display: block;
+}
+
+.brand span {
+  color: var(--color-text-muted);
+}
+
+.top-nav {
+  display: flex;
+  gap: var(--space-6);
+}
+
+.top-nav a {
+  display: flex;
+  align-items: center;
+  color: var(--color-neutral-600);
+  text-decoration: none;
+}
+
+.top-nav a:hover {
+  color: var(--color-neutral-900);
+}
+
+/* On a phone the links get a row of their own. */
+@media (max-width: 560px) {
+  .top-inner {
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+
+  .brand {
+    padding-block: var(--space-3);
+  }
+
+  .top-nav {
+    width: 100%;
+    justify-content: space-between;
+    padding-block: var(--space-3);
+    border-top: 1px solid var(--color-border);
+  }
+}
+
+/* Sidebar, then the page. */
+
+.shell {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr);
+  gap: var(--space-10);
+  padding-block: var(--space-10) var(--space-16);
+}
+
+.sidebar {
+  position: sticky;
+  top: var(--space-6);
+  align-self: start;
+  max-height: calc(100vh - 2 * var(--space-6));
+  overflow-y: auto;
+}
+
+.sidebar-toggle {
+  display: none;
+}
+
+.sidebar-section {
+  margin: var(--space-6) 0 var(--space-2);
+  color: var(--color-text-muted);
+}
+
+.sidebar-section:first-of-type {
+  margin-top: 0;
+}
+
+.sidebar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar a {
+  display: block;
+  padding: var(--space-1-5) var(--space-3);
+  border-left: 2px solid var(--color-border);
+  color: var(--color-neutral-700);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  text-decoration: none;
+}
+
+.sidebar a:hover {
+  color: var(--color-neutral-900);
+  border-left-color: var(--color-neutral-400);
+}
+
+.sidebar a.active {
+  color: var(--color-primary-700);
+  border-left-color: var(--color-primary-600);
+  font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+    padding-top: var(--space-4);
+  }
+
+  .sidebar {
+    position: static;
+    max-height: none;
+  }
+
+  .sidebar-toggle {
+    display: inline-flex;
+  }
+
+  .sidebar-list {
+    display: none;
+    margin-top: var(--space-3);
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .sidebar-list--open {
+    display: block;
+  }
+}
+
+/* A doc page: the article, and its table of contents on wide screens. */
+
+.doc {
+  display: grid;
+  grid-template-columns: minmax(0, var(--content-width)) 13rem;
+  justify-content: space-between;
+  gap: var(--space-10);
+}
+
+.doc-header {
+  margin-bottom: var(--space-8);
+}
+
+.doc-header h1 {
+  margin: 0;
+}
+
+.toc {
+  position: sticky;
+  top: var(--space-6);
+  align-self: start;
+  max-height: calc(100vh - 2 * var(--space-6));
+  overflow-y: auto;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+}
+
+.toc p {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-muted);
+}
+
+.toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc li {
+  margin-bottom: var(--space-2);
+}
+
+.toc .toc-sub {
+  padding-left: var(--space-3);
+}
+
+.toc a {
+  color: var(--color-neutral-600);
+  text-decoration: none;
+}
+
+.toc a:hover {
+  color: var(--color-primary-700);
+}
+
+@media (max-width: 1200px) {
+  .doc {
+    grid-template-columns: minmax(0, var(--content-width));
+  }
+
+  .toc {
+    display: none;
+  }
+}
+
+.pager {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-12);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
+}
+
+.pager-link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: 48%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-heading);
+  text-decoration: none;
+}
+
+.pager-link:hover {
+  border-color: var(--color-primary-600);
+}
+
+.pager-link span {
+  color: var(--color-text-muted);
+}
+
+.pager-link--next {
+  margin-left: auto;
+  text-align: right;
+}
+
+.edit {
+  margin-top: var(--space-6);
+  font-size: 0.875rem;
+}
+
+/* Rendered Markdown. */
+
+.prose {
+  color: var(--color-text);
+}
+
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose h2 {
+  margin: var(--space-12) 0 var(--space-4);
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+}
+
+.prose h3 {
+  margin: var(--space-8) 0 var(--space-3);
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+}
+
+.prose h4 {
+  margin: var(--space-6) 0 var(--space-2);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.prose h2,
+.prose h3,
+.prose h4 {
+  scroll-margin-top: var(--space-6);
+}
+
+.prose .anchor {
+  margin-left: var(--space-2);
+  color: var(--color-neutral-400);
+  text-decoration: none;
+  opacity: 0;
+}
+
+.prose :is(h2, h3, h4):hover .anchor,
+.prose .anchor:focus-visible {
+  opacity: 1;
+}
+
+.prose p,
+.prose ul,
+.prose ol {
+  margin: 0 0 var(--space-4);
+}
+
+.prose li + li {
+  margin-top: var(--space-1-5);
+}
+
+.prose :is(h2, h3, h4) code {
+  font-size: 0.9em;
+}
+
+.prose :not(pre, h2, h3, h4) > code {
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-sm);
+  background: var(--color-neutral-100);
+  color: var(--color-neutral-900);
+  overflow-wrap: anywhere;
+}
+
+.prose blockquote {
+  margin: 0 0 var(--space-4);
+  padding-left: var(--space-4);
+  border-left: 3px solid var(--color-border);
+  color: var(--color-neutral-600);
+}
+
+.prose img {
+  max-width: 100%;
+}
+
+.prose hr {
+  margin: var(--space-10) 0;
+  border: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.table-wrap {
+  margin: 0 0 var(--space-4);
+  overflow-x: auto;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.prose th,
+.prose td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose th {
+  color: var(--color-text-heading);
+  font-weight: 600;
+}
+
+/* Code: a light panel, highlighted with the design system's colours. */
+
+.code {
+  margin: 0 0 var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-subtle);
+  overflow: hidden;
+}
+
+.code figcaption {
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-neutral-600);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.code pre {
+  margin: 0;
+  padding: var(--space-4);
+  overflow-x: auto;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+}
+
+.code code {
+  font-size: inherit;
+  color: var(--color-neutral-800);
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: var(--color-neutral-500);
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-meta .hljs-keyword {
+  color: var(--color-primary-700);
+}
+
+.hljs-string,
+.hljs-attr .hljs-string,
+.hljs-regexp {
+  color: var(--color-success-700);
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-built_in {
+  color: var(--color-warning-700);
+}
+
+.hljs-title,
+.hljs-title.function_,
+.hljs-title.class_ {
+  color: var(--color-info-700);
+}
+
+.hljs-attr,
+.hljs-attribute,
+.hljs-name,
+.hljs-tag {
+  color: var(--color-secondary-700);
+}
+
+.hljs-addition {
+  color: var(--color-success-700);
+  background: var(--color-success-50);
+}
+
+.hljs-deletion {
+  color: var(--color-error-700);
+  background: var(--color-error-50);
+}
+
+pre.mermaid {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+pre.mermaid[data-processed] {
+  text-align: center;
+  background: var(--color-surface);
+}
+
+/* GitHub-style callouts: > [!NOTE], [!TIP], [!IMPORTANT], [!WARNING], [!CAUTION]. */
+
+.callout {
+  --callout: var(--color-info-700);
+  --callout-bg: var(--color-info-50);
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--callout);
+  border-radius: var(--radius-md);
+  background: var(--callout-bg);
+}
+
+.callout > :last-child {
+  margin-bottom: 0;
+}
+
+.callout-title {
+  margin: 0 0 var(--space-1);
+  color: var(--callout);
+  font-weight: 600;
+}
+
+.callout--tip {
+  --callout: var(--color-success-700);
+  --callout-bg: var(--color-success-50);
+}
+
+.callout--important {
+  --callout: var(--color-primary-700);
+  --callout-bg: var(--color-primary-50);
+}
+
+.callout--warning {
+  --callout: var(--color-warning-700);
+  --callout-bg: var(--color-warning-50);
+}
+
+.callout--caution {
+  --callout: var(--color-error-700);
+  --callout-bg: var(--color-error-50);
+}
+
+/* Home. */
+
+.home {
+  display: block;
+  max-width: 60rem;
+}
+
+.home h1 {
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: var(--space-8) 0 var(--space-12);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: var(--space-5);
+}
+
+.cards h2 {
+  margin: 0 0 var(--space-3);
+}
+
+.cards ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cards li {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--space-3);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.cards li span {
+  color: var(--color-text-muted);
+}
+
+/* Footer. */
+
+.bottom {
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface-subtle);
+  color: var(--color-neutral-600);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.bottom-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-6);
+  padding-block: var(--space-6);
+}
+
+.bottom p {
+  margin: 0;
+}
+
+.bottom nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+}
+
+.bottom a {
+  color: var(--color-neutral-700);
+}
+
+.bottom a:hover {
+  color: var(--color-primary-700);
+}

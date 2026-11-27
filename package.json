@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nx run movies:dev",
     "dev:demo": "nx run cloudflare-demo:dev",
+    "dev:docs": "nx run docs:dev",
     "build": "nx run-many -t build",
     "ready": "vp check && nx run-many -t build"
   },
