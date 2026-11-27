@@ -6,9 +6,14 @@ import {
   createStreamingHandler,
 } from '@push-based/angular-stream-core/server';
 import { createTemplateLoader, toWebRequest } from '@push-based/angular-stream-node';
-import type { FastifyPluginAsync, FastifyReply, RouteShorthandOptions } from 'fastify';
+import type {
+  FastifyPluginAsync,
+  FastifyReply,
+  FastifyRequest,
+  RouteShorthandOptions,
+} from 'fastify';
 
-export interface AngularStreamOptions extends StreamingAppOptions {
+export interface FastifyHandlerOptions extends StreamingAppOptions {
   /**
    * The built template every page is rendered into, as a path or a `file:`
    * URL: with ngp's `ssr` option, `dist/server/index.server.html`. Read from
@@ -22,6 +27,18 @@ export interface AngularStreamOptions extends StreamingAppOptions {
    * Default: `false`.
    */
   trustProxy?: boolean;
+}
+
+/**
+ * A Fastify route handler that renders the request's URL as a page and sends
+ * it through the reply.
+ */
+export type FastifyHandler = (
+  request: FastifyRequest,
+  reply: FastifyReply,
+) => Promise<FastifyReply>;
+
+export interface AngularStreamOptions extends FastifyHandlerOptions {
   /**
    * Options for the page route, as `fastify.get(path, options, handler)`
    * takes them: `{ compress: false }` to leave pages out of
@@ -31,37 +48,49 @@ export interface AngularStreamOptions extends StreamingAppOptions {
 }
 
 /**
- * A Fastify plugin that renders the application: a `GET` and `HEAD` route on
- * `/*`, under the prefix it is registered with, that renders the route into
- * the template and streams the page through `reply.send()`.
+ * The page route's handler, for a route of your own: it renders the request's
+ * URL into the template and streams the page through `reply.send()`, so
+ * `onSend` hooks (`@fastify/compress` among them) still apply. The
+ * `angularStream` plugin is this handler on `GET` and `HEAD` `/*`.
  *
- * Register what answers other `GET`s first or after, as Fastify matches the
- * most specific route: an API, and the browser build with `@fastify/static`
- * (`wildcard: false`, since a wildcard route of its own would take `/*`).
- *
- * A `Host` that is more than a host and a port is a `BadRequestError`, which
- * Fastify answers with `400`. When the client goes away mid-render, Fastify
- * destroys the body, and that stops the render.
+ * A `Host` that is more than a host and a port rejects with a
+ * `BadRequestError`, which Fastify answers with `400`. When the client goes
+ * away mid-render, Fastify destroys the body, and that stops the render.
  */
-export const angularStream: FastifyPluginAsync<AngularStreamOptions> = async (fastify, options) => {
-  const { template, trustProxy, route, ...app } = options;
+export function createFastifyHandler(options: FastifyHandlerOptions): FastifyHandler {
+  const { template, trustProxy, ...app } = options;
   const render = createStreamingHandler<IncomingMessage>({
     ...app,
     // In `vite dev`, it takes the dev server's template from the raw request.
     loadTemplate: createTemplateLoader(template),
   });
 
+  return async (request, reply) => {
+    const response = await render(
+      toWebRequest(request.raw, reply.raw, { trustProxy }),
+      request.raw,
+    );
+    return sendResponse(reply, response);
+  };
+}
+
+/**
+ * A Fastify plugin that renders the application: a `GET` and `HEAD` route on
+ * `/*`, under the prefix it is registered with, with the handler
+ * `createFastifyHandler()` returns.
+ *
+ * Register what answers other `GET`s first or after, as Fastify matches the
+ * most specific route: an API, and the browser build with `@fastify/static`
+ * (`wildcard: false`, since a wildcard route of its own would take `/*`).
+ */
+export const angularStream: FastifyPluginAsync<AngularStreamOptions> = async (fastify, options) => {
+  const { route, ...handlerOptions } = options;
+
   fastify.route({
     ...route,
     method: ['GET', 'HEAD'],
     url: '/*',
-    async handler(request, reply) {
-      const response = await render(
-        toWebRequest(request.raw, reply.raw, { trustProxy }),
-        request.raw,
-      );
-      return sendResponse(reply, response);
-    },
+    handler: createFastifyHandler(handlerOptions),
   });
 };
 

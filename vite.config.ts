@@ -75,10 +75,15 @@ export default defineConfig({
               sourceTag: 'runtime:fastify',
               onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:node', 'runtime:fastify'],
             },
-            // NestJS sits on the Node adapter.
+            // NestJS sits on the Node adapter, and on the Fastify one on platform-fastify.
             {
               sourceTag: 'runtime:nestjs',
-              onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:node', 'runtime:nestjs'],
+              onlyDependOnLibsWithTags: [
+                'runtime:agnostic',
+                'runtime:node',
+                'runtime:fastify',
+                'runtime:nestjs',
+              ],
             },
           ],
         },

@@ -143,7 +143,7 @@ export const DOCS: DocSection[] = [
         slug: 'nestjs',
         title: 'NestJS',
         description:
-          'Stream an Angular app from a NestJS app on platform-express, next to its controllers, from the app config to running it in production.',
+          'Stream an Angular app from a NestJS app on platform-express or platform-fastify, next to its controllers, from the app config to running it in production.',
         load: () => import('../../content/getting-started/nestjs.md'),
       },
     ],

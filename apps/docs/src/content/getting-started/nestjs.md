@@ -4,8 +4,9 @@ built into the same server bundle. Its controllers answer under `/api`, and
 `AngularStreamModule` renders every other `GET` as a streamed page. It is built
 on the [Node adapter](node.md), so most of what that page says holds here too.
 
-Only `@nestjs/platform-express` is supported for now; see
-[Fastify](#fastify).
+On `@nestjs/platform-fastify`, only the server entry, compression and static
+files change; [Fastify](#fastify) has those, and `apps/example-nestjs-fastify`
+is that setup.
 
 ## 1. The browser config
 
@@ -243,11 +244,9 @@ buffered it; see
 
 `staticDir` serves the browser build from the render route: a file in
 `dist/client` is sent from disk, anything else is rendered. A path that
-ends in `.html` is left to the renderer, so `/index.html` renders too. The
-check is case-sensitive: on a case-insensitive disk, such as macOS's default,
-`/INDEX.HTML` can still be sent as the raw template. A missing file under
-`/assets/`, such as a chunk from before a deploy, is a `404` rather than a
-page. Keep `staticDir` unless something else serves the files.
+ends in `.html`, in any case, is left to the renderer, so `/index.html` and
+`/INDEX.HTML` render too. A missing file under `/assets/`, such as a chunk
+from before a deploy, is a `404` rather than a page. Keep `staticDir` unless something else serves the files.
 
 If you'd rather use Express's static middleware, leave `staticDir` out and
 register it in `src/server.ts`, before `listen()`:
@@ -278,6 +277,11 @@ The order of the imports doesn't matter. `AngularStreamModule` adds its render
 route last, right before Nest's 404 handler, so `ServeStaticModule`'s files,
 `GraphQLModule`'s endpoint and anything else a module adds when the app
 initializes are answered first.
+
+This is Express only. On Fastify, `ServeStaticModule` always adds a `GET *`
+route, whatever `exclude` says, and Fastify refuses to start with two
+catch-all routes (`FST_ERR_DUPLICATED_ROUTE`). Use `staticDir` or
+`@fastify/static` there; see [Fastify](#fastify).
 
 ## 10. What Nest sees of a page
 
@@ -319,6 +323,109 @@ trigger: read [Making something stream](../guides/making-something-stream.md).
 
 ## Fastify
 
-`@nestjs/platform-fastify` isn't supported yet: on it, `AngularStreamModule`
-throws when the app starts. Support will build on the Fastify plugin,
-`@push-based/angular-stream-fastify`.
+The same module renders pages on `@nestjs/platform-fastify`, with the same
+options and the same results: the API keeps `/api`, an unknown `/api/...`
+gets Nest's `404`, a missing file under `/assets/` is a `404`, and a bad
+`Host` is a `400`. Every step but static files (step 9) stays the same.
+Install the Nest adapter, the stream's Fastify adapter, which the module loads
+only on Fastify, and `@fastify/compress` if you compress in Node:
+
+```bash
+npm install @nestjs/platform-fastify @push-based/angular-stream-fastify@next @fastify/compress
+```
+
+### The server entry
+
+```ts title="src/server.ts"
+import 'reflect-metadata';
+import fastifyCompress from '@fastify/compress';
+import { NestFactory } from '@nestjs/core';
+import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
+import { createRequestListener } from '@push-based/angular-stream-nestjs';
+import { AppModule } from './app.module';
+
+const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
+app.setGlobalPrefix('api');
+
+// Before the app initializes, so it applies to the controllers and the pages.
+await app.register(fastifyCompress, { flushOnIdle: true });
+
+// `vite dev` imports this module for its default export, and serves it itself.
+export default createRequestListener(app);
+
+import.meta.hot?.accept();
+import.meta.hot?.dispose(() => app.close());
+
+if (import.meta.env.PROD) {
+  const port = Number(process.env['PORT'] ?? 3000);
+  await app.listen(port);
+  console.log(`Listening on http://localhost:${port}`);
+}
+```
+
+`createRequestListener()` tells the two platforms apart. On Fastify, the first
+request in `vite dev` initializes the app, starts the Fastify instance
+(`ready()`), and from then on hands each request to Fastify's router.
+
+On Fastify, `AngularStreamModule` adds a route, `GET` and `HEAD` on `/*`,
+rather than middleware. Fastify answers a URL with its most specific route,
+so a controller, or a route another module adds, answers first, whichever
+order they were added in. The page route is built on the Fastify adapter's
+[`createFastifyHandler()`](../reference/fastify.md#createfastifyhandler): the
+page goes out through `reply.send()`, so `onSend` hooks still see it.
+
+### Compression
+
+Register `@fastify/compress` with `flushOnIdle: true`, before `app.listen()`.
+Without `flushOnIdle`, the compressed page arrives in one piece once the
+render is done. Check it with `curl --compressed`:
+
+```bash
+curl -sN --compressed -o /dev/null --trace-time --trace-ascii - http://localhost:3000/ | grep 'Recv data'
+```
+
+```text
+21:15:36.928001 <= Recv data, 1516 bytes (0x5ec)
+21:15:38.932440 <= Recv data, 393 bytes (0x189)
+```
+
+To leave pages uncompressed, and compress in a proxy in front, leave
+`@fastify/compress` out. See
+[`@fastify/compress`](../reference/fastify.md#fastifycompress) for the details.
+
+### Static files
+
+`staticDir` works as on Express. A file from it is written straight to the
+socket (`reply.hijack()`), so `@fastify/compress` doesn't compress it, and
+headers that Fastify hooks set with `reply.header()` aren't sent with it.
+Headers that `app.use()` middleware sets are.
+
+To compress the browser build too, leave `staticDir` out, install
+`@fastify/static` (`npm install @fastify/static`), and register it in
+`src/server.ts`:
+
+```ts
+import { fileURLToPath } from 'node:url';
+import fastifyStatic from '@fastify/static';
+
+await app.register(fastifyStatic, {
+  root: fileURLToPath(new URL('../client/', import.meta.url)),
+  wildcard: false,
+  globIgnore: ['**/*.html'],
+});
+```
+
+- **`wildcard: false`**: by default, `@fastify/static` adds a `GET /*` route
+  of its own, and the app fails to start with `FST_ERR_DUPLICATED_ROUTE`.
+- **`globIgnore: ['**/*.html']`**: without it, `/` and `/index.html` answer
+  with the browser build's unrendered `index.html`.
+
+`app.useStaticAssets()` registers the same plugin, but Nest's type for its
+options has no `globIgnore`. Either way, a missing file under `/assets/` is
+still a `404`.
+
+### What Fastify sees of a page
+
+As on Express, guards, interceptors and pipes don't run for pages. Middleware
+added with `app.use()` and Fastify's own `onRequest` hooks do, so put anything
+that has to cover pages there.

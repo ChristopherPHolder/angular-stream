@@ -10,12 +10,16 @@
 
 Streamed server-side rendering for Angular in a NestJS app. The browser starts
 hydrating the page while the response is still arriving. `AngularStreamModule`
-renders every `GET` that nothing else in the app answers, on `@nestjs/platform-express`,
-through the Node adapter,
-[`@push-based/angular-stream-node`](https://www.npmjs.com/package/@push-based/angular-stream-node).
+renders every `GET` that nothing else in the app answers, on
+`@nestjs/platform-express` through the Node adapter,
+[`@push-based/angular-stream-node`](https://www.npmjs.com/package/@push-based/angular-stream-node),
+and on `@nestjs/platform-fastify` through the Fastify adapter,
+[`@push-based/angular-stream-fastify`](https://www.npmjs.com/package/@push-based/angular-stream-fastify).
 
 ```bash
 npm install @push-based/angular-stream-core@next @push-based/angular-stream-nestjs@next
+# On @nestjs/platform-fastify only:
+npm install @push-based/angular-stream-fastify@next
 ```
 
 ```ts
@@ -45,6 +49,7 @@ import 'reflect-metadata';
 import { createRequestListener } from '@push-based/angular-stream-nestjs';
 
 const app = await NestFactory.create<NestExpressApplication>(AppModule);
+// or, on Fastify: NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter())
 app.setGlobalPrefix('api'); // the API under /api, pages everywhere else
 
 export default createRequestListener(app); // for `vite dev`

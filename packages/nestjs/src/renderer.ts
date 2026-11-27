@@ -1,22 +1,13 @@
-import type { ServerResponse } from 'node:http';
-import {
-  BadRequestException,
-  NotFoundException,
-  type OnApplicationBootstrap,
-  type OnModuleInit,
-} from '@nestjs/common';
+import type { OnApplicationBootstrap, OnModuleInit } from '@nestjs/common';
 import type { AbstractHttpAdapter, ApplicationConfig, HttpAdapterHost } from '@nestjs/core';
-import {
-  BadRequestError,
-  type NodeRequest,
-  type StaticHandler,
-  createNodeHandler,
-  createStaticHandler,
-} from '@push-based/angular-stream-node';
+import type { FastifyInstance } from 'fastify';
+import { addExpressRenderer } from './express';
+import type { addFastifyRenderer } from './fastify';
 import type { AngularStreamModuleOptions } from './options';
-import { globalPrefix, isUnderPrefix } from './prefix';
+import { globalPrefix } from './prefix';
 
-type Next = (error?: unknown) => void;
+/** The `getType()` of the HTTP adapters the module renders pages on. */
+const PLATFORMS = ['express', 'fastify'];
 
 /**
  * Adds the render route to the HTTP adapter last: right before Nest's 404 and
@@ -25,9 +16,19 @@ type Next = (error?: unknown) => void;
  * `onModuleInit` (`ServeStaticModule`, `GraphQLModule`), answer first,
  * whatever order Nest initializes the modules in, and a page only renders for
  * a request none of them took.
+ *
+ * On Fastify a module can't add a catch-all route of its own (`ServeStaticModule`
+ * does, and the app fails to start): Fastify refuses duplicate routes.
+ *
+ * On `@nestjs/platform-express`, that order is what puts the render route
+ * after the others. On `@nestjs/platform-fastify`, the most specific route
+ * answers wherever it was added, and adding the route last keeps it after
+ * the plugins the app registered, `@fastify/compress` among them.
  */
 export class AngularStreamRenderer implements OnModuleInit, OnApplicationBootstrap {
   private registered = false;
+  /** Loaded on Fastify only, so an Express app needs no Fastify packages. */
+  private addFastify: typeof addFastifyRenderer | undefined;
 
   constructor(
     private readonly adapterHost: HttpAdapterHost,
@@ -35,16 +36,29 @@ export class AngularStreamRenderer implements OnModuleInit, OnApplicationBootstr
     private readonly options: AngularStreamModuleOptions,
   ) {}
 
-  onModuleInit(): void {
+  async onModuleInit(): Promise<void> {
     const adapter = this.adapterHost.httpAdapter;
     // An application context (`NestFactory.createApplicationContext()`) has no HTTP server.
     if (adapter === undefined) {
       return;
     }
     const type = adapter.getType();
-    if (type !== 'express') {
+    if (!PLATFORMS.includes(type)) {
       throw new Error(
-        `[angular-stream] AngularStreamModule renders pages on @nestjs/platform-express; this application runs on '${type}'.`,
+        `[angular-stream] AngularStreamModule renders pages on @nestjs/platform-express or @nestjs/platform-fastify; this application runs on '${type}'.`,
+      );
+    }
+
+    if (type === 'fastify') {
+      // Nest awaits this hook before it adds its 404 handler, so the wrap below still comes first.
+      this.addFastify = await import('./fastify').then(
+        (module) => module.addFastifyRenderer,
+        (error: unknown) => {
+          throw new Error(
+            '[angular-stream] On @nestjs/platform-fastify, AngularStreamModule needs @push-based/angular-stream-fastify: npm install @push-based/angular-stream-fastify@next',
+            { cause: error },
+          );
+        },
       );
     }
 
@@ -69,40 +83,11 @@ export class AngularStreamRenderer implements OnModuleInit, OnApplicationBootstr
 
   private register(adapter: AbstractHttpAdapter): void {
     this.registered = true;
-    const { staticDir } = this.options;
-    const handler = createNodeHandler(this.options);
-    const serveStatic: StaticHandler =
-      staticDir === undefined ? async () => false : createStaticHandler(staticDir);
     const prefix = globalPrefix(this.config);
-
-    // Middleware, not a route: it passes methods other than GET and HEAD on,
-    // and errors before the response has started, to Nest's own handlers.
-    adapter.use((req: NodeRequest, res: ServerResponse, next: Next) => {
-      const target = req.originalUrl ?? req.url ?? '/';
-      // Under the global prefix, a request no controller took is Nest's 404.
-      if (prefix !== null && isUnderPrefix(target, prefix)) {
-        next();
-        return;
-      }
-      // Vite's hashed build output. A file that isn't there, such as an old
-      // chunk after a deploy, is a 404 rather than a page.
-      if (isUnderPrefix(target, '/assets')) {
-        serveStatic(req, res).then((served) => {
-          if (!served) {
-            next(new NotFoundException(`Cannot ${req.method} ${target}`));
-          }
-        }, next);
-        return;
-      }
-      handler(req, res, (error?: unknown) => {
-        // Nest maps an error to its status only when it is an HttpException
-        // (or http-errors'); anything else is a 500.
-        next(
-          error instanceof BadRequestError
-            ? new BadRequestException(error.message, { cause: error })
-            : error,
-        );
-      });
-    });
+    if (adapter.getType() === 'fastify' && this.addFastify !== undefined) {
+      this.addFastify(adapter.getInstance<FastifyInstance>(), this.options, prefix);
+    } else {
+      addExpressRenderer(adapter, this.options, prefix);
+    }
   }
 }

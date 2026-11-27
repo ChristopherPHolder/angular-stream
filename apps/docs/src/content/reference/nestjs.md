@@ -2,12 +2,15 @@
 npm install @push-based/angular-stream-nestjs@next
 ```
 
-The NestJS module, for `@nestjs/platform-express`. It is built on the
-[Node adapter](node.md) and depends on
+The NestJS module, for `@nestjs/platform-express` and
+`@nestjs/platform-fastify`. It is built on the [Node adapter](node.md), and on
+Fastify on the [Fastify adapter](fastify.md)'s route handler. It depends on
 [`@push-based/angular-stream-core`](core.md), whose browser providers the app
-still needs. It needs `@nestjs/common`, `@nestjs/core` and
-`@nestjs/platform-express` 12. For the whole setup, see
-[NestJS](../getting-started/nestjs.md).
+still needs. It needs `@nestjs/common` and `@nestjs/core` 12, and one of
+`@nestjs/platform-express` and `@nestjs/platform-fastify` 12. On Fastify,
+install `@push-based/angular-stream-fastify` too: it's an optional peer, loaded
+only there, so an Express app installs nothing from Fastify. For the whole
+setup, see [NestJS](../getting-started/nestjs.md).
 
 Two entry points: `@push-based/angular-stream-nestjs` for the server, and
 `@push-based/angular-stream-nestjs/vite` for the dev server.
@@ -47,11 +50,14 @@ answers. The options are those of
 export class AppModule {}
 ```
 
-When the app initializes, the module adds one middleware to the Express app,
-last: right before Nest's own 404 and error handlers. That is after the
-controllers' routes, and after whatever other modules add when they
-initialize (`ServeStaticModule`, `GraphQLModule`), whichever order Nest runs
-their `onModuleInit` hooks in. For each request that reaches it, in order:
+When the app initializes, the module adds its render route last: right
+before Nest's own 404 and error handlers. On Express, that is one middleware;
+on Fastify, a route with the same steps (see [On Fastify](#on-fastify)). That
+is after the controllers' routes, and after whatever other modules add when
+they initialize (`GraphQLModule`, and `ServeStaticModule` on Express),
+whichever order Nest runs their `onModuleInit` hooks in. On Fastify, another
+catch-all `/*` route can't be added at all: Fastify refuses duplicate routes. For each request that reaches it, in
+order:
 
 1. Under the global prefix (`app.setGlobalPrefix('api')`), the request is
    passed on, so an unknown `/api/...` gets Nest's `404`. The prefix is matched
@@ -59,17 +65,50 @@ their `onModuleInit` hooks in. For each request that reaches it, in order:
 2. A method other than `GET` and `HEAD` is passed on, and ends in a 404
    unless something after the module takes it.
 3. Under `/assets/`, a file in `staticDir` is served from disk, and anything
-   else is a `NotFoundException` (`404`), not a page: Vite names those files
-   by their content hash, so a missing one is an old or mistyped URL, such as
-   a chunk from before a deploy.
+   else is a `404`, not a page: Vite names those files by their content hash,
+   so a missing one is an old or mistyped URL, such as a chunk from before a
+   deploy. With `staticDir`, the Node adapter's static handler answers it
+   (`Not found`, in plain text); without it, the module throws a
+   `NotFoundException`, which Nest's filters answer.
 4. With `staticDir`, any other file in it is served from disk. A path that
-   ends in `.html` is left to the renderer, so `/` and `/index.html` render.
-   The check is case-sensitive, so on a case-insensitive disk `/INDEX.HTML`
-   can still be sent as the raw template.
+   ends in `.html`, in any case, is left to the renderer, so `/`,
+   `/index.html` and `/INDEX.HTML` render.
 5. Everything else is rendered as a streamed page.
 
 A controller, or a route or middleware another module adds, always answers
 first, wherever it is mounted: pages are only what is left.
+
+### On Fastify
+
+On `@nestjs/platform-fastify`, the render route is a Fastify route, `GET` and
+`HEAD` on `/*`, which Fastify picks only when no more specific route matches
+the URL. A controller's route, or one another module adds, wins whichever
+order they were added in. The module adds the route from a plugin that
+Fastify loads when the app starts, after every plugin registered before it,
+so `@fastify/compress` applies to pages even when its registration wasn't
+awaited. The plugin isn't encapsulated, so the route has Nest's own 404 and
+error handlers.
+
+The steps are the ones above, with Fastify's means:
+
+- Under the global prefix, and for a missing file under `/assets/` without
+  `staticDir`, the route calls `reply.callNotFound()`, which is Nest's `404`.
+  With `staticDir`, the static handler answers a missing asset, as above.
+- A method other than `GET` and `HEAD` has no route, and gets Nest's `404`.
+- A file in `staticDir` is written to the socket by the Node adapter's static
+  handler, and the reply is hijacked: `onSend` hooks (so
+  `@fastify/compress`) don't run for it, and headers set with
+  `reply.header()` aren't sent with it. Register `@fastify/static` with
+  `wildcard: false` and `globIgnore: ['**/*.html']` instead to compress the
+  files; see
+  [Static files](../getting-started/nestjs.md#static-files).
+- A page is rendered by the Fastify adapter's
+  [`createFastifyHandler()`](fastify.md#createfastifyhandler): the status and
+  headers go on the reply, and the body through `reply.send()` as a stream, so
+  `onSend` hooks see it and Fastify logs the request as usual.
+
+Middleware added with `app.use()` and Fastify `onRequest` hooks run for
+pages; guards, interceptors and pipes don't, as on Express.
 
 ### What runs for a page
 
@@ -84,7 +123,8 @@ run for them:
   `forRoutes('*')` reaches pages too, but `forRoutes(SomeController)` never
   does.
 - **`app.use()`**: middleware added there runs for every request, pages
-  included, since Express runs it before any route.
+  included, since Express runs it before any route, and Fastify in an
+  `onRequest` hook.
 
 Anything that must cover pages, such as authentication, sessions or
 compression, belongs in `app.use()`.
@@ -108,7 +148,7 @@ global filters included:
 Once the shell has been sent, nothing goes back to Nest. An error is logged
 (`[ssr] streaming render failed after commit`) and the connection is cut
 without the closing chunk, so the client sees a broken response rather than a
-complete one, and no filter writes into it.
+complete one, and no filter writes into it. That holds on both platforms.
 
 ## `AngularStreamModule.forRootAsync()`
 
@@ -154,8 +194,9 @@ function createRequestListener(app: INestApplication): NodeHandler;
 ```
 
 A `node:http` request listener, `(req, res, next?)`, that hands each request
-to the app's Express instance: the server entry's default export, for
-[`angularStreamNest()`](#angularstreamnest) to call in `vite dev`.
+to the app's Express instance, or to the Fastify instance's router: the server
+entry's default export, for [`angularStreamNest()`](#angularstreamnest) to
+call in `vite dev`.
 
 ```ts
 const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -169,7 +210,9 @@ if (import.meta.env.PROD) {
 ```
 
 The first request calls `app.init()`, which registers the routes and the
-render route; `app.listen()` does the same in production, and only once. Vite
+render route, and on Fastify then starts the instance with `ready()`;
+`app.listen()` does the same in production, and only once. Fastify answers
+every request itself, a `404` included, so `next` is never called there. Vite
 rewrites a page request's URL to `/index.html` before it reaches the listener,
 so the listener puts back `req.originalUrl`, the URL that was asked for, for
 Nest to route.
@@ -223,9 +266,19 @@ Three ways to serve the browser build, `dist/client`:
   every `GET` that isn't a file with `index.html`, so nothing is rendered. Turn
   that off with `exclude: ['/{*any}']` and pass
   `serveStaticOptions: { index: false }`. Where it is imported doesn't matter:
-  its middleware always comes before the render route.
+  its middleware always comes before the render route. Express only: on
+  Fastify it always adds a `GET *` route, and the app fails to start with
+  `FST_ERR_DUPLICATED_ROUTE`.
 
 In each case a missing file under `/assets/` is a `404`.
+
+On Fastify, `staticDir` works the same, but files from it skip
+`@fastify/compress` (see [On Fastify](#on-fastify)). The alternative is
+`@fastify/static`, registered with `wildcard: false`, since its default
+`GET /*` route makes the app fail to start (`FST_ERR_DUPLICATED_ROUTE`), and
+`globIgnore: ['**/*.html']`, so that `/` and `/index.html` render. Nest's
+`app.useStaticAssets()` registers the same plugin, though its options type
+lacks `globIgnore`.
 
 ## Decorators
 
@@ -236,11 +289,14 @@ services need `experimentalDecorators` and `emitDecoratorMetadata`, which
 Vite's transform reads from the tsconfig; see
 [TypeScript](../getting-started/nestjs.md#5-typescript).
 
-## Fastify
+## Other platforms
 
-`@nestjs/platform-fastify` isn't supported yet. On it, the module throws when
-the app initializes:
+On an HTTP adapter other than Express and Fastify, the module throws when the
+app initializes:
 
 ```text
-[angular-stream] AngularStreamModule renders pages on @nestjs/platform-express; this application runs on 'fastify'.
+[angular-stream] AngularStreamModule renders pages on @nestjs/platform-express or @nestjs/platform-fastify; this application runs on '<type>'.
 ```
+
+An application context (`NestFactory.createApplicationContext()`) has no HTTP
+adapter, and the module does nothing there.

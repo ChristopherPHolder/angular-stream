@@ -1,7 +1,7 @@
 {
   "name": "@push-based/angular-stream-nestjs",
   "version": "0.0.0",
-  "description": "Streamed SSR for Angular in a NestJS app: a module that renders every page route on platform-express, next to the app's controllers.",
+  "description": "Streamed SSR for Angular in a NestJS app: a module that renders every page route on platform-express or platform-fastify, next to the app's controllers.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/push-based/angular-stream.git",
@@ -45,6 +45,8 @@
     "@nestjs/common": "^12.0.0",
     "@nestjs/core": "^12.0.0",
     "@nestjs/platform-express": "^12.0.0",
+    "@nestjs/platform-fastify": "^12.0.0",
+    "@push-based/angular-stream-fastify": "workspace:*",
     "vite": ">=7"
   },
   "devDependencies": {
@@ -55,7 +57,10 @@
     "@nestjs/common": "^12.6.0",
     "@nestjs/core": "^12.6.0",
     "@nestjs/platform-express": "^12.6.0",
+    "@nestjs/platform-fastify": "^12.6.0",
+    "@push-based/angular-stream-fastify": "workspace:*",
     "@types/node": "^20.19.43",
+    "fastify": "5.12.8",
     "reflect-metadata": "^0.2.2",
     "rxjs": "~7.8.0",
     "typescript": "~6.0.2",
@@ -69,6 +74,15 @@
     ]
   },
   "peerDependenciesMeta": {
+    "@nestjs/platform-express": {
+      "optional": true
+    },
+    "@nestjs/platform-fastify": {
+      "optional": true
+    },
+    "@push-based/angular-stream-fastify": {
+      "optional": true
+    },
     "vite": {
       "optional": true
     }
