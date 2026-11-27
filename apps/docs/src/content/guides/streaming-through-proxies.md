@@ -64,6 +64,19 @@ it.
   that when the stream is created with `flush: zlib.constants.Z_SYNC_FLUSH`
   (Brotli: `zlib.constants.BROTLI_OPERATION_FLUSH`); look up where your
   middleware takes zlib options, then check with `curl --compressed`.
+- **`koa-compress`** holds the whole page back by default. Give each
+  encoding a `flush` option, which it passes on to zlib:
+  `zlib.constants.Z_SYNC_FLUSH` for `gzip` and `deflate`,
+  `BROTLI_OPERATION_FLUSH` for `br` and `ZSTD_e_flush` for `zstd`. Version
+  5.3 prefers zstd, which Chrome asks for, so leave none out. The setup, and
+  the timings with and without it, are in
+  [Koa](../getting-started/koa.md#7-compression).
+- **Other middleware built on Node's `zlib`** (`@fastify/compress` and
+  others) has to flush after each write as well. zlib does that when the
+  stream is created with `flush: zlib.constants.Z_SYNC_FLUSH` (Brotli:
+  `zlib.constants.BROTLI_OPERATION_FLUSH`, zstd: `ZSTD_e_flush`); look up
+  where your middleware takes zlib options, then check every encoding it
+  offers, not only what `curl --compressed` asks for.
 - **Or don't compress HTML in Node** and let the proxy in front do it, or
   leave pages out of the middleware's filter. Scripts and styles, which don't
   stream, can still be compressed.

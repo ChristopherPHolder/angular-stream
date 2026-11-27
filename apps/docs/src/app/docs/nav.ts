@@ -91,6 +91,13 @@ export const DOCS: DocSection[] = [
         load: () => import('../../content/getting-started/node.md'),
       },
       {
+        slug: 'koa',
+        title: 'Koa',
+        description:
+          'Stream an Angular app from Koa, with koa-static, koa-compress and your API routes, from the app config to running it in production.',
+        load: () => import('../../content/getting-started/koa.md'),
+      },
+      {
         slug: 'azure-functions',
         title: 'Azure Functions',
         description:
