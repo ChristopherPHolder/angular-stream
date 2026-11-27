@@ -67,9 +67,14 @@ together; the short version:
   `apps/cloudflare-demo` (streamed hydration shown step by step, with an
   in-process fake API) are private apps, each deployed as a Cloudflare Worker.
   `packages/core` (`@push-based/angular-stream-core`: the renderer, inline
-  runtime and client, runtime-agnostic) and `packages/cloudflare`
-  (`@push-based/angular-stream-cloudflare`: `createStreamingWorker()`) are
-  published to npm. `apps/docs` is the documentation site (prerendered,
+  runtime and client, runtime-agnostic) and the adapters are published to npm:
+  `packages/cloudflare` (`createStreamingWorker()`), `packages/node`
+  (`node:http`, Connect, Express, and a Vite dev plugin), `packages/fastify`,
+  `packages/nestjs` (on Express or Fastify), `packages/aws-lambda` and
+  `packages/nitro`, each `@push-based/angular-stream-<name>`. Runtimes that
+  speak `Request`/`Response` natively (Hono, Deno, Bun, Fastly, Vercel,
+  Netlify, Azure Functions, a Service Worker) have a docs recipe and an
+  example, but no package. `apps/docs` is the documentation site (prerendered,
   GitHub Pages), `libs/design-system` (`@angular-stream/design-system`,
   private) the design system the demo and the docs share, and `press-kit`
   (`@angular-stream/press-kit`, private) the logo.
@@ -93,7 +98,8 @@ together; the short version:
   and ngp compiles it with each app; `vp pack` builds `dist/` only for
   publishing. Packages must not import from an app, the core must not import
   an adapter or any runtime-specific API (only web `Request`, `Response` and
-  streams), and an adapter imports only the core. The Nx tags in each
+  streams), and an adapter imports only the core, or another adapter it is
+  built on (Fastify and NestJS on Node, NestJS on Fastify). The Nx tags in each
   `package.json` enforce this. Take what a package needs as options, the way
   `createStreamingHandler()` takes the root component, config and
   `loadTemplate`. Packages carry no Angular decorators (they are not compiled
@@ -103,7 +109,11 @@ together; the short version:
   `@push-based/angular-stream-<runtime>`, tagged `type:package` and
   `runtime:<runtime>`, depending on the core with `workspace:*`, wrapping
   `createStreamingHandler()`. Add its tag to the boundary rules in
-  `vite.config.ts`. Everything under `packages/` is released together.
+  `vite.config.ts`. Everything under `packages/` is released together. Make a
+  package only when a runtime doesn't speak `Request`/`Response` or needs
+  shared plumbing; otherwise a docs recipe and an `apps/example-<runtime>` are
+  enough. Every adapter's example answers a missing `/assets/*` with `404` and
+  renders `/index.html` as a page; keep new ones the same.
 - **Releases**: `nx release`, one fixed group, versions from conventional
   commits, run by `.github/workflows/release.yml`. Commit messages are
   therefore conventional (`feat(core): …`, `fix(cloudflare): …`).
