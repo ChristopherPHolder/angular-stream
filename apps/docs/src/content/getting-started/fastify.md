@@ -166,7 +166,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   optimizeDeps: { entries: ['index.html'] },
   plugins: [
-    angularStreamNode({ entry: 'src/server.ts' }),
+    angularStreamNode({ entry: 'src/server.ts', routes: ['/api'] }),
     ngp({ ssr: { entry: 'src/server.ts' } }),
   ],
 });
@@ -178,8 +178,11 @@ plus the event dispatch contract.
 
 `angularStreamNode()`, from the Node adapter, is for `vite dev`. It calls your
 server entry's default export with each page request, and with `index.html`,
-as the dev server transforms it, left on the request. List it before ngp, or
-the dev server refuses to start. In a build it does nothing.
+as the dev server transforms it, left on the request. `routes: ['/api']` sends
+it every request under `/api` as well, whatever its method and `Accept`
+header, before Vite sees it; it matches `/api` and `/api/health`, not
+`/api.json`. List it before ngp, or the dev server refuses to start. In a
+build it does nothing.
 
 The default export is what makes this work with Fastify. The plugin calls it
 as a `node:http` request listener, `(req, res, next)`, and a Fastify instance
@@ -199,14 +202,13 @@ vite dev   # http://localhost:5173
 ```
 
 The dev server serves the sources, and every page is rendered by your Fastify
-app and streamed, compressed by `@fastify/compress` as in production.
+app and streamed, compressed by `@fastify/compress` as in production. The API
+under `/api` is answered by the same app.
 
-Only page requests reach the app in dev: the Vite plugin hands it a `GET` or
-`HEAD` that asks for HTML (`Accept: text/html`), and leaves everything else
-to Vite. A `fetch('/api/health')` from the app therefore gets Vite's answer,
-not your route's. Run the built server to work on the API, or proxy it from
-`vite dev` to a second instance with Vite's `server.proxy`. To check a page
-with `curl` in dev, send the header a browser sends:
+Vite answers everything else: the plugin hands the app the requests `routes`
+names, and pages, a `GET` or `HEAD` that asks for HTML (`Accept: text/html`).
+An API outside `/api` needs its own prefix in `routes`. To check a page with
+`curl` in dev, send the header a browser sends:
 
 ```bash
 curl -sN -H 'Accept: text/html' http://localhost:5173/

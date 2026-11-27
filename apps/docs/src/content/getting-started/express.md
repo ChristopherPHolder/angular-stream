@@ -194,46 +194,12 @@ connection, and the error doesn't reach `next()`.
 ```ts title="vite.config.ts"
 import { angularStreamNode } from '@push-based/angular-stream-node/vite';
 import { ngp } from '@push-based/vite-plugin-ngp';
-import type { IncomingMessage, ServerResponse } from 'node:http';
-import { type Plugin, defineConfig, isRunnableDevEnvironment } from 'vite';
-
-/** What src/server.ts default-exports: the Express app. */
-type App = (req: IncomingMessage, res: ServerResponse, next: (error?: unknown) => void) => void;
-
-/**
- * `vite dev`: requests under `/api` go to the Express app too. The Node
- * plugin only sends it pages, and Vite would answer these with index.html.
- */
-function api(entry: string): Plugin {
-  return {
-    name: 'example-express-api',
-    apply: 'serve',
-    configureServer(server) {
-      server.middlewares.use((req, res, next) => {
-        const path = (req.url ?? '/').split('?')[0];
-        if (path !== '/api' && !path?.startsWith('/api/')) {
-          next();
-          return;
-        }
-        const ssr = server.environments['ssr'];
-        if (ssr === undefined || !isRunnableDevEnvironment(ssr)) {
-          next(new Error('the ssr environment has no module runner'));
-          return;
-        }
-        ssr.runner.import<{ default: App }>(entry).then(
-          (module) => module.default(req, res, next),
-          (error: unknown) => next(error),
-        );
-      });
-    },
-  };
-}
+import { defineConfig } from 'vite';
 
 export default defineConfig({
   optimizeDeps: { entries: ['index.html'] },
   plugins: [
-    api('src/server.ts'),
-    angularStreamNode({ entry: 'src/server.ts' }),
+    angularStreamNode({ entry: 'src/server.ts', routes: ['/api'] }),
     ngp({ ssr: { entry: 'src/server.ts' } }),
   ],
 });
@@ -248,12 +214,13 @@ Express app, with `index.html` as the dev server transforms it, so the page
 loads Vite's client and your sources, and SSR streams as it does in
 production. List it before ngp, or the dev server refuses to start.
 
-It sends the app pages only: requests that accept HTML and that Vite doesn't
-serve itself. A request to the API doesn't accept HTML, and Vite would answer
-it with `index.html`. `api()` sends everything under `/api` to the Express app
-as well, loaded the same way, so the API answers in dev as it does in
-production. List one path for each prefix your API routes use. In a build,
-neither plugin does anything.
+On its own, it sends the app pages only: requests that accept HTML and that
+Vite doesn't serve itself. A request to the API doesn't accept HTML, and Vite
+would answer it with `index.html`. `routes` sends everything under `/api` to
+the Express app as well, whatever its method and `Accept` header, before Vite
+sees it, so the API answers in dev as it does in production. `'/api'` matches
+`/api` and `/api/hello`, not `/api.json`; list one prefix for each your API
+routes use. In a build the plugin does nothing.
 
 ## 5. Develop
 
@@ -267,9 +234,10 @@ so `src/server.ts` doesn't start a server of its own.
 
 In dev, Express sees a page request with the URL Vite rewrote it to,
 `/index.html`; `req.originalUrl` holds the one the browser asked for, and that
-is what the handler renders. The catch-all matches either, but a route that
-picks pages by their path, such as `app.get('/admin', requireLogin)`, only
-matches in production. Middleware that has to run for some pages in dev too
+is what the handler renders. A request under `/api` keeps its URL: the plugin
+hands it over before Vite rewrites anything. The catch-all matches either, but
+a route that picks pages by their path, such as `app.get('/admin',
+requireLogin)`, only matches in production. Middleware that has to run for some pages in dev too
 can be mounted without a path and read `req.originalUrl`.
 
 ## 6. Build and run
