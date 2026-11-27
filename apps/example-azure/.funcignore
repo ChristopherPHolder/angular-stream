@@ -1,0 +1,12 @@
+# What `func azure functionapp publish` leaves out. The function app needs
+# host.json, package.json, dist/server and the template, dist/client/index.html.
+# The rest of dist/client goes to the static host.
+.funcignore
+local.settings.json
+index.html
+public/
+src/
+tsconfig*.json
+vite.config.ts
+dist/client/*
+!dist/client/index.html
