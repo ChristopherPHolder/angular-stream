@@ -1,0 +1,14 @@
+/**
+ * The Hono on Cloudflare Workers example. Not deployed. `html_handling: "none"`
+ * sends every navigation to the Worker, where Hono passes it to the renderer.
+ */
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "angular-stream-example-hono-workers",
+  "main": "./src/worker.ts",
+  "compatibility_date": "2026-09-07",
+  "assets": {
+    "binding": "ASSETS",
+    "html_handling": "none",
+  },
+}

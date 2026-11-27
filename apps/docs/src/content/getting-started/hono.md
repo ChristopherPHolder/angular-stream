@@ -4,8 +4,11 @@ streamed `Response` it gets back. The same app runs on Node, Bun, Deno and
 Cloudflare Workers, and keeps API routes and the Angular app in one server.
 
 This page sets it up on Node in full, then shows what changes on each of the
-other runtimes. [`apps/example-hono`](../../../../../apps/example-hono/src/server.ts)
-in the repository is the Node setup, as written here.
+other runtimes. In the repository,
+[`apps/example-hono`](../../../../../apps/example-hono/src/server.ts) is the
+Node setup and
+[`apps/example-hono-workers`](../../../../../apps/example-hono-workers/src/worker.ts)
+the Workers one, as written here.
 
 ```bash
 npm install @push-based/angular-stream-core@next hono @hono/node-server
@@ -262,8 +265,12 @@ const angular = createStreamingWorker({
   allowedHosts: ['localhost', 'my-app.example.workers.dev'],
 });
 
+/** Hono routes the API; every other request is a page, rendered by the Worker as a stream. */
 const app = new Hono<{ Bindings: Env }>();
 app.get('/api/hello', (c) => c.json({ hello: 'from Hono' }));
+// Cloudflare serves the files that exist, so an /assets/ request that gets here is
+// a missing hashed file (an old chunk after a deploy): a 404, not a page.
+app.get('/assets/*', (c) => c.notFound());
 app.get('*', (c) => angular.fetch(c.req.raw, c.env));
 
 export default app satisfies ExportedHandler<Env>;
