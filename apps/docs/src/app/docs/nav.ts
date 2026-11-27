@@ -118,6 +118,13 @@ export const DOCS: DocSection[] = [
           'Stream an Angular app from a Netlify Function or an Edge Function, from the app config to the deploy.',
         load: () => import('../../content/getting-started/netlify.md'),
       },
+      {
+        slug: 'express',
+        title: 'Express',
+        description:
+          'Stream an Angular app from Express 5, next to your API routes and behind compression, from the app config to production.',
+        load: () => import('../../content/getting-started/express.md'),
+      },
     ],
   },
   {

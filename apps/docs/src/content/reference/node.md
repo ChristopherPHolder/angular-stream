@@ -292,6 +292,10 @@ if (import.meta.env.PROD) {
 }
 ```
 
+The plugin sends the app page requests only, so in dev an API route on the
+same app isn't reached; [Express](../getting-started/express.md#4-vite) shows
+a few lines of Vite config that send it the API's requests as well.
+
 Koa's is `app.callback()`. Fastify and NestJS build their own request handling
 on top of `node:http`: export a function that passes `req` and `res` to the app
 once it is ready, rather than the app object, and make sure the raw request
