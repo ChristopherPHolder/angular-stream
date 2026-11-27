@@ -17,6 +17,7 @@ import logo from '@angular-stream/press-kit/symbol/angular-stream-symbol.svg?no-
 import { ALL_PAGES, DOCS, type DocSection } from './docs/nav';
 import { DEMO, MOVIES, REPO } from './links';
 import { trackPageHead } from './page-head';
+import { DocsSearch } from './search/search';
 
 @Component({
   selector: 'app-root',
@@ -30,6 +31,7 @@ import { trackPageHead } from './page-head';
           <img [ngSrc]="logo" alt="" width="32" height="32" priority />
           angular-stream <span>docs</span>
         </a>
+        <docs-search />
         <nav class="top-nav text-link-mono" aria-label="Site">
           <a routerLink="/docs/getting-started/introduction">Docs</a>
           <a [href]="demo">Demo</a>
@@ -113,8 +115,8 @@ import { trackPageHead } from './page-head';
       </div>
     </footer>
   `,
-  host: { '(document:keydown.escape)': 'menuOpen() && closeMenu()' },
-  imports: [NgOptimizedImage, RouterLink, RouterLinkActive, RouterOutlet],
+  host: { '(document:keydown.escape)': 'escaped()' },
+  imports: [DocsSearch, NgOptimizedImage, RouterLink, RouterLinkActive, RouterOutlet],
 })
 export class App {
   protected readonly logo = logo;
@@ -230,6 +232,18 @@ export class App {
   protected toggled(section: DocSection, event: Event): void {
     const open = (event.target as HTMLDetailsElement).open;
     this.toggledSections.update((sections) => ({ ...sections, [section.id]: open }));
+  }
+
+  /**
+   * Escape closes the menu. A method, not `menuOpen() && closeMenu()` in the
+   * host binding: that expression is `false` while the menu is closed, and
+   * Angular cancels an event whose listener returns `false`, which kept Escape
+   * from everything else on the page, such as closing the search dialog.
+   */
+  protected escaped(): void {
+    if (this.menuOpen()) {
+      this.closeMenu();
+    }
   }
 
   protected closeMenu(): void {

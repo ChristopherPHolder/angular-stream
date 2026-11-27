@@ -1,4 +1,4 @@
-import { existsSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import hljs from 'highlight.js/lib/core';
 import bash from 'highlight.js/lib/languages/bash';
@@ -69,6 +69,23 @@ export function markdown(options: MarkdownOptions): Plugin {
   return {
     name: 'docs-markdown',
     enforce: 'pre',
+    resolveId(id) {
+      return id === SEARCH_MODULE ? '\0' + SEARCH_MODULE : null;
+    },
+    // The search index: every page's text, section by section. A module of its
+    // own, so it is a chunk of its own that only a search downloads.
+    load(id) {
+      if (id !== '\0' + SEARCH_MODULE) {
+        return null;
+      }
+      const entries: SearchEntry[] = [];
+      for (const file of contentFiles(options.contentDir)) {
+        this.addWatchFile(file);
+        const { html } = renderPage(readFileSync(file, 'utf8'), file, options);
+        entries.push(...searchEntries(routeOf(file, options.contentDir), html));
+      }
+      return { code: `export default ${JSON.stringify(entries)};`, map: null };
+    },
     transform(source, id) {
       const file = id.split('?')[0];
       if (!file.endsWith('.md')) {
@@ -79,6 +96,76 @@ export function markdown(options: MarkdownOptions): Plugin {
       return { code: `export default ${JSON.stringify(page)};`, map: null };
     },
   };
+}
+
+/** What the app imports the search index as; `src/types.d.ts` declares it. */
+const SEARCH_MODULE = 'virtual:docs-search';
+
+/** One section of one page, as plain text: what a search looks through. */
+export interface SearchEntry {
+  /** The page: `docs/<dir>/<page>`. */
+  path: string;
+  /** The section's heading id, or `''` for what comes before the first heading. */
+  id: string;
+  /** The section's heading, or `''`. */
+  heading: string;
+  text: string;
+}
+
+/** Every page: the `.md` files one folder down from `contentDir`, in a stable order. */
+function contentFiles(contentDir: string): string[] {
+  return readdirSync(contentDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .flatMap((dir) =>
+      readdirSync(path.join(contentDir, dir.name))
+        .filter((file) => file.endsWith('.md'))
+        .map((file) => path.join(contentDir, dir.name, file)),
+    )
+    .sort();
+}
+
+/**
+ * Splits a rendered page at its `h2` and `h3` headings, the ones with a place
+ * in "On this page", and reduces each part to its text. Code is kept: an
+ * option's name is what people search for. Diagrams, the copy buttons and the
+ * headings' link icons are not text of the page.
+ */
+export function searchEntries(route: string, html: string): SearchEntry[] {
+  const content = html
+    .replace(/<pre class="mermaid"[^>]*>[\s\S]*?<\/pre>/g, '')
+    .replace(/<button[^>]*>[\s\S]*?<\/button>/g, '')
+    .replace(/<a class="anchor"[^>]*>[\s\S]*?<\/a>/g, '');
+  return content
+    .split(/(?=<h[23] id=")/)
+    .map((part) => {
+      const heading = /^<h[23] id="([^"]*)">([\s\S]*?)<\/h[23]>/.exec(part);
+      return {
+        path: route,
+        id: heading?.[1] ?? '',
+        heading: toText(heading?.[2] ?? ''),
+        text: toText(heading ? part.slice(heading[0].length) : part),
+      };
+    })
+    .filter((entry) => entry.heading !== '' || entry.text !== '');
+}
+
+/**
+ * HTML to the text it shows, on one line. Inline tags go without a trace, so
+ * highlighted code reads `allowedHosts: [` and not `allowedHosts : [`; any
+ * other tag separates words.
+ */
+function toText(html: string): string {
+  return html
+    .replace(/<\/?(?:span|code|strong|em|a|wbr)\b[^>]*>/g, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, code: string) => String.fromCodePoint(Number(code)))
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 /** The route of a content file: `content/guides/debugging.md` is `docs/guides/debugging`. */

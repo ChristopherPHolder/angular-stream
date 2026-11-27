@@ -149,15 +149,16 @@ pre.mermaid {
 .top-inner {
   display: flex;
   align-items: stretch;
-  justify-content: space-between;
   gap: var(--space-6);
   height: var(--header-height);
 }
 
+/* The brand on the left, everything else on the right. */
 .brand {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  margin-right: auto;
   white-space: nowrap;
   color: var(--color-text-heading);
   text-decoration: none;
@@ -184,6 +185,131 @@ pre.mermaid {
 }
 
 .top-nav a:hover {
+  color: var(--color-neutral-900);
+}
+
+/* Search: the button in the header, and the dialog it opens. */
+
+docs-search {
+  display: flex;
+  align-items: center;
+}
+
+.search-open {
+  gap: var(--space-2);
+  padding-block: var(--space-2);
+}
+
+.search-open svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+/* The key that opens it. */
+.search-open kbd {
+  padding-inline: var(--space-1-5);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--radius-base);
+  background: var(--color-surface);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+  font-weight: 500;
+}
+
+.search {
+  width: min(42rem, 100% - 2 * var(--space-4));
+  max-height: min(36rem, 100dvh - 2 * var(--space-4));
+  margin-top: var(--space-16);
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  color: inherit;
+  overflow: hidden;
+}
+
+/* Only when open: a closed <dialog> is display: none. */
+.search[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.search::backdrop {
+  background: color-mix(in srgb, var(--color-neutral-950) 40%, transparent);
+}
+
+/* The page behind the dialog stays where it is. */
+html:has(.search[open]) {
+  overflow: hidden;
+}
+
+.search-field {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.search-field input {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-status {
+  margin: 0;
+  padding: var(--space-3) var(--space-4) var(--space-2);
+  color: var(--color-neutral-600);
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+}
+
+.search-results {
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--space-2) var(--space-2);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.search-results li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+
+.search-results .search-active {
+  background: var(--color-primary-50);
+}
+
+.search-where {
+  color: var(--color-neutral-600);
+  font-size: 0.6875rem;
+  line-height: 1rem;
+}
+
+.search-title {
+  color: var(--color-text-heading);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.search-snippet {
+  color: var(--color-neutral-600);
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  overflow-wrap: anywhere;
+}
+
+.search-snippet mark {
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-100);
   color: var(--color-neutral-900);
 }
 
@@ -310,9 +436,17 @@ details[open] > summary.sidebar-title::after {
     --header-height: 3.5rem;
   }
 
-  /* The brand and the button fit a 320px screen with this between them. */
+  /* The brand and the buttons fit a 320px screen with this between them. */
   .top-inner {
-    gap: var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .search-open kbd {
+    display: none;
+  }
+
+  .search {
+    margin-top: var(--space-4);
   }
 
   .top-nav {
@@ -388,6 +522,28 @@ details[open] > summary.sidebar-title::after {
   .sidebar {
     width: 100%;
     border-left: 0;
+  }
+
+  /* The magnifier alone; the button keeps its name for a screen reader. */
+  .search-open {
+    padding: var(--space-2-5);
+  }
+
+  .search-open-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* The narrowest phones: the name without "docs" leaves room for both buttons. */
+@media (max-width: 360px) {
+  .brand span {
+    display: none;
   }
 }
 

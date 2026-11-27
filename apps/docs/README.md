@@ -73,6 +73,11 @@ highlighter ships to the browser:
   (`../../../../../packages/core/src/server/handler.ts`), which becomes a link
   to it on GitHub. A link to a file that does not exist fails the build.
 
+The same plugin builds the search index (`virtual:docs-search`): the text of
+every page, cut at its `##` and `###` headings, code included. A new page is
+searchable once it is listed in `nav.ts`; there is nothing else to do. The index
+is a chunk of its own that the browser downloads on the first search.
+
 A page may also hold HTML. The repository's `press-kit/` folder is published
 under `press-kit/` (`press-kit.ts`), so `<img src="press-kit/...">` shows one of
 its files and `<a href="press-kit/..." download>` links one; these paths are not
