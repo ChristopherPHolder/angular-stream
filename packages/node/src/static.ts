@@ -45,8 +45,9 @@ const CONTENT_TYPES: Record<string, string> = {
  *
  * It answers `GET` and `HEAD` for files in `dir` and leaves everything else
  * alone: other methods, folders, paths outside `dir`, files that don't exist,
- * and every `.html` file. A page is never served as a file, so `/` and
- * `/index.html` reach the renderer, which renders them into the template.
+ * and every `.html` file, in any case. A page is never served as a file, so
+ * `/`, `/index.html` and `/INDEX.HTML` reach the renderer, which renders them
+ * into the template.
  *
  * Files under `assets/`, which Vite names by their content hash, are cached
  * for a year; everything else is revalidated on each use. A missing `dir` is
@@ -61,7 +62,10 @@ export function createStaticHandler(dir: string | URL): StaticHandler {
     }
 
     const file = resolveFile(root, req.url ?? '/');
-    if (file === null || path.extname(file) === '.html') {
+    // Any case: on a case-insensitive disk, `/INDEX.HTML` is `index.html`.
+    // `resolveFile()` has decoded the path, so `/index%2Ehtml` is too.
+    const extension = file === null ? '' : path.extname(file).toLowerCase();
+    if (file === null || extension === '.html') {
       return false;
     }
 
@@ -72,7 +76,7 @@ export function createStaticHandler(dir: string | URL): StaticHandler {
 
     const etag = `W/"${stats.size.toString(16)}-${Math.floor(stats.mtimeMs).toString(16)}"`;
     const immutable = path.relative(root, file).split(path.sep)[0] === 'assets';
-    res.setHeader('Content-Type', CONTENT_TYPES[path.extname(file)] ?? 'application/octet-stream');
+    res.setHeader('Content-Type', CONTENT_TYPES[extension] ?? 'application/octet-stream');
     res.setHeader(
       'Cache-Control',
       immutable ? 'public, max-age=31536000, immutable' : 'public, max-age=0, must-revalidate',
