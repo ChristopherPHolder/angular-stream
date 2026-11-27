@@ -50,8 +50,10 @@ const CONTENT_TYPES: Record<string, string> = {
  * into the template.
  *
  * Files under `assets/`, which Vite names by their content hash, are cached
- * for a year; everything else is revalidated on each use. A missing `dir` is
- * not an error: nothing is served from it.
+ * for a year; everything else is revalidated on each use. A file under
+ * `assets/` that doesn't exist is answered with `404`: it's an old hashed
+ * chunk after a deploy, and a page in its place would fail as a script. A
+ * missing `dir` is not an error: nothing is served from it.
  */
 export function createStaticHandler(dir: string | URL): StaticHandler {
   const root = path.resolve(typeof dir === 'string' ? dir : fileURLToPath(dir));
@@ -70,17 +72,23 @@ export function createStaticHandler(dir: string | URL): StaticHandler {
       return false;
     }
 
+    const inAssets = path.relative(root, file).split(path.sep)[0]?.toLowerCase() === 'assets';
     const stats = await stat(file).catch(() => null);
     if (stats === null || !stats.isFile()) {
-      return false;
+      if (!inAssets) {
+        return false;
+      }
+      res.statusCode = 404;
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.end(req.method === 'HEAD' ? undefined : 'Not found');
+      return true;
     }
 
     const etag = `W/"${stats.size.toString(16)}-${Math.floor(stats.mtimeMs).toString(16)}"`;
-    const immutable = path.relative(root, file).split(path.sep)[0]?.toLowerCase() === 'assets';
     res.setHeader('Content-Type', CONTENT_TYPES[extension] ?? 'application/octet-stream');
     res.setHeader(
       'Cache-Control',
-      immutable ? 'public, max-age=31536000, immutable' : 'public, max-age=0, must-revalidate',
+      inAssets ? 'public, max-age=31536000, immutable' : 'public, max-age=0, must-revalidate',
     );
     res.setHeader('ETag', etag);
     res.setHeader('Last-Modified', stats.mtime.toUTCString());
