@@ -22,6 +22,9 @@ pnpm-debug.log*
 .env
 .env.*
 
+# Azure Functions (local settings can hold connection strings)
+local.settings.json
+
 # IDEs and editors
 .idea/
 .project

@@ -90,6 +90,13 @@ export const DOCS: DocSection[] = [
           'Stream an Angular app from Node with node:http, Express or Connect, from the app config to running it in production.',
         load: () => import('../../content/getting-started/node.md'),
       },
+      {
+        slug: 'azure-functions',
+        title: 'Azure Functions',
+        description:
+          'Stream an Angular app from Azure Functions, from the app config to the deploy.',
+        load: () => import('../../content/getting-started/azure-functions.md'),
+      },
     ],
   },
   {

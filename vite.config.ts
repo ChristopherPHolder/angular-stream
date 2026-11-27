@@ -54,6 +54,10 @@ export default defineConfig({
               sourceTag: 'runtime:node',
               onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:node'],
             },
+            {
+              sourceTag: 'runtime:azure',
+              onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:azure'],
+            },
           ],
         },
       ],
