@@ -95,9 +95,13 @@ worker.addEventListener('fetch', (event) => {
 deletes the caches of earlier builds and calls `clients.claim()`, so the page
 that installed the worker is controlled straight away.
 [The full file](../../../../../apps/example-service-worker/src/service-worker.ts)
-also adds a `Server-Timing: sw-boot;dur=…` header to each page: how long the
-worker took to start and run its script, shown in DevTools under the
-navigation's _Timing_ tab.
+also adds a `Server-Timing: sw-boot;dur=…` header to the first page a worker
+answers after it starts: how long it took to start and run its script, shown
+in DevTools under the navigation's _Timing_ tab. A page the worker can't
+render falls back to the network, so a broken worker build doesn't take the
+site down. The install step fetches with `cache: 'reload'`, past the HTTP
+cache, so a host that sends `max-age` can't hand a new worker the previous
+build's `index.html`.
 
 `allowedHosts` is the worker's own hostname: it only ever sees navigations to
 its own origin.
@@ -176,17 +180,17 @@ installs a new worker.
 Measured with the example on an Apple M4 Max, in headless Chrome 158, served by
 `vp preview`.
 
-| Measured                                   | Result                         |
-| ------------------------------------------ | ------------------------------ |
-| `sw.js`, minified                          | 463 kB, 142 kB gzipped         |
-| `sw.js`, unminified                        | 992 kB, 214 kB gzipped         |
-| The client bundle, for comparison          | 191 kB, 63 kB gzipped          |
-| Worker start-up, first start after install | 21–35 ms                       |
-| Worker start-up, later cold starts         | 5–9 ms                         |
-| Shell in the page, worker running          | 5–10 ms after navigation start |
-| Shell in the page, worker stopped          | 13–24 ms                       |
-| Widget chunk in the page                   | 2003–2022 ms                   |
-| Widget hydrated                            | 1–4 ms after its chunk         |
+| Measured                                   | Result                                                                                                      |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `sw.js`, minified                          | 463 kB, 142 kB gzipped                                                                                      |
+| `sw.js`, unminified                        | 992 kB, 214 kB gzipped                                                                                      |
+| The client bundle, for comparison          | 191 kB, 63 kB gzipped                                                                                       |
+| Worker start-up, first start after install | 21–35 ms                                                                                                    |
+| Worker start-up, later cold starts         | 5–9 ms                                                                                                      |
+| Shell in the page, worker running          | 5–10 ms after navigation start                                                                              |
+| Shell in the page, worker stopped          | 13–24 ms                                                                                                    |
+| Widget chunk in the page                   | 2003–2022 ms                                                                                                |
+| Widget hydrated                            | 2–10 ms after its chunk; about 230 ms on the first render after an install, while the lazy chunk loads cold |
 
 _Start-up_ is the time from the worker's start to its script having run (the
 `sw-boot` value). Chrome keeps the compiled script of an installed worker,
@@ -219,9 +223,15 @@ more, into the worker's cache.
   sends. A streaming server for the first visit and this worker for the rest
   should combine, but that wasn't tried.
 - **Updates replace everything at once.** A new build installs a new worker,
-  which takes over open tabs and deletes the old cache. A tab still running the
-  old build that then loads one of the old build's lazy chunks while offline
-  won't find it.
+  which takes over open tabs and deletes the old cache. From then on, any old
+  file a tab still running the old build asks for (a lazy chunk, an image) goes
+  to the network, online too. On a host that doesn't keep the previous build's
+  hashed files, that's a 404: a chunk that won't load, or a page that doesn't
+  hydrate. Keep the previous build's assets deployed, or reload open tabs when
+  a new worker takes over.
+- **Every navigation is a page.** The worker renders every same-origin
+  navigation, so opening `/sw.js` or a script in a tab, or an unknown path,
+  gets the rendered app with status 200.
 - **Search engines and link previews** never run a Service Worker. They get
   the first-visit page.
 - **Only Chrome was checked.** Streaming a `ReadableStream` body through
@@ -233,7 +243,7 @@ more, into the worker's cache.
 ## Next to `@angular/service-worker`
 
 Only one Service Worker controls a scope. Angular's `ngsw-worker.js` calls
-`event.respondWith()` for every `GET` in its scope, and answers navigations
+`event.respondWith()` for nearly every request in its scope, and answers navigations
 with the cached `index.html`: an app shell the browser then renders. This
 experiment replaces exactly that answer with a rendered, streamed page.
 

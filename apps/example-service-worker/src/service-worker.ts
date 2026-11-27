@@ -59,7 +59,9 @@ worker.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((cache) => cache.addAll(files))
+      // `cache: 'reload'` skips the HTTP cache: a host that sends `max-age` would otherwise hand
+      // the new worker the previous build's `index.html`, whose scripts no longer exist.
+      .then((cache) => cache.addAll(files.map((file) => new Request(file, { cache: 'reload' }))))
       .then(() => worker.skipWaiting()),
   );
 });
@@ -95,9 +97,25 @@ worker.addEventListener('fetch', (event) => {
   event.respondWith(fromCache(request).then((cached) => cached ?? fetch(request)));
 });
 
-/** Every navigation is rendered here, streamed, with the worker's start-up time attached. */
+/** Whether this worker has answered a page yet: `sw-boot` is sent with its first page only. */
+let booted = false;
+
+/**
+ * Every navigation is rendered here, streamed. The first page after the worker started also
+ * carries its start-up time. If rendering fails, the page comes from the network as it would
+ * without the worker, so a broken worker build never takes the site down.
+ */
 async function renderPage(request: Request): Promise<Response> {
-  const response = await render(request);
+  let response: Response;
+  try {
+    response = await render(request);
+  } catch {
+    return fetch(request);
+  }
+  if (booted) {
+    return response;
+  }
+  booted = true;
   const headers = new Headers(response.headers);
   headers.set('Server-Timing', `sw-boot;dur=${bootMs.toFixed(1)}`);
 
