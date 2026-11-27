@@ -109,12 +109,19 @@ function escapeHtml(text: string): string {
  * Lets a long identifier in inline code wrap after a separator
  * (`@push-based/<wbr>angular-stream-node`, `app.<wbr>component.<wbr>html`)
  * instead of in the middle of a word. Only between a word and a letter, so
- * `22.3.0`, `...` and `.html` stay whole. Takes escaped HTML: no entity holds
- * one of these characters.
+ * `22.3.0`, `...` and `.html` stay whole, and only in a long one: a short one
+ * (`/api/hello`, `src/server.ts`) reads better moved to the next line whole.
+ * Takes escaped HTML: no entity holds one of these characters.
  */
 function breakable(html: string): string {
+  if (html.length <= LONGEST_UNBROKEN_CODE) {
+    return html;
+  }
   return html.replace(/(?<=[\w)\]])([/.:(,])(?=[A-Za-z_$])/g, '$1<wbr>');
 }
+
+/** In characters: about half a line of a phone's column. */
+const LONGEST_UNBROKEN_CODE = 24;
 
 const CALLOUTS: Record<string, string> = {
   NOTE: 'Note',
