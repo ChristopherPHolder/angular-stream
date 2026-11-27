@@ -1,11 +1,16 @@
 # PushBased
 
-> **In this repo:** a copy of the PushBased design system for `apps/cloudflare-demo`. Only
-> `tokens.css`, `components/components.css` and the component READMEs are kept;
-> the React components, `tokens.json` and `preview.html` are left out. The
-> Google Fonts `@import` is removed from `components.css` because
-> `apps/cloudflare-demo/index.html` loads Geist itself, and the logo lives at
-> `apps/cloudflare-demo/public/pushbased-logo.svg`.
+> **In this repo:** a copy of the PushBased design system, shared by
+> `apps/cloudflare-demo` and `apps/docs` as `@angular-stream/design-system`
+> (private, never published). Only `tokens.css`, `components/components.css`,
+> the logo and the component READMEs are kept; the React components,
+> `tokens.json` and `preview.html` are left out. The Google Fonts `@import` is
+> removed from `components.css`: each app's `index.html` loads Geist itself.
+> Import the CSS as `@angular-stream/design-system/tokens.css` and
+> `@angular-stream/design-system/components.css`; import the logo as
+> `@angular-stream/design-system/pushbased-logo.svg?no-inline`, which Vite
+> turns into an asset URL (without `?no-inline` it inlines it as a `data:` URI,
+> which `NgOptimizedImage` rejects).
 
 Fast, maintainable web apps, built by Angular and Nx experts.
 
@@ -58,7 +63,7 @@ The site uses simple single-color line icons (search, arrows) drawn at 16px and 
 
 ## Logo
 
-The logo pairs a rounded "P" mark (deep purple top bowl, red lower bowl) with the stacked PUSH / BASED wordmark. Find it at `assets/logos/pushbased-logo.svg`. Display it at a minimum height of 32px, which is the size the site's navigation uses.
+The logo pairs a rounded "P" mark (deep purple top bowl, red lower bowl) with the stacked PUSH / BASED wordmark. Find it at `pushbased-logo.svg`. Display it at a minimum height of 32px, which is the size the site's navigation uses.
 
 ## Components
 

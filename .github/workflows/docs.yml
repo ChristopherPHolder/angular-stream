@@ -1,0 +1,59 @@
+name: Docs
+
+# Builds the docs, prerenders every page and publishes them to GitHub Pages.
+# The repository's Pages source must be set to "GitHub Actions".
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/docs/**'
+      - 'libs/design-system/**'
+      - '.github/workflows/docs.yml'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: docs
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      # ngp requires Node 26.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # A project site lives under /<repository>/; links, assets and the
+      # router's base href all follow DOCS_BASE.
+      - name: Build and prerender
+        run: pnpm exec nx build docs --skip-nx-cache
+        env:
+          DOCS_BASE: /${{ github.event.repository.name }}/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/docs/dist/client
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

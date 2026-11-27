@@ -69,7 +69,9 @@ together; the short version:
   `packages/core` (`@push-based/angular-stream-core`: the renderer, inline
   runtime and client, runtime-agnostic) and `packages/cloudflare`
   (`@push-based/angular-stream-cloudflare`: `createStreamingWorker()`) are
-  published to npm.
+  published to npm. `apps/docs` is the documentation site (prerendered,
+  GitHub Pages) and `libs/design-system` (`@angular-stream/design-system`,
+  private) the design system the demo and the docs share.
 - **Toolchain**: Nx runs the tasks (`pnpm nx <target> <project>`,
   `run-many`, `affected`); targets are inferred from each `package.json`'s
   scripts, which call Vite+ (`vp`). Angular is compiled by
@@ -103,10 +105,10 @@ together; the short version:
   per-route render modes and SSR status codes are unavailable.
 - **Streaming**: content that depends on HTTP data belongs in a `@defer` block
   with a `hydrate` trigger, placed directly inside an element; prefer
-  `hydrate when <its data is there>`. Read "Streamed hydration" in `README.md`
-  and `docs/streamed-hydration.md` before changing `packages/core/`, and
-  verify such changes the way the latter's "Verifying a change" section
-  describes, in both apps. `docs/out-of-order-streaming/` is the
+  `hydrate when <its data is there>`. Read the docs' "How it works" and
+  "Making something stream" pages (`apps/docs/src/content/`) before changing
+  `packages/core/`, and verify such changes the way "Debugging and verifying"
+  describes, in both Worker apps. `docs/out-of-order-streaming/` is the
   pre-implementation research, not a description of the current code.
 - **Demo**: four pages, from the idea to the detail. `/`
   (`apps/cloudflare-demo/src/app/home/`) is the landing page: why, shown as the same page
@@ -117,16 +119,22 @@ together; the short version:
   Keep the first two simple. Every box in `apps/cloudflare-demo` states what is happening
   at that step. If a change to `packages/` changes what happens, its
   API or its wire format, update the demo's text, the hand-written code in
-  `example/samples.ts` and `home/response-player.ts`, and
-  `docs/streamed-hydration.md` with it. Quotes on the landing page and in the
-  docs' "Why stream out of order" are verbatim from the linked sources; do not
-  reword them.
-- **Demo styles**: `apps/cloudflare-demo` uses the PushBased design system in
-  `apps/cloudflare-demo/src/design-system/` (read its `README.md`). Use its tokens and the
+  `example/samples.ts` and `home/response-player.ts`, and the docs with it.
+  Quotes on the landing page and in the docs' "Why stream out of order" are
+  verbatim from the linked sources; do not reword them.
+- **Docs vs demo**: the demo shows (interactive pages, live streams); the docs
+  explain (written pages: getting started, guides, how it works, API). Written
+  explanation goes in `apps/docs/src/content/`, not in the demo or the README.
+  A docs page is a Markdown file plus an entry in `src/app/docs/nav.ts`; read
+  `apps/docs/README.md` for the Markdown extras and how links work. The docs
+  are static: `vp build` plus `scripts/prerender.ts`, no Worker, so nothing
+  there may depend on a request.
+- **Styles (demo and docs)**: both use the PushBased design system in
+  `libs/design-system/` (read its `README.md`). Use its tokens and the
   `.pb-*` component classes and `.text-*` type styles; never hard-code colours,
   spacing or radii. `apps/cloudflare-demo/src/styles.css` maps the demo's meaning colours
   (`--server`, `--placeholder`, `--chunk`, `--hydrated`) onto its state scales.
-- **Server entry**: each app's `src/worker.ts`, a Workers `fetch` handler. It
+- **Server entry**: each Worker app's `src/worker.ts`, a Workers `fetch` handler. It
   runs in workerd: no `node:fs`, no `window`, no Node globals. Check any new
   server-side dependency against that before reaching for it.
 - **Angular version is pinned to exactly `22.3.0-rc.0`** in every project.

@@ -1,6 +1,7 @@
 packages:
   - apps/*
   - packages/*
+  - libs/*
 
 # Vite+ ships its own Vite build; every package that asks for `vite` gets it.
 overrides:

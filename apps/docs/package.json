@@ -1,0 +1,39 @@
+{
+  "name": "docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vp dev",
+    "build": "vp build && node scripts/prerender.ts",
+    "preview": "vp preview"
+  },
+  "dependencies": {
+    "@angular-stream/design-system": "workspace:*",
+    "@angular/common": "22.3.0-rc.0",
+    "@angular/compiler": "22.3.0-rc.0",
+    "@angular/core": "22.3.0-rc.0",
+    "@angular/platform-browser": "22.3.0-rc.0",
+    "@angular/platform-server": "22.3.0-rc.0",
+    "@angular/router": "22.3.0-rc.0",
+    "mermaid": "^12.3.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/compiler-cli": "22.3.0-rc.0",
+    "@push-based/vite-plugin-ngp": "^0.4.1",
+    "@types/node": "^20.19.43",
+    "highlight.js": "^11.12.0",
+    "marked": "^18.3.0",
+    "typescript": "~6.0.2",
+    "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8001",
+    "vite-plus": "1.8.0"
+  },
+  "nx": {
+    "tags": [
+      "type:app",
+      "runtime:static"
+    ]
+  }
+}

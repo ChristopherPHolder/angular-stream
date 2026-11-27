@@ -1,17 +1,18 @@
 # angular-stream
 
-Streamed server-side rendering for Angular on Cloudflare Workers, built with
-Vite+. The browser starts hydrating the page while the response is still
-arriving. The repo holds two apps that use it: a real TMDB-backed movie browser,
-and a demo that shows each step of streamed hydration as it happens.
+Streamed server-side rendering for Angular. The browser starts hydrating the
+page while the response is still arriving. The repo holds the packages, their
+docs, and two apps that use them: a demo that shows each step of streamed
+hydration as it happens, and a real TMDB-backed movie browser.
 
-- **[The demo](https://angular-stream-demo.chris-holder.workers.dev/)** is the
-  place to start: why a page should not wait for its slowest part, how one
-  response delivers it in pieces, and a live example with the code for it.
+- **[The docs](https://christopherpholder.github.io/angular-stream/)** explain
+  how to use it and how it works: getting started, guides, a real response
+  taken apart flush by flush, and the API.
+- **[The demo](https://angular-stream-demo.chris-holder.workers.dev/)** shows
+  it: why a page should not wait for its slowest part, how one response
+  delivers it in pieces, and a live example with the code for it.
 - **[The movie browser](https://angular-stream.chris-holder.workers.dev/)** is
   the same technique on a real app.
-- **[`docs/streamed-hydration.md`](docs/streamed-hydration.md)** is the long
-  version, with a real response taken apart flush by flush.
 
 Most Angular SSR guides target a Node server and the Angular CLI. This repo
 takes the other path: Angular compiled by [ngp][ngp] through Vite, with the
@@ -46,8 +47,10 @@ everything under `packages/` is published to npm under `@push-based/`:
 | ---------------------- | ------------------------------------------------------------------------------------------------------ |
 | `apps/movies`          | The TMDB movie browser. Deployed as the `angular-stream` Worker.                                       |
 | `apps/cloudflare-demo` | Streamed hydration, step by step, with no external API. The `angular-stream-demo` Worker.              |
+| `apps/docs`            | The documentation site: Angular, prerendered by ngp, published to GitHub Pages.                        |
 | `packages/core`        | `@push-based/angular-stream-core`: the streaming renderer, its inline runtime and the client.          |
 | `packages/cloudflare`  | `@push-based/angular-stream-cloudflare`: `createStreamingWorker()`, over the Workers `ASSETS` binding. |
+| `libs/design-system`   | `@angular-stream/design-system`: the PushBased design system the demo and the docs share. Private.     |
 | `nx.json`              | Task defaults, cache inputs and outputs, and the release group.                                        |
 | `vite.config.ts`       | Workspace-wide lint (module boundaries included) and format settings.                                  |
 
@@ -88,8 +91,9 @@ partial compilation and work in any Angular build.
 
 **Module boundaries.** Each `package.json` carries Nx tags, and
 `nx/enforce-module-boundaries` (run by Oxlint in `vp check`) holds them:
-packages never import an app, the core (`runtime:agnostic`) never imports an
-adapter, and an adapter imports only the core.
+packages never import an app or a private lib, the core (`runtime:agnostic`)
+never imports an adapter, and an adapter imports only the core. `libs/` holds
+code shared by the apps that is never published.
 
 ## Requirements
 
@@ -112,6 +116,7 @@ toolchain more than a normal Angular app:
 pnpm install
 pnpm dev          # the movie browser
 pnpm dev:demo     # the demo
+pnpm dev:docs     # the docs
 ```
 
 The dev server runs each Worker in workerd, so SSR behaves as it does in
@@ -126,6 +131,7 @@ At the root:
 | --------------- | ---------------------------------------------------------------------- |
 | `pnpm dev`      | `nx run movies:dev`                                                    |
 | `pnpm dev:demo` | `nx run cloudflare-demo:dev`                                           |
+| `pnpm dev:docs` | `nx run docs:dev`                                                      |
 | `pnpm build`    | `nx run-many -t build`: every app and package, with Nx's task cache    |
 | `pnpm ready`    | `vp check` (format, lint, type-aware lint, boundaries), then the build |
 
@@ -181,6 +187,14 @@ Deploying by hand is `pnpm nx deploy movies` (or `cloudflare-demo`). Either way
 reached through the app's `.wrangler/deploy/config.json`) rather than the app's
 `wrangler.jsonc`, whose `main` points at TypeScript source.
 
+### The docs
+
+`.github/workflows/docs.yml` builds the docs with `DOCS_BASE=/angular-stream/`,
+prerenders them and publishes `apps/docs/dist/client` to GitHub Pages on every
+push to `main` that touches them. The repository's Pages source must be set to
+"GitHub Actions". Pull requests build them through `nx affected` like any other
+project, so a broken link in the Markdown fails CI.
+
 ## Releasing the packages
 
 `nx release` versions everything under `packages/` as one group: core and
@@ -200,7 +214,7 @@ release.
 
 ## How the pieces fit
 
-Both apps are wired the same way; paths below are relative to an app.
+The two Worker apps are wired the same way; paths below are relative to an app.
 
 **`index.html` is the template, not the page.** `wrangler.jsonc` sets
 `assets.html_handling: "none"`, so the asset server matches only exact file
@@ -219,6 +233,11 @@ Worker falls back to a buffered `renderApplication`.
 **`packages/core/src/server/`** is the renderer: it sends a hydratable
 shell as soon as the route's structure exists and streams the rest. See
 [Streamed hydration](#streamed-hydration).
+
+The docs app is wired differently: it is static. ngp's `ssr` option builds its
+`src/main.server.ts` (a `render(url, document)` over `renderApplication`) next
+to the browser bundle, and `scripts/prerender.ts` calls it once per route after
+`vp build`. See [`apps/docs/README.md`](apps/docs/README.md).
 
 **`src/app/app.config.server.ts`** is the server config handed to the Worker. In
 the movie browser it also swaps in a Workers-safe SVG strategy: the default one
@@ -240,79 +259,17 @@ exactly as calls to a real API would.
 
 ## Streamed hydration
 
-A page request is answered in pieces, and the browser hydrates each piece as it
-arrives instead of waiting for the last one:
+A page request is answered in pieces: the shell as soon as the route's
+structure exists, then a chunk per `@defer` block as its data arrives. The
+browser hydrates each piece as it lands, and nothing is fetched twice.
 
-1. **Shell.** The server bootstraps, waits for the route and its `@defer` blocks
-   to exist — not for TMDB — and sends that state, annotated for hydration, with
-   the entry script at the end marked `async`. The browser loads Angular and
-   hydrates the shell while the response is still open.
-2. **Chunks.** Each time a request finishes and the application has rendered the
-   result, the server sends every `@defer` block that changed: its markup in a
-   `<template>`, then an inline script carrying the block's hydration data and
-   the transfer state the change came from. The script swaps the markup in front
-   of the block's anchor comment, whether or not Angular is running yet.
-3. **Hydration.** The block hydrates against the streamed markup when its
-   trigger fires. Nothing is fetched twice: a request the server is already
-   making is held back in the browser until its response arrives on the stream.
-
-[`docs/streamed-hydration.md`](docs/streamed-hydration.md) starts with
-[why](docs/streamed-hydration.md#why-stream-out-of-order): what streaming out of
-order buys, and how other frameworks came to it. Then it takes a real
-response apart flush by flush. It shows the HTML each flush carries, what the
-page looks like after it, and when each part hydrates. It also covers the wire
-format and how to verify a change.
-
-### Making something stream
-
-Put it in a `@defer` block with a `hydrate` trigger, directly inside an element:
-
-```html
-<article>
-  @defer (on immediate; hydrate when listReady()) {
-  <ui-movie-list [movies]="movies$" />
-  }
-</article>
-```
-
-Angular leaves such a block's markup alone until the trigger fires, which is
-what lets the server replace it underneath a running application. Everything
-outside a block is the shell, and the shell is sent once: if it changes after
-that, the client renders the change itself from the streamed data, and the
-change never appears in the server HTML. Text that depends on data belongs
-inside a block.
-
-- **`hydrate when <data is there>`** hydrates the block as soon as its own data
-  has arrived, while other blocks are still streaming. Prefer it.
-- **`hydrate on idle | immediate | timer | viewport`** say nothing about data, so
-  on a streamed render they wait for the end of the stream.
-- **Blocks nest.** A block that changes inside an unchanged one is sent by
-  itself, and can still be swapped in after the outer block has hydrated. The
-  cast list on the movie page works this way.
-- **"Directly inside an element"** is a requirement. Angular finds nodes by
-  counting, and a block at the root of an `@if`, in an `<ng-container>` or in
-  projected content is part of its parent's count. The server logs a warning for
-  such a block and leaves it to the client.
-- **What a block renders with no data is what paints first.** It is in the
-  shell, so make it a proper loading state.
-- **Chunks follow the network, not the document.** They go out in the order
-  requests finish, and a request that finishes before the shell is taken lands
-  in the shell instead of a chunk.
-
-### Debugging
-
-- `window.__ngs` is the inline runtime. If it is missing, the Worker fell back
-  to the buffered render; the server logs
-  `[ssr] streaming render failed before commit`.
-- Check hydration under `pnpm dev`. Angular only checks node matches in
-  dev mode.
-- To see the steps one at a time, run the demo (`pnpm dev:demo`). `/example`
-  streams one widget and shows the code for it; `/walkthrough` and `/inspect`
-  show each flush and each hydration as it happens.
-- Request each page at least twice on the same server process. NG0600 from
-  `hydrate when` only shows from the second request on.
-
-More in [Verifying a change](docs/streamed-hydration.md#verifying-a-change).
+The docs cover it for users:
+[the introduction](https://christopherpholder.github.io/angular-stream/docs/getting-started/introduction),
+[how to make something stream](https://christopherpholder.github.io/angular-stream/docs/guides/making-something-stream),
+[debugging and verifying](https://christopherpholder.github.io/angular-stream/docs/guides/debugging),
+and, under "How it works", why it streams out of order, a real response taken
+apart flush by flush, and the wire format. Their source is Markdown under
+[`apps/docs/src/content/`](apps/docs/src/content/).
 
 ### Where things live
 
@@ -330,39 +287,10 @@ is `packages/cloudflare/src/index.ts`: the handler, with the template read from
 | `client/stream-hydration.ts`           | Keeps Angular's hydration data, block registry and HTTP in step with the stream |
 | `client/stream-protocol.ts`            | The wire format shared by all of the above                                      |
 
-### Caveats
+### Caveats and limitations
 
-- **It leans on Angular internals**: the layout of serialized hydration data,
-  `ɵannotateForHydration`, the dehydrated block registry, and `DeferBlockFixture`'s
-  way of rendering a block. One more reason for the exact version pin.
-- **`hydrate when` is rendered by hand on the server.** Angular renders it during
-  a template update, which throws `NG0600` from the second request on if the
-  component has signal queries. The buffered fallback cannot work around that, so
-  it renders without incremental hydration and leaves `@defer` blocks to the
-  client.
-- **`hydrate on viewport`** blocks only take streamed markup that arrives before
-  Angular starts, or after the trigger has fired; its observer cannot follow
-  replaced elements.
-- **`hydrate on hover | interaction`** need Angular's event-dispatch contract
-  script, which this build does not inline.
-- **No CSP nonce** on the inline scripts yet.
-- **Not cacheable.** Streamed responses are sent with `Cache-Control: no-store`.
-- **If the response breaks off**, the browser keeps what it has and the client
-  fetches the rest itself.
-
-## Known limitations
-
-These come from the ngp SSR path, which deliberately does not use
-`@angular/ssr`:
-
-- **No HTTP status codes.** The Worker answers every page with `200`, so the
-  not-found page is served with `200` too. Per-route render modes and `AngularNodeAppEngine` are not
-  available either.
-- **No prerendering, service worker, critical CSS inlining, or SRI.**
-- **Inline component `styles` are plain CSS.** There is no
-  `inlineStyleLanguage`; every component here uses `styleUrl`, which does go
-  through Vite's Sass pipeline.
-- **ngp is a prototype.** Any Angular commit can break it, hence the exact pin.
+See [Caveats and limitations](https://christopherpholder.github.io/angular-stream/docs/reference/limitations)
+in the docs.
 
 ## Analytics
 
