@@ -139,6 +139,13 @@ export const DOCS: DocSection[] = [
           'Stream an Angular app from a Fastify plugin, next to your routes, with @fastify/static and @fastify/compress.',
         load: () => import('../../content/getting-started/fastify.md'),
       },
+      {
+        slug: 'nestjs',
+        title: 'NestJS',
+        description:
+          'Stream an Angular app from a NestJS app on platform-express, next to its controllers, from the app config to running it in production.',
+        load: () => import('../../content/getting-started/nestjs.md'),
+      },
     ],
   },
   {
@@ -247,6 +254,13 @@ export const DOCS: DocSection[] = [
         description:
           'The API of @push-based/angular-stream-fastify: a Fastify plugin that streams every page route.',
         load: () => import('../../content/reference/fastify.md'),
+      },
+      {
+        slug: 'nestjs',
+        title: 'angular-stream-nestjs',
+        description:
+          'The API of @push-based/angular-stream-nestjs: a Nest module that renders every page route, and a Vite plugin for dev.',
+        load: () => import('../../content/reference/nestjs.md'),
       },
       {
         slug: 'limitations',
