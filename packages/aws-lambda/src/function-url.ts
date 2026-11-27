@@ -76,7 +76,7 @@ export async function writeResponse(
           break;
         }
         if (!stream.write(value)) {
-          await drained(stream);
+          await streamEvent(stream, 'drain');
         }
       }
     } catch (error) {
@@ -87,15 +87,26 @@ export async function writeResponse(
     }
   }
 
-  await new Promise<void>((resolve) => {
-    stream.end(resolve);
-  });
+  const finished = streamEvent(stream, 'finish');
+  stream.end();
+  await finished;
 }
 
-/** Resolves when `stream` can take more, rejects when it fails or closes first. */
-function drained(stream: LambdaResponseStream): Promise<void> {
+/**
+ * Resolves on `event` (`drain`: it can take more; `finish`: everything is
+ * written). Rejects when the stream fails or closes first, or already has.
+ *
+ * The stream is closed when the runtime's connection to the Runtime API
+ * drops. Its `close` and `error` events have fired by then, and a write or
+ * `end()` neither fails nor calls back, so without the check up front the
+ * handler would wait until the function times out.
+ */
+function streamEvent(stream: LambdaResponseStream, event: 'drain' | 'finish'): Promise<void> {
+  if (stream.destroyed || (event === 'drain' && stream.writableEnded)) {
+    return Promise.reject(closedError());
+  }
   return new Promise((resolve, reject) => {
-    const onDrain = () => {
+    const onEvent = () => {
       cleanUp();
       resolve();
     };
@@ -105,16 +116,20 @@ function drained(stream: LambdaResponseStream): Promise<void> {
     };
     const onClose = () => {
       cleanUp();
-      reject(new Error('The response stream closed before the response was written.'));
+      reject(closedError());
     };
     const cleanUp = () => {
-      stream.off('drain', onDrain);
+      stream.off(event, onEvent);
       stream.off('error', onError);
       stream.off('close', onClose);
     };
 
-    stream.once('drain', onDrain);
+    stream.once(event, onEvent);
     stream.once('error', onError);
     stream.once('close', onClose);
   });
+}
+
+function closedError(): Error {
+  return new Error('The response stream closed before the response was written.');
 }
