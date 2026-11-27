@@ -12,6 +12,8 @@
  * lose those clicks without an error.
  * `404` becomes 404.html, Pages' page for every unknown path.
  *
+ * Last, it writes sitemap.xml: every page at its public address.
+ *
  * `DOCS_BASE` must match the one the build ran with.
  */
 import { readFile, readdir, writeFile, mkdir } from 'node:fs/promises';
@@ -31,6 +33,8 @@ if (entryFile === undefined) {
 interface ServerEntry {
   default: (url: string, document: string) => Promise<string>;
   PRERENDERED_ROUTES: string[];
+  /** The public address of the site, with its trailing slash. */
+  SITE: string;
 }
 const entry = (await import(path.join(serverDir, entryFile))) as ServerEntry;
 
@@ -43,6 +47,20 @@ for (const route of entry.PRERENDERED_ROUTES) {
   await writeFile(file, html);
   console.log(`prerendered /${route} → ${path.relative(client, file)}`);
 }
+
+// Every page but the not-found one, for crawlers. The addresses are the
+// published ones (the same the pages name as canonical), whatever DOCS_BASE is.
+const urls = entry.PRERENDERED_ROUTES.filter((route) => route !== '404').map(
+  (route) => `  <url><loc>${entry.SITE}${route}</loc></url>`,
+);
+await writeFile(
+  path.join(client, 'sitemap.xml'),
+  '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+    urls.join('\n') +
+    '\n</urlset>\n',
+);
+console.log(`wrote sitemap.xml: ${urls.length} pages`);
 
 // Pages would otherwise skip files and folders that start with an underscore.
 await writeFile(path.join(client, '.nojekyll'), '');

@@ -16,6 +16,7 @@ import { filter } from 'rxjs';
 import logo from '@angular-stream/press-kit/symbol/angular-stream-symbol.svg?no-inline';
 import { ALL_PAGES, DOCS, type DocSection } from './docs/nav';
 import { DEMO, MOVIES, REPO } from './links';
+import { trackPageHead } from './page-head';
 
 @Component({
   selector: 'app-root',
@@ -145,6 +146,8 @@ export class App {
   private readonly toggledSections = signal<Record<string, boolean>>({});
 
   constructor() {
+    trackPageHead();
+
     const location = inject(Location);
     this.currentSection.set(sectionOf(location.path()));
     inject(Router)

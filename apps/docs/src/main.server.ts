@@ -4,6 +4,7 @@ import { App } from './app/app';
 import { config } from './app/app.config.server';
 
 export { PRERENDERED_ROUTES } from './app/docs/nav';
+export { SITE } from './app/links';
 
 /**
  * ngp's server entry: renders one URL into `index.html`. The dev server calls
