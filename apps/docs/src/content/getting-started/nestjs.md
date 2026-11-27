@@ -242,9 +242,12 @@ buffered it; see
 ## 9. Static files
 
 `staticDir` serves the browser build from the render route: a file in
-`dist/client` is sent from disk, anything else is rendered. `.html` files are
-never served as files, so `/index.html` renders too. Keep it unless something
-else serves the files.
+`dist/client` is sent from disk, anything else is rendered. A path that
+ends in `.html` is left to the renderer, so `/index.html` renders too. The
+check is case-sensitive: on a case-insensitive disk, such as macOS's default,
+`/INDEX.HTML` can still be sent as the raw template. A missing file under
+`/assets/`, such as a chunk from before a deploy, is a `404` rather than a
+page. Keep `staticDir` unless something else serves the files.
 
 If you'd rather use Express's static middleware, leave `staticDir` out and
 register it in `src/server.ts`, before `listen()`:
@@ -258,9 +261,7 @@ the browser build. `/index.html` itself is still served from disk as it is.
 
 `ServeStaticModule` from `@nestjs/serve-static` answers every `GET` it can't
 find a file for with its own `index.html`, which leaves nothing for the Angular
-app to render. To use it for the browser build, turn that off, and import it
-before `AngularStreamModule`, so its files are served before pages are
-rendered:
+app to render. To use it for the browser build, turn that off:
 
 ```ts
 imports: [
@@ -273,22 +274,34 @@ imports: [
 ],
 ```
 
-Imported after it, its files are never reached: the script and stylesheet
-requests are rendered as pages.
+The order of the imports doesn't matter. `AngularStreamModule` adds its render
+route last, right before Nest's 404 handler, so `ServeStaticModule`'s files,
+`GraphQLModule`'s endpoint and anything else a module adds when the app
+initializes are answered first.
 
 ## 10. What Nest sees of a page
 
-Pages aren't controller routes. The render route is added after your
-controllers, so Nest's guards, interceptors and pipes never run for a page, and
-neither does anything that could buffer or rewrite it. Middleware added with
-`app.use()` runs for pages as it does for everything else.
+Pages aren't controller routes. The render route is added after everything
+else, so Nest's guards, interceptors and pipes never run for a page, and
+neither does anything that could buffer or rewrite it. That has two
+consequences to plan for:
+
+- **A global guard doesn't protect pages.** An auth guard registered as
+  `APP_GUARD` covers your controllers only; every page stays public.
+- **`MiddlewareConsumer` middleware doesn't reach pages.** With a global
+  prefix, `consumer.apply(...).forRoutes('*')` is scoped to `/api`.
+
+Middleware added with `app.use()` runs for every request, pages included. Put
+anything that has to cover pages there: authentication, sessions,
+compression.
 
 Errors go to Nest's exception filters only while nothing has been sent: a
 `Host` header that is more than a host and a port is a `BadRequestException`
-(`400`), and a render that fails before its first byte is a `500`. Once the
-shell has gone out, an error is the renderer's: it logs it and cuts the
-connection, so the browser keeps what it has and no filter writes a JSON body
-into the page.
+(`400`). A render that fails before its first byte is retried as a buffered
+render, and only if that fails too does the error reach the filters, as a
+`500`. Once the shell has gone out, an error is the renderer's: it logs it and
+cuts the connection, so the browser keeps what it has and no filter writes a
+JSON body into the page.
 
 ## 11. Behind a proxy
 

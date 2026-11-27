@@ -47,26 +47,50 @@ answers. The options are those of
 export class AppModule {}
 ```
 
-When the app initializes, after Nest has registered the controllers' routes
-and before its own 404 and error handlers, the module adds one middleware to
-the Express app. For each request that reaches it, in order:
+When the app initializes, the module adds one middleware to the Express app,
+last: right before Nest's own 404 and error handlers. That is after the
+controllers' routes, and after whatever other modules add when they
+initialize (`ServeStaticModule`, `GraphQLModule`), whichever order Nest runs
+their `onModuleInit` hooks in. For each request that reaches it, in order:
 
 1. Under the global prefix (`app.setGlobalPrefix('api')`), the request is
    passed on, so an unknown `/api/...` gets Nest's `404`. The prefix is matched
    by whole path segments: `/apiary` is a page.
 2. A method other than `GET` and `HEAD` is passed on, and ends in a 404
    unless something after the module takes it.
-3. With `staticDir`, a file in it is served from disk; `.html` files never
-   are.
-4. Everything else is rendered as a streamed page.
+3. Under `/assets/`, a file in `staticDir` is served from disk, and anything
+   else is a `NotFoundException` (`404`), not a page: Vite names those files
+   by their content hash, so a missing one is an old or mistyped URL, such as
+   a chunk from before a deploy.
+4. With `staticDir`, any other file in it is served from disk. A path that
+   ends in `.html` is left to the renderer, so `/` and `/index.html` render.
+   The check is case-sensitive, so on a case-insensitive disk `/INDEX.HTML`
+   can still be sent as the raw template.
+5. Everything else is rendered as a streamed page.
 
-A controller always answers first, wherever it is mounted: pages are only
-what is left.
+A controller, or a route or middleware another module adds, always answers
+first, wherever it is mounted: pages are only what is left.
 
-Pages aren't controller routes, so Nest's guards, interceptors, pipes and
-exception filters don't run for them. Middleware added with `app.use()` does,
-since Express runs it before any route. Use that for anything a page needs
-before it renders, such as authentication or compression.
+### What runs for a page
+
+Pages aren't controller routes, so Nest's guards, interceptors and pipes don't
+run for them:
+
+- **Guards**: an auth guard registered as `APP_GUARD` protects the
+  controllers only. Every page stays public.
+- **`MiddlewareConsumer`**: middleware applied in a module's `configure()`
+  doesn't run for pages when the app has a global prefix, since
+  `forRoutes('*')` is then scoped to the prefix. Without a prefix,
+  `forRoutes('*')` reaches pages too, but `forRoutes(SomeController)` never
+  does.
+- **`app.use()`**: middleware added there runs for every request, pages
+  included, since Express runs it before any route.
+
+Anything that must cover pages, such as authentication, sessions or
+compression, belongs in `app.use()`.
+
+Exception filters see a page only when it fails before anything has been
+sent, as below.
 
 ### Errors
 
@@ -170,7 +194,10 @@ The Vite plugins for `vite dev`:
 through the server entry's default export with the dev template, and a
 middleware after it that sends that same export every other request Vite has
 no file or module for. Without the second, `vite dev` answers `/api/...` with
-its own 404. List it before ngp. In a build it does nothing.
+its own 404. That middleware gives a `GET` or `HEAD` the dev template too, so
+a page fetched without `Accept: text/html` (`curl`, `fetch()`, a link checker)
+renders as it does in production. List it before ngp. In a build it does
+nothing.
 
 In dev, an edit to the server runs the entry again, which creates a new Nest
 app. To close the old one, so its `onModuleDestroy` hooks run, accept the
@@ -185,19 +212,20 @@ import.meta.hot?.dispose(() => app.close());
 
 Three ways to serve the browser build, `dist/client`:
 
-- **`staticDir`**: served by the render route, after the controllers. `.html`
-  files are never served as files, so `/` and `/index.html` both render. This
-  is the one to use unless something else serves the files.
+- **`staticDir`**: served by the render route, after the controllers.
+  Paths ending in `.html` are left to the renderer, so `/` and `/index.html`
+  both render. This is the one to use unless something else serves the files.
 - **`app.useStaticAssets(dir, { index: false })`**: Express's static
   middleware, registered when it is called, before every route. Leave
   `staticDir` out. Without `index: false`, `/` gets the browser build's
   unrendered `index.html`; `/index.html` gets it either way.
 - **`ServeStaticModule`** from `@nestjs/serve-static`: by default it answers
   every `GET` that isn't a file with `index.html`, so nothing is rendered. Turn
-  that off with `exclude: ['/{*any}']`, pass `serveStaticOptions: { index: false }`,
-  and import it before `AngularStreamModule`: both add their middleware when
-  the app initializes, in import order. Imported after, its files are rendered
-  as pages.
+  that off with `exclude: ['/{*any}']` and pass
+  `serveStaticOptions: { index: false }`. Where it is imported doesn't matter:
+  its middleware always comes before the render route.
+
+In each case a missing file under `/assets/` is a `404`.
 
 ## Decorators
 
