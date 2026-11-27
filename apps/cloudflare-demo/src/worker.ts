@@ -1,3 +1,4 @@
+import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
 import { createStreamingWorker } from '@push-based/angular-stream-cloudflare';
 import { App } from './app/app';
 import { config } from './app/app.config.server';
@@ -6,5 +7,8 @@ import { config } from './app/app.config.server';
 export default createStreamingWorker({
   rootComponent: App,
   config,
+  // withEventReplay() needs Angular's event dispatch contract in the template,
+  // and the built index.html the Worker renders into doesn't have it.
+  eventDispatchContract,
   allowedHosts: ['localhost', 'angular-stream-demo.chris-holder.workers.dev'],
 }) satisfies ExportedHandler<Env>;

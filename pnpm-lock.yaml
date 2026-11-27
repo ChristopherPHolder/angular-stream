@@ -247,8 +247,8 @@ importers:
         specifier: ^1.67.0
         version: 1.67.0(@types/node@20.19.43)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(workerd@1.20261104.1)(wrangler@4.158.0(@types/node@20.19.43))
       '@push-based/vite-plugin-ngp':
-        specifier: ^0.4.1
-        version: 0.4.1(@angular/compiler-cli@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3))(@angular/compiler@22.3.0-rc.0)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(typescript@7.0.2)
+        specifier: ^0.4.3
+        version: 0.4.3(@angular/compiler-cli@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3))(@angular/compiler@22.3.0-rc.0)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(typescript@7.0.2)
       '@types/node':
         specifier: ^20.19.43
         version: 20.19.43
@@ -305,8 +305,8 @@ importers:
         specifier: 22.3.0-rc.0
         version: 22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3)
       '@push-based/vite-plugin-ngp':
-        specifier: ^0.4.1
-        version: 0.4.1(@angular/compiler-cli@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3))(@angular/compiler@22.3.0-rc.0)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(typescript@7.0.2)
+        specifier: ^0.4.3
+        version: 0.4.3(@angular/compiler-cli@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3))(@angular/compiler@22.3.0-rc.0)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(typescript@7.0.2)
       '@types/node':
         specifier: ^20.19.43
         version: 20.19.43
@@ -381,8 +381,8 @@ importers:
         specifier: ^1.67.0
         version: 1.67.0(@types/node@20.19.43)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(workerd@1.20261104.1)(wrangler@4.158.0(@types/node@20.19.43))
       '@push-based/vite-plugin-ngp':
-        specifier: ^0.4.1
-        version: 0.4.1(@angular/compiler-cli@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3))(@angular/compiler@22.3.0-rc.0)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(typescript@7.0.2)
+        specifier: ^0.4.3
+        version: 0.4.3(@angular/compiler-cli@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3))(@angular/compiler@22.3.0-rc.0)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(typescript@7.0.2)
       '@types/node':
         specifier: ^20.19.43
         version: 20.19.43
@@ -2161,14 +2161,14 @@ packages:
       '@angular/core': '>17.1.0'
       rxjs: '>7.8.0'
 
-  '@push-based/vite-plugin-ngp@0.4.1':
-    resolution: {integrity: sha512-eJQzoBaJW9RxeM51OYT1El0F5loyFpGCc2LghYENYgDQcMJy8FI6JnxJJSPkiIknRMDpBXzh7uwtX+V9SVlNIg==}
+  '@push-based/vite-plugin-ngp@0.4.3':
+    resolution: {integrity: sha512-aGJQI0zUq9v6GLgm2DrX7pS3CMKE2d85qx3psWAOh90q3qi8j5rKi0Y9AjIyxdfzrGOzLPQo1D0vuvcg0kPMWA==}
     engines: {node: '>=26.0.0'}
     hasBin: true
     peerDependencies:
-      '@angular/compiler': 22.3.0-rc.0
-      '@angular/compiler-cli': 22.3.0-rc.0
-      '@angular/localize': 22.3.0-rc.0
+      '@angular/compiler': '>=22.3.0-rc.0 <22.4.0'
+      '@angular/compiler-cli': '>=22.3.0-rc.0 <22.4.0'
+      '@angular/localize': '>=22.3.0-rc.0 <22.4.0'
       tsrs: '>=0.16.0-0'
       typescript: '>=6.0 <6.1'
       vite: ^8.3.0
@@ -6147,7 +6147,7 @@ snapshots:
       rxjs: 7.8.2
       tslib: 2.9.1
 
-  '@push-based/vite-plugin-ngp@0.4.1(@angular/compiler-cli@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3))(@angular/compiler@22.3.0-rc.0)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(typescript@7.0.2)':
+  '@push-based/vite-plugin-ngp@0.4.3(@angular/compiler-cli@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3))(@angular/compiler@22.3.0-rc.0)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(typescript@7.0.2)':
     dependencies:
       '@angular/compiler': 22.3.0-rc.0
       '@angular/compiler-cli': 22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3)

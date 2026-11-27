@@ -12,8 +12,13 @@
 - **`hydrate on viewport`** blocks only take streamed markup that arrives before
   Angular starts, or after the trigger has fired; its observer cannot follow
   replaced elements.
-- **`hydrate on hover | interaction`** need Angular's event-dispatch contract
-  script, which is not inlined.
+- **Event replay covers the shell's event types only.** `withEventReplay()` and
+  `hydrate on hover | interaction` rely on Angular's event dispatch contract,
+  which the handler adds when given `eventDispatchContract`. Angular sets it up
+  for the event types the shell listens to; an event type that first appears in
+  a streamed `@defer` block isn't recorded, so that block loses the clicks made
+  before Angular starts. When the shell has no listeners at all, Angular removes
+  the contract, and nothing is recorded.
 - **No CSP nonce** on the inline scripts yet.
 - **Not cacheable.** Streamed responses are sent with `Cache-Control: no-store`.
 - **If the response breaks off**, the browser keeps what it has and the client
