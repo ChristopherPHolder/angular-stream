@@ -4,7 +4,7 @@ static assets served by Vercel, and every navigation routed to the function.
 There is no adapter package: the core's `createStreamingHandler()` is already a
 web-standard handler, which is what a Vercel Function exports. The Vite build
 writes the deployment itself, in the layout of Vercel's
-[Build Output API](https://vercel.com/docs/build-output-api/v3).
+[Build Output API](https://vercel.com/docs/build-output-api).
 
 > [!IMPORTANT]
 > This setup has not been deployed yet. It has been built with `vercel build`
@@ -147,7 +147,12 @@ function vercelBuildOutput(): Plugin {
           path.join(output, 'config.json'),
           JSON.stringify({
             version: 3,
-            routes: [{ handle: 'filesystem' }, { src: '/(.*)', dest: '/index' }],
+            routes: [
+              { handle: 'filesystem' },
+              // A hashed file that no longer exists (an old chunk after a deploy) is a 404, not a page.
+              { src: '/assets/(.*)', status: 404 },
+              { src: '/(.*)', dest: '/index' },
+            ],
           }),
         );
       },
@@ -164,13 +169,13 @@ dependency into the server build, so the function needs no `node_modules`.
 
 The plugin's `buildApp` hook builds both, then writes `.vercel/output`:
 
-| Path                                     | What it holds                                                     |
-| ---------------------------------------- | ----------------------------------------------------------------- |
-| `config.json`                            | The routes: static files first, every other path to the function. |
-| `static/`                                | `dist/client` without `index.html`, served by Vercel's CDN.       |
-| `functions/index.func/function.js`       | The server bundle, and its chunks in `assets/`.                   |
-| `functions/index.func/index.server.html` | The template.                                                     |
-| `functions/index.func/.vc-config.json`   | A Node.js function, with response streaming on.                   |
+| Path                                     | What it holds                                                                                          |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `config.json`                            | The routes: static files first, a 404 for a missing `/assets/` file, every other path to the function. |
+| `static/`                                | `dist/client` without `index.html`, served by Vercel's CDN.                                            |
+| `functions/index.func/function.js`       | The server bundle, and its chunks in `assets/`.                                                        |
+| `functions/index.func/index.server.html` | The template.                                                                                          |
+| `functions/index.func/.vc-config.json`   | A Node.js function, with response streaming on.                                                        |
 
 `index.html` stays out of `static/` for the same reason the Cloudflare setup
 sets `html_handling: "none"`: it is the template, not a page. If it were there,
@@ -196,8 +201,9 @@ logs NG0505 because there is no hydration data. Nothing streams until the build.
 ## The Edge runtime
 
 Vercel also runs functions on its Edge runtime, and the Angular server bundle
-fits there: the example's is about 210 kB gzipped, against limits of 1 MB
-(Hobby), 2 MB (Pro) and 4 MB (Enterprise). Built for the Edge runtime and run
+fits there: the example's is about 210 kB gzipped, against
+[limits](https://vercel.com/docs/functions/runtimes/edge) of 1 MB (Hobby),
+2 MB (Pro) and 4 MB (Enterprise). Built for the Edge runtime and run
 in Vercel's local Edge emulation, it streams the same way. It does take three
 changes from the setup above:
 
@@ -210,14 +216,16 @@ changes from the setup above:
   `{ "runtime": "edge", "entrypoint": "..." }`. The bundle that was checked was
   a single file (`codeSplitting: false`), with no chunks to load.
 
-Vercel itself recommends the Node.js runtime over Edge, and the Node.js setup is
+[Vercel itself recommends](https://vercel.com/docs/functions/runtimes/edge)
+the Node.js runtime over Edge, and the Node.js setup is
 the one documented here and used by the example.
 
 ## What has been checked
 
 In this repository, with `apps/example-vercel`:
 
-- `vite build`, and `vercel build` with no account and no project link: Vercel
+- `vite build`, and `vercel build` with no login, and a hand-written `.vercel/project.json`
+  in place of `vercel link`: Vercel
   CLI picked up the `.vercel/output` the build wrote, with or without the Vite
   framework preset.
 - The built function, run through `@vercel/node`'s local server (the code that

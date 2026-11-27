@@ -66,7 +66,12 @@ function vercelBuildOutput(): Plugin {
           path.join(output, 'config.json'),
           JSON.stringify({
             version: 3,
-            routes: [{ handle: 'filesystem' }, { src: '/(.*)', dest: '/index' }],
+            routes: [
+              { handle: 'filesystem' },
+              // A hashed file that no longer exists (an old chunk after a deploy) is a 404, not a page.
+              { src: '/assets/(.*)', status: 404 },
+              { src: '/(.*)', dest: '/index' },
+            ],
           }),
         );
       },
