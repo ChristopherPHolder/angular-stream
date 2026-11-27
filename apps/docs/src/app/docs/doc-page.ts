@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import {
   Component,
   DOCUMENT,
@@ -16,7 +17,7 @@ import type { ResolvedDoc } from './doc.resolver';
 @Component({
   selector: 'docs-page',
   templateUrl: './doc-page.html',
-  imports: [RouterLink],
+  imports: [NgTemplateOutlet, RouterLink],
 })
 export class DocPage {
   readonly doc = input.required<ResolvedDoc>();
@@ -48,6 +49,13 @@ export class DocPage {
         void drawDiagrams(diagrams);
       }
     });
+  }
+
+  /** The folded outline closes once a heading is picked, so the heading is what shows. */
+  protected closeOnLink(event: Event, outline: HTMLDetailsElement): void {
+    if ((event.target as Element | null)?.closest('a')) {
+      outline.open = false;
+    }
   }
 
   /**

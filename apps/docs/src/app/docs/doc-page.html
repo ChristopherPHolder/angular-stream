@@ -1,3 +1,16 @@
+<!-- "On this page", once: beside the article on a wide screen, folded above it on a narrow one. -->
+<ng-template #outline>
+  <ul>
+    @for (entry of doc().toc; track entry.id) {
+      <li [class.toc-sub]="entry.level === 3">
+        <a [href]="doc().page.path + '#' + entry.id" (click)="followLink($event)">{{
+          entry.text
+        }}</a>
+      </li>
+    }
+  </ul>
+</ng-template>
+
 <div class="doc">
   <article class="doc-article">
     <header class="doc-header">
@@ -5,6 +18,14 @@
       <h1 class="text-section-title">{{ doc().page.title }}</h1>
       <p class="text-lead lede">{{ doc().page.description }}</p>
     </header>
+    @if (doc().toc.length > 1) {
+      <details class="toc toc--inline" (click)="closeOnLink($event, inline)" #inline>
+        <summary class="text-subtitle">On this page</summary>
+        <nav aria-label="On this page">
+          <ng-container [ngTemplateOutlet]="outline" />
+        </nav>
+      </details>
+    }
     <!-- Clicks are handled on the container: the links are part of the HTML below. -->
     <div class="prose" [innerHTML]="html()" (click)="followLink($event)"></div>
     <nav class="pager" aria-label="Previous and next page">
@@ -24,17 +45,9 @@
     <p class="edit"><a [href]="editUrl()">Edit this page on GitHub</a></p>
   </article>
   @if (doc().toc.length > 1) {
-    <nav class="toc" aria-labelledby="toc-title">
+    <nav class="toc toc--aside" aria-labelledby="toc-title">
       <p class="text-subtitle" id="toc-title">On this page</p>
-      <ul>
-        @for (entry of doc().toc; track entry.id) {
-          <li [class.toc-sub]="entry.level === 3">
-            <a [href]="doc().page.path + '#' + entry.id" (click)="followLink($event)">{{
-              entry.text
-            }}</a>
-          </li>
-        }
-      </ul>
+      <ng-container [ngTemplateOutlet]="outline" />
     </nav>
   }
 </div>
