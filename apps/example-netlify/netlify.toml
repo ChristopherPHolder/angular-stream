@@ -1,0 +1,22 @@
+# The Netlify example. Not deployed: it follows apps/example-cloudflare.
+#
+# The site's base directory is the repository root, where pnpm installs the
+# workspace, and its package directory is apps/example-netlify, where this
+# file is. Paths here are relative to the base directory.
+#
+# The build writes both variants: the Netlify Function to dist/function and the
+# Edge Function to dist/edge. This file deploys the Netlify Function. For the
+# Edge Function instead, set publish to "apps/example-netlify/dist/edge/client"
+# and replace [functions] with
+# edge_functions = "apps/example-netlify/dist/edge/netlify/edge-functions"
+# under [build]. Never both: an Edge Function on /* answers every page first.
+[build]
+command = "pnpm nx build example-netlify"
+publish = "apps/example-netlify/dist/function/client"
+
+[build.environment]
+# The workspace needs Node 26 or later (package.json "engines").
+NODE_VERSION = "26"
+
+[functions]
+directory = "apps/example-netlify/dist/function/netlify/functions"

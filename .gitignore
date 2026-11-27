@@ -65,3 +65,6 @@ opensrc/
 # Nx
 .nx/cache
 .nx/workspace-data
+
+# Netlify CLI
+.netlify/

@@ -763,6 +763,61 @@ importers:
         specifier: ^4.156.1
         version: 4.158.0(@types/node@20.19.43)
 
+  apps/example-netlify:
+    dependencies:
+      '@angular-stream/stream-example':
+        specifier: workspace:*
+        version: link:../../libs/stream-example
+      '@angular/common':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@angular/compiler':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0
+      '@angular/core':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2)
+      '@angular/platform-browser':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/common@22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))
+      '@angular/platform-server':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/common@22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.3.0-rc.0)(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(@angular/platform-browser@22.3.0-rc.0(@angular/common@22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@push-based/angular-stream-core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      rxjs:
+        specifier: ~7.8.0
+        version: 7.8.2
+      tslib:
+        specifier: ^2.3.0
+        version: 2.9.1
+    devDependencies:
+      '@angular/compiler-cli':
+        specifier: 22.3.0-rc.0
+        version: 22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3)
+      '@netlify/edge-functions':
+        specifier: ^4.0.4
+        version: 4.0.4
+      '@netlify/functions':
+        specifier: ^6.1.2
+        version: 6.1.2
+      '@push-based/vite-plugin-ngp':
+        specifier: ^0.4.3
+        version: 0.4.3(@angular/compiler-cli@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(typescript@6.0.3))(@angular/compiler@22.3.0-rc.0)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(typescript@7.0.2)
+      '@types/node':
+        specifier: ^20.19.43
+        version: 20.19.43
+      typescript:
+        specifier: ~6.0.2
+        version: 6.0.3
+      vite:
+        specifier: npm:@voidzero-dev/vite-plus-core@8.3.8001
+        version: '@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0)'
+      vite-plus:
+        specifier: 1.8.0
+        version: 1.8.0(@types/node@20.19.43)(@vitest/browser-preview@5.1.1)(@vitest/ui@5.1.1)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(vitest@5.1.1)(yaml@2.9.0)
+
   apps/example-nitro:
     dependencies:
       '@angular-stream/stream-example':
@@ -2954,6 +3009,26 @@ packages:
     peerDependencies:
       '@emnapi/core': ^1.7.1 || 2.0.0-beta.2 || 2.0.0-beta.3
       '@emnapi/runtime': ^1.7.1 || 2.0.0-beta.2 || 2.0.0-beta.3
+
+  '@netlify/cache@4.2.2':
+    resolution: {integrity: sha512-465pszTiI4m5b+K92Akg3F2Bh59FQWWV5jPEOwDdwcWdsCRwWkYlzhFD5kJc9mFGj8snaQ0SShFEK+BVJxM3bw==}
+    engines: {node: '>=22.12.0'}
+
+  '@netlify/edge-functions@4.0.4':
+    resolution: {integrity: sha512-OGPI1E8hjKcmXejKvzf/t7KQAcZjS1YqNujL9sohLC3iD2kWu8I0p0Athgk4lGjvner4BWegqBfuYLaPL5RveQ==}
+    engines: {node: '>=22.12.0'}
+
+  '@netlify/functions@6.1.2':
+    resolution: {integrity: sha512-JTBCeefjypHueU+wlemiXSA69ZIaYw3dPOqOSDxLEZ7F0Pu3vZM+21GeIvJwjwbHMPKzzCpepmFSVK5YJ9AMDg==}
+    engines: {node: '>=22.12.0'}
+
+  '@netlify/runtime-utils@3.1.0':
+    resolution: {integrity: sha512-mzlRsXQCo9a9Y4W/jiKvPrDOgmoVu+QIsQ2Lehi7hFJD7KlvEsCucJ2i1DOgN3LpYVbo8gyrxmGZFT2Jlf6SHA==}
+    engines: {node: '>=22.12.0'}
+
+  '@netlify/types@3.3.1':
+    resolution: {integrity: sha512-LwPy3VpwMTETniJEgLr67yP8Rt8eORZaQ/NwVXhOOkv9q1F2SANSoJbfkhEmyLpwQ/aoPTAi0bULBDlFHXwEQA==}
+    engines: {node: '>=22.12.0'}
 
   '@noble/hashes@1.8.0':
     resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
@@ -8209,6 +8284,23 @@ snapshots:
       '@emnapi/runtime': 2.0.0-beta.3
       '@tybys/wasm-util': 0.10.5
     optional: true
+
+  '@netlify/cache@4.2.2':
+    dependencies:
+      '@netlify/runtime-utils': 3.1.0
+
+  '@netlify/edge-functions@4.0.4':
+    dependencies:
+      '@netlify/types': 3.3.1
+
+  '@netlify/functions@6.1.2':
+    dependencies:
+      '@netlify/cache': 4.2.2
+      '@netlify/types': 3.3.1
+
+  '@netlify/runtime-utils@3.1.0': {}
+
+  '@netlify/types@3.3.1': {}
 
   '@noble/hashes@1.8.0': {}
 

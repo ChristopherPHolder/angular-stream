@@ -66,6 +66,10 @@ export default defineConfig({
               sourceTag: 'runtime:fastly',
               onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:fastly'],
             },
+            {
+              sourceTag: 'runtime:netlify',
+              onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:netlify'],
+            },
           ],
         },
       ],

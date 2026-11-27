@@ -1,0 +1,37 @@
+{
+  "name": "example-netlify",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vp dev",
+    "build": "vp build && vp build --mode edge"
+  },
+  "dependencies": {
+    "@angular-stream/stream-example": "workspace:*",
+    "@angular/common": "22.3.0-rc.0",
+    "@angular/compiler": "22.3.0-rc.0",
+    "@angular/core": "22.3.0-rc.0",
+    "@angular/platform-browser": "22.3.0-rc.0",
+    "@angular/platform-server": "22.3.0-rc.0",
+    "@push-based/angular-stream-core": "workspace:*",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/compiler-cli": "22.3.0-rc.0",
+    "@netlify/edge-functions": "^4.0.4",
+    "@netlify/functions": "^6.1.2",
+    "@push-based/vite-plugin-ngp": "^0.4.3",
+    "@types/node": "^20.19.43",
+    "typescript": "~6.0.2",
+    "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8001",
+    "vite-plus": "1.8.0"
+  },
+  "nx": {
+    "tags": [
+      "type:app",
+      "runtime:netlify"
+    ]
+  }
+}

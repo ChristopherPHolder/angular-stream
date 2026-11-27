@@ -111,6 +111,13 @@ export const DOCS: DocSection[] = [
           'Stream an Angular app from Fastly Compute, with its files in a KV Store, from the app config to the deploy.',
         load: () => import('../../content/getting-started/fastly-compute.md'),
       },
+      {
+        slug: 'netlify',
+        title: 'Netlify',
+        description:
+          'Stream an Angular app from a Netlify Function or an Edge Function, from the app config to the deploy.',
+        load: () => import('../../content/getting-started/netlify.md'),
+      },
     ],
   },
   {
