@@ -2,12 +2,15 @@ import { NgTemplateOutlet } from '@angular/common';
 import {
   Component,
   DOCUMENT,
+  DestroyRef,
   ElementRef,
+  afterNextRender,
   afterRenderEffect,
   computed,
   effect,
   inject,
   input,
+  signal,
 } from '@angular/core';
 import { DomSanitizer, Meta } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
@@ -47,6 +50,12 @@ export class DocPage {
   /** On an API page: the setup pages that use the package. */
   protected readonly setups = computed(() => setupsOf(this.doc().page));
 
+  /** The id of the heading being read, which the outline marks. */
+  protected readonly current = signal<string | undefined>(undefined);
+
+  /** Said to a screen reader after a copy; the button's own text changes for everyone else. */
+  protected readonly status = signal('');
+
   constructor() {
     const meta = inject(Meta);
     effect(() => meta.updateTag({ name: 'description', content: this.doc().page.description }));
@@ -61,6 +70,96 @@ export class DocPage {
         void drawDiagrams(diagrams);
       }
     });
+
+    // The outline follows the page: the last heading that has passed the header.
+    const destroyRef = inject(DestroyRef);
+    afterNextRender(() => {
+      const view = this.document.defaultView;
+      if (!view) {
+        return;
+      }
+      let frame = 0;
+      const update = (): void => {
+        frame = 0;
+        this.current.set(this.headingInView());
+      };
+      const onScroll = (): void => {
+        frame ||= view.requestAnimationFrame(update);
+      };
+      view.addEventListener('scroll', onScroll, { passive: true });
+      view.addEventListener('resize', onScroll, { passive: true });
+      destroyRef.onDestroy(() => {
+        view.removeEventListener('scroll', onScroll);
+        view.removeEventListener('resize', onScroll);
+        view.cancelAnimationFrame(frame);
+      });
+    });
+    // Another page, other headings.
+    afterRenderEffect(() => {
+      this.doc();
+      this.current.set(this.headingInView());
+    });
+  }
+
+  /** Clicks in the rendered Markdown: its links, and the copy button of a code block. */
+  protected onProseClick(event: MouseEvent): void {
+    const button = (event.target as Element | null)?.closest<HTMLElement>('.code-copy');
+    if (button) {
+      void this.copy(button);
+    } else {
+      this.followLink(event);
+    }
+  }
+
+  private async copy(button: HTMLElement): Promise<void> {
+    const code = button.closest('.code')?.querySelector('code');
+    if (!code) {
+      return;
+    }
+    let copied = true;
+    try {
+      await this.document.defaultView?.navigator.clipboard.writeText(code.textContent ?? '');
+    } catch {
+      // No clipboard access, as on a page served without HTTPS: select the code instead.
+      copied = false;
+      this.document.defaultView?.getSelection()?.selectAllChildren(code);
+    }
+    button.textContent = copied ? 'Copied' : 'Selected';
+    this.status.set(copied ? 'Code copied' : 'Code selected: copy it with your keyboard');
+    this.document.defaultView?.setTimeout(() => {
+      button.textContent = 'Copy';
+      // Emptied, so the next copy is a change and is announced again.
+      this.status.set('');
+    }, COPIED_FOR);
+  }
+
+  /**
+   * The id of the last `h2` or `h3` above the reading line, which is a little
+   * below the sticky header; none while the page's first heading is still
+   * further down, and the last one at the end of the page.
+   */
+  private headingInView(): string | undefined {
+    const view = this.document.defaultView;
+    if (!view) {
+      return undefined;
+    }
+    const headings = this.host.nativeElement.querySelectorAll<HTMLElement>(
+      '.prose h2[id], .prose h3[id]',
+    );
+    // At the end of the page the last sections are too short to reach the line.
+    const root = this.document.documentElement;
+    if (view.scrollY > 0 && view.innerHeight + view.scrollY >= root.scrollHeight - 2) {
+      return headings[headings.length - 1]?.id;
+    }
+    const header = this.document.querySelector<HTMLElement>('.top')?.offsetHeight ?? 0;
+    let current: string | undefined;
+    for (const heading of headings) {
+      if (heading.getBoundingClientRect().top > header + READING_LINE) {
+        break;
+      }
+      current = heading.id;
+    }
+    return current;
   }
 
   /** The folded outline closes once a heading is picked, so the heading is what shows. */
@@ -94,6 +193,12 @@ export class DocPage {
     void this.router.navigateByUrl(path + url.hash);
   }
 }
+
+/** How far below the sticky header a heading counts as reached, in pixels. */
+const READING_LINE = 40;
+
+/** How long a copy button says "Copied", in milliseconds. */
+const COPIED_FOR = 2000;
 
 async function drawDiagrams(nodes: NodeListOf<HTMLElement>): Promise<void> {
   const { default: mermaid } = await import('mermaid');

@@ -3,9 +3,13 @@
   <ul>
     @for (entry of doc().toc; track entry.id) {
       <li [class.toc-sub]="entry.level === 3">
-        <a [href]="doc().page.path + '#' + entry.id" (click)="followLink($event)">{{
-          entry.text
-        }}</a>
+        <a
+          [href]="doc().page.path + '#' + entry.id"
+          [class.toc-current]="entry.id === current()"
+          [attr.aria-current]="entry.id === current() ? 'location' : null"
+          (click)="followLink($event)"
+          >{{ entry.text }}</a
+        >
       </li>
     }
   </ul>
@@ -75,7 +79,8 @@
       </details>
     }
     <!-- Clicks are handled on the container: the links are part of the HTML below. -->
-    <div class="prose" [innerHTML]="html()" (click)="followLink($event)"></div>
+    <div class="prose" [innerHTML]="html()" (click)="onProseClick($event)"></div>
+    <p class="visually-hidden" role="status">{{ status() }}</p>
     <nav class="pager" aria-label="Previous and next page">
       @if (doc().previous; as previous) {
         <a class="pager-link" [routerLink]="'/' + previous.path">

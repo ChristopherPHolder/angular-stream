@@ -59,6 +59,7 @@ highlighter ships to the browser:
 
 - `##` and `###` headings get ids (GitHub's) and make up "On this page".
 - Code blocks are highlighted. Name a file with ` ```ts title="src/worker.ts" `.
+  Each gets a bar with that name, or else its language, and a copy button.
 - ` ```mermaid ` blocks are drawn in the browser, on the pages that have one.
 - `> [!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]` and `[!CAUTION]` block
   quotes are callouts.
