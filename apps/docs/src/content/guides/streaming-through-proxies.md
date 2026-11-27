@@ -61,6 +61,12 @@ it.
   sees them, and how to leave pages out of it.
 - **Other middleware built on Node's `zlib`** (`@fastify/compress`,
   `koa-compress` and others) has to flush after each write as well. zlib does
+- **`@fastify/compress`** streams with `flushOnIdle: true`, which flushes
+  the compressor each time the page pauses. Without it, a compressed page
+  arrives in one piece. See
+  [`@fastify/compress`](../reference/fastify.md#fastifycompress).
+- **Other middleware built on Node's `zlib`** (`koa-compress` and others) has
+  to flush after each write as well. zlib does
   that when the stream is created with `flush: zlib.constants.Z_SYNC_FLUSH`
   (Brotli: `zlib.constants.BROTLI_OPERATION_FLUSH`); look up where your
   middleware takes zlib options, then check with `curl --compressed`.

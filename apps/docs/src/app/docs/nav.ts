@@ -132,6 +132,13 @@ export const DOCS: DocSection[] = [
           'Stream an Angular app from Express 5, next to your API routes and behind compression, from the app config to production.',
         load: () => import('../../content/getting-started/express.md'),
       },
+      {
+        slug: 'fastify',
+        title: 'Fastify',
+        description:
+          'Stream an Angular app from a Fastify plugin, next to your routes, with @fastify/static and @fastify/compress.',
+        load: () => import('../../content/getting-started/fastify.md'),
+      },
     ],
   },
   {
@@ -233,6 +240,13 @@ export const DOCS: DocSection[] = [
         description:
           'The API of @push-based/angular-stream-aws-lambda: a response-streaming handler for a Lambda Function URL.',
         load: () => import('../../content/reference/aws-lambda.md'),
+      },
+      {
+        slug: 'fastify',
+        title: 'angular-stream-fastify',
+        description:
+          'The API of @push-based/angular-stream-fastify: a Fastify plugin that streams every page route.',
+        load: () => import('../../content/reference/fastify.md'),
       },
       {
         slug: 'limitations',
