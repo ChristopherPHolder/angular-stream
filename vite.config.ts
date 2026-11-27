@@ -50,6 +50,10 @@ export default defineConfig({
               sourceTag: 'runtime:hono',
               onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:hono', 'runtime:cloudflare'],
             },
+            {
+              sourceTag: 'runtime:node',
+              onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:node'],
+            },
           ],
         },
       ],
