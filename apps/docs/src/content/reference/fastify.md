@@ -14,13 +14,16 @@ import { angularStream } from '@push-based/angular-stream-fastify';
 
 const angularStream: FastifyPluginAsync<AngularStreamOptions>;
 
-interface AngularStreamOptions extends StreamingAppOptions {
+interface AngularStreamOptions extends FastifyHandlerOptions {
+  /** Options for the page route, as fastify.get(path, options, handler) takes them. */
+  route?: RouteShorthandOptions;
+}
+
+interface FastifyHandlerOptions extends StreamingAppOptions {
   /** The built template, as a path or a file: URL. Read on the first request, then kept. */
   template: string | URL;
   /** Take the protocol and host from X-Forwarded-Proto and X-Forwarded-Host. Default: false. */
   trustProxy?: boolean;
-  /** Options for the page route, as fastify.get(path, options, handler) takes them. */
-  route?: RouteShorthandOptions;
 }
 
 interface StreamingAppOptions {
@@ -48,10 +51,11 @@ app.register(angularStream, {
 ```
 
 It adds one route, `GET` and `HEAD` on `/*`, under the `prefix` it is
-registered with. Fastify answers a URL with its most specific route, so the
-plugin renders only what no other route answers: register an API, and the
-browser build with [`@fastify/static`](#fastifystatic), in any order. Other
-methods aren't routed to it, and get Fastify's `404`.
+registered with, with [`createFastifyHandler()`](#createfastifyhandler) as its
+handler. Fastify answers a URL with its most specific route, so the plugin
+renders only what no other route answers: register an API, and the browser
+build with [`@fastify/static`](#fastifystatic), in any order. Other methods
+aren't routed to it, and get Fastify's `404`.
 
 For each request:
 
@@ -130,6 +134,43 @@ route: { logLevel: 'warn', onRequest: [checkSession] },
 Fastify's `handlerTimeout`, when you set one, is measured to the end of the
 streamed response, not to the shell. When it runs out mid-page, Fastify cuts
 the connection, so give pages one longer than the slowest block takes.
+
+## `createFastifyHandler()`
+
+```ts
+import { createFastifyHandler } from '@push-based/angular-stream-fastify';
+
+function createFastifyHandler(options: FastifyHandlerOptions): FastifyHandler;
+
+type FastifyHandler = (request: FastifyRequest, reply: FastifyReply) => Promise<FastifyReply>;
+```
+
+The page route's handler on its own, for a route of your own: the steps
+above, from the web `Request` to `reply.send()`, for whatever URL the route
+matched. The plugin is this handler on `GET` and `HEAD` `/*`. Use it to
+decide in front of it which requests are pages, or to mount it where a
+plugin doesn't fit:
+
+```ts
+const render = createFastifyHandler({
+  rootComponent: App,
+  config,
+  allowedHosts: ['localhost'],
+  template: new URL('./index.server.html', import.meta.url),
+});
+
+app.get('/*', async (request, reply) => {
+  if (request.url.startsWith('/admin/')) {
+    return reply.callNotFound();
+  }
+  return render(request, reply);
+});
+```
+
+It rejects with a [`BadRequestError`](#badrequesterror) for a `Host` it can't
+build a URL from; a route that wraps it can map that to an error of its own.
+The NestJS module's route on `@nestjs/platform-fastify` is built this way; see
+[On Fastify](nestjs.md#on-fastify).
 
 ## `@fastify/static`
 
@@ -225,5 +266,7 @@ your own, `error instanceof BadRequestError` tells it apart.
 
 The plugin is an ordinary async Fastify plugin, encapsulated: it isn't wrapped
 in `fastify-plugin`, adds no decorators, and registers nothing outside its own
-context but the route. Anything that hands you the Fastify instance, such as
-NestJS's `FastifyAdapter` through `getInstance()`, can register it as above.
+context but the route. Anything that hands you the Fastify instance can
+register it as above, or mount [`createFastifyHandler()`](#createfastifyhandler)
+on a route of its own. For NestJS on `@nestjs/platform-fastify`, use the
+[NestJS module](nestjs.md), which does that.
