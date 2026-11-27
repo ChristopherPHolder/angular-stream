@@ -74,46 +74,77 @@ app.setup({ enableHttpStream: true });
 const templateFile = new URL('../client/index.html', import.meta.url);
 let template: Promise<string> | undefined;
 
+function readTemplate(): Promise<string> {
+  // A failed read isn't kept: the next request tries again.
+  template ??= readFile(templateFile, 'utf8').catch((error: unknown) => {
+    template = undefined;
+    throw error;
+  });
+  return template;
+}
+
 const handle = createStreamingHandler({
   rootComponent: App,
   config,
   eventDispatchContract,
   allowedHosts: ['localhost', 'my-app.azurewebsites.net'],
-  loadTemplate: async () => new Response(await (template ??= readFile(templateFile, 'utf8'))),
+  loadTemplate: async () => new Response(await readTemplate()),
 });
 
 app.http('ssr', {
   route: '{*path}',
-  methods: ['GET'],
+  methods: ['GET', 'HEAD'],
   authLevel: 'anonymous',
   handler: async (request) => {
     const response = await handle(
       new Request(request.url, { method: request.method, headers: request.headers }),
     );
 
+    // A HEAD request, such as a health probe, gets the status of a real render
+    // once its shell is ready, and the render stops there.
+    const head = request.method === 'HEAD';
+    if (head) await response.body?.cancel();
+
     return new HttpResponse({
       status: response.status,
       headers: response.headers,
-      body: response.body ?? undefined,
+      body: head ? undefined : (response.body ?? undefined),
     });
   },
 });
 ```
 
 `app.setup()` has to run before the function is registered, so it sits at the
-top of the entry. With HTTP streams on, `request.headers` is a web `Headers`
-and `HttpResponse` takes a web `ReadableStream` as its body, which the worker
-writes to the connection chunk by chunk.
+top of the entry. On the v4 programming model `request.headers` is a web
+`Headers`, so it passes straight to `new Request()`. `HttpResponse` takes a web
+`ReadableStream` as its body, and with HTTP streams on, the worker writes it to
+the connection chunk by chunk.
 
 The `{*path}` route sends every path, `/` included, to the function. Static
 assets never reach it: they are served by the host in front
-([step 7](#7-static-assets)). The function answers `GET` only; the core
-renders a page for whatever reaches it.
+([step 7](#7-static-assets)). The core renders a page for whatever reaches it.
+
+The function answers `GET` and `HEAD`. A method the function doesn't take falls
+through to the Functions host, and at `/` the host answers with its own landing
+page, `200` and about 150 KB of HTML, whether the function works or not. A
+health probe sent with `HEAD`, Front Door's default, would then pass while the
+function is broken. Answering `HEAD` itself, the function renders the page
+until its shell is ready, returns that status with no body, and cancels the
+render. To keep the landing page away from other methods as well, set the app
+setting `AzureWebJobsDisableHomepage` to `true`: a `POST /` then gets an empty
+`204` instead.
 
 The template is the built `index.html`, deployed with the function app next to
 the bundle (`dist/client/index.html`, one folder up from `dist/server/ssr.js`).
 It is read from disk on the first request and kept for as long as the instance
-lives.
+lives. A read that fails isn't kept, so the next request tries again.
+
+> [!NOTE]
+> A visitor who goes away doesn't stop the render. `@azure/functions` (4.17.1)
+> writes the body to the connection until the stream ends, and never listens
+> for the connection closing, so the stream isn't cancelled. Unlike on
+> Cloudflare Workers, an abandoned navigation keeps rendering until its slowest
+> request has finished. The function can't change that.
 
 `allowedHosts` must list every hostname the function answers for: Angular's
 SSR host guard rejects any other `host` header, and the function answers
@@ -121,7 +152,10 @@ SSR host guard rejects any other `host` header, and the function answers
 reaches the function app, not `X-Forwarded-Host`. Behind Front Door that is the
 origin's host header: an origin added in the portal sends the function app's own
 hostname (`my-app.azurewebsites.net`), one created from a template without that
-field sends the hostname the visitor asked for.
+field sends the hostname the visitor asked for. In that second case the
+function app only accepts the request if that hostname is also bound to it as a
+custom domain, so add the domain to the function app as well as to Front Door,
+and list it in `allowedHosts`.
 
 `eventDispatchContract` is for `withEventReplay()`. The function renders into
 the built `index.html`, which doesn't carry the script Angular needs to queue
@@ -159,9 +193,10 @@ A function app on the v4 programming model is a folder with a `host.json` and a
 at `/` rather than `/api/`.
 
 `local.settings.json` holds the settings `func start` uses locally. It isn't
-deployed:
+deployed. Keep it out of git as well: it is where a storage connection string
+ends up once you add one. Commit a `local.settings.example.json` and copy it:
 
-```json title="local.settings.json"
+```json title="local.settings.example.json"
 {
   "IsEncrypted": false,
   "Values": {
@@ -182,11 +217,14 @@ export default defineConfig({
   environments: {
     client: { build: { outDir: 'dist/client' } },
     ssr: {
-      resolve: { noExternal: true, external: ['@azure/functions'] },
+      resolve: { noExternal: true, external: ['@azure/functions-core'] },
       build: {
         outDir: 'dist/server',
         copyPublicDir: false,
-        rolldownOptions: { input: { ssr: 'src/functions/ssr.ts' } },
+        rolldownOptions: {
+          input: { ssr: 'src/functions/ssr.ts' },
+          external: ['@azure/functions-core'],
+        },
       },
     },
   },
@@ -198,9 +236,10 @@ export default defineConfig({
 `dist/client` and the function into `dist/server/ssr.js`. ngp compiles the
 function with its server compiler because it runs in the `ssr` environment;
 its own `ssr` option stays off, since that expects a `render(url, document)`
-entry. The function bundles all its dependencies except `@azure/functions`,
-which has to be the copy the Functions worker loads, so the deployed app needs
-only that one package in `node_modules`.
+entry. The function bundles all its dependencies, `@azure/functions` and its
+own dependencies included, so the deployed app needs no `node_modules`. The one
+module left out is `@azure/functions-core`: it isn't a package you install,
+the Functions worker provides it when `@azure/functions` asks for it.
 
 ## 6. Run it locally
 
@@ -208,6 +247,7 @@ only that one package in `node_modules`.
 run the Functions host on your machine, with no Azure account:
 
 ```bash
+cp local.settings.example.json local.settings.json
 vite build   # client to dist/client, function to dist/server
 func start   # http://localhost:7071
 ```
@@ -242,6 +282,8 @@ to the function:
   `/*` to the function app, with caching off. Front Door only compresses on
   routes with caching on, and never a chunked response, so it doesn't hold the
   page back to compress it. A chunked response over 8 MB isn't supported.
+  Point the function app's health probe at `/`: with `HEAD`, the default, it
+  gets the status of a real render ([step 3](#3-the-function)).
 - **Azure Static Web Apps, for the assets only.** A linked function app is
   reachable only under `/api`, its routes can only be redirected or secured,
   not rewritten to, and it has to keep the `/api` prefix this setup removes. So
@@ -252,35 +294,62 @@ Keep `index.html` out of the static host: it is the template, not a page.
 
 ## 8. Deploy
 
-Deploy the function app folder: `host.json`, `package.json`, `dist/server`
-and `dist/client/index.html`. `@azure/functions` is the only package the
-bundle loads from `node_modules`. A `.funcignore` keeps the rest out:
+Deploy what you built, not the sources: `host.json`, `package.json`,
+`dist/server` and `dist/client/index.html`. The bundle carries its
+dependencies, so there is no `node_modules` to deploy and nothing to install. A
+`.funcignore` keeps the rest out:
 
 ```gitignore title=".funcignore"
+.funcignore
 local.settings.json
+local.settings.example.json
+node_modules
 index.html
 public/
 src/
-tsconfig*.json
+tsconfig.json
+tsconfig.app.json
 vite.config.ts
 dist/client/*
 !dist/client/index.html
 ```
 
+List each file by name: Core Tools didn't match `tsconfig*.json` against
+`tsconfig.json`, nor `node_modules/` against the folder.
+
 ```bash
 vite build
-func azure functionapp publish my-app
+func azure functionapp publish my-app --no-build
+```
+
+`--no-build` deploys the files as they are. Without it, Core Tools builds a
+Node.js app remotely when it deploys to Linux: Azure runs `npm install`, and
+your `build` script if there is one, against the deployed folder, which holds
+no sources to build. `--build local` runs npm on your machine instead, which
+you don't need either: `vite build` has already made everything.
+
+To see what gets deployed, or to deploy with the Azure CLI, make the zip
+yourself. `func pack --no-build` packs the folder through the same
+`.funcignore` without running npm:
+
+```bash
+func pack --no-build   # writes <folder name>.zip, here my-app.zip
+unzip -l my-app.zip    # host.json, package.json, dist/server/*, dist/client/index.html
+az functionapp deployment source config-zip -g my-group -n my-app --src my-app.zip
 ```
 
 HTTP streams need `@azure/functions` 4.3.0 or later, the Functions runtime
 4.28 or later and, locally, Core Tools 4.0.5530 or later. ngp needs Node 26 to
 build. The function itself runs on Node 24, the current GA release on Azure
-Functions; Node 26 is in preview there, on Linux only
+Functions, on the Flex Consumption, Premium and Dedicated (App Service) plans,
+and on Windows in the Consumption plan. The Linux Consumption plan stops at
+Node 22 and gets no newer versions. Node 26 is in preview, on Linux only
 ([supported versions](https://learn.microsoft.com/azure/azure-functions/supported-languages)).
 
 > [!NOTE]
 > This setup has been checked with `func start` on Node 24 and Node 26,
-> streaming and hydrating, but not yet against a deployed function app or
+> streaming and hydrating, and the `func pack` zip run on its own, with no
+> `node_modules`. It hasn't yet been checked against a deployed function app or
 > through Front Door.
 
 ## 9. Stream something
