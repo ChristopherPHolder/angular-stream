@@ -21,14 +21,18 @@ if (typeof URL.canParse !== 'function') {
 /** The files of `dist/client`, from the KV Store the static publisher fills. */
 const publisher = PublisherServer.fromStaticPublishRc(rc);
 
+/** The template's key in the KV Store. The publisher would serve it as a file at this path. */
+const templatePath = '/index.html';
+
+const allowedHosts = ['localhost', '127.0.0.1'];
+
 const render = createStreamingHandler({
   rootComponent: ExamplePage,
   config,
   eventDispatchContract,
-  allowedHosts: ['localhost', '127.0.0.1'],
-  // `index.html` is published as a hidden file: the template, never served as is.
+  allowedHosts,
   loadTemplate: async () => {
-    const asset = await publisher.getMatchingAsset('/index.html', { includeHidden: true });
+    const asset = await publisher.getMatchingAsset(templatePath);
     const file = asset && (await publisher.loadAssetVariant(asset, null));
     return file ? new Response(file.storageEntry.body) : new Response(null, { status: 404 });
   },
@@ -77,11 +81,61 @@ async function renderPage(event: FetchEvent): Promise<Response> {
   return new Response(body, response);
 }
 
-/** Compute entry: a published file if one matches, otherwise the streamed page. */
-addEventListener('fetch', (event) =>
-  event.respondWith(
-    publisher
-      .serveRequest(event.request, { fallback: false })
-      .then((file) => file ?? renderPage(event)),
-  ),
-);
+/**
+ * The path the publisher looks a file up by: it matches the decoded path exactly,
+ * so `/%69ndex.html` is `/index.html` and `/INDEX.HTML` is no file. `null` if
+ * the path doesn't decode.
+ */
+function publishedPath(url: URL): string | null {
+  try {
+    return decodeURI(url.pathname);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A page's headers without its body. Compute doesn't cancel a JS body nobody
+ * reads, so a rendered page would run to its end for a `HEAD`, and the instance
+ * would then exit with an error.
+ */
+function headPage(url: URL): Response {
+  if (!allowedHosts.includes(url.hostname)) {
+    return new Response(null, { status: 403 });
+  }
+  return new Response(null, {
+    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+  });
+}
+
+/**
+ * Compute entry: a published file if one matches, a 404 for a missing hashed
+ * asset, otherwise the streamed page. `/index.html` is the template, so it is
+ * rendered like any other page and never served as a file.
+ */
+async function handleRequest(event: FetchEvent): Promise<Response> {
+  const url = new URL(event.request.url);
+  const path = publishedPath(url);
+  if (path === null) {
+    return new Response('Bad request.', { status: 400 });
+  }
+
+  if (path !== templatePath) {
+    const file = await publisher.serveRequest(event.request);
+    if (file !== null && event.request.method === 'HEAD') {
+      // The publisher's body checks the file's length as it is read: drop it.
+      await file.body?.cancel();
+      return new Response(null, file);
+    }
+    if (file !== null) {
+      return file;
+    }
+    if (path.startsWith('/assets/')) {
+      return new Response('Not found.', { status: 404 });
+    }
+  }
+
+  return event.request.method === 'HEAD' ? headPage(url) : renderPage(event);
+}
+
+addEventListener('fetch', (event) => event.respondWith(handleRequest(event)));

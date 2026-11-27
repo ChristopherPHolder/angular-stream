@@ -87,14 +87,18 @@ if (typeof URL.canParse !== 'function') {
 /** The files of `dist/client`, from the KV Store the static publisher fills. */
 const publisher = PublisherServer.fromStaticPublishRc(rc);
 
+/** The template's key in the KV Store. The publisher would serve it as a file at this path. */
+const templatePath = '/index.html';
+
+const allowedHosts = ['localhost', '127.0.0.1', 'my-app.edgecompute.app'];
+
 const render = createStreamingHandler({
   rootComponent: App,
   config,
   eventDispatchContract,
-  allowedHosts: ['localhost', '127.0.0.1', 'my-app.edgecompute.app'],
-  // `index.html` is published as a hidden file: the template, never served as is.
+  allowedHosts,
   loadTemplate: async () => {
-    const asset = await publisher.getMatchingAsset('/index.html', { includeHidden: true });
+    const asset = await publisher.getMatchingAsset(templatePath);
     const file = asset && (await publisher.loadAssetVariant(asset, null));
     return file ? new Response(file.storageEntry.body) : new Response(null, { status: 404 });
   },
@@ -143,17 +147,67 @@ async function renderPage(event: FetchEvent): Promise<Response> {
   return new Response(body, response);
 }
 
-/** Compute entry: a published file if one matches, otherwise the streamed page. */
-addEventListener('fetch', (event) =>
-  event.respondWith(
-    publisher
-      .serveRequest(event.request, { fallback: false })
-      .then((file) => file ?? renderPage(event)),
-  ),
-);
+/**
+ * The path the publisher looks a file up by: it matches the decoded path exactly,
+ * so `/%69ndex.html` is `/index.html` and `/INDEX.HTML` is no file. `null` if
+ * the path doesn't decode.
+ */
+function publishedPath(url: URL): string | null {
+  try {
+    return decodeURI(url.pathname);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A page's headers without its body. Compute doesn't cancel a JS body nobody
+ * reads, so a rendered page would run to its end for a `HEAD`, and the instance
+ * would then exit with an error.
+ */
+function headPage(url: URL): Response {
+  if (!allowedHosts.includes(url.hostname)) {
+    return new Response(null, { status: 403 });
+  }
+  return new Response(null, {
+    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+  });
+}
+
+/**
+ * Compute entry: a published file if one matches, a 404 for a missing hashed
+ * asset, otherwise the streamed page. `/index.html` is the template, so it is
+ * rendered like any other page and never served as a file.
+ */
+async function handleRequest(event: FetchEvent): Promise<Response> {
+  const url = new URL(event.request.url);
+  const path = publishedPath(url);
+  if (path === null) {
+    return new Response('Bad request.', { status: 400 });
+  }
+
+  if (path !== templatePath) {
+    const file = await publisher.serveRequest(event.request);
+    if (file !== null && event.request.method === 'HEAD') {
+      // The publisher's body checks the file's length as it is read: drop it.
+      await file.body?.cancel();
+      return new Response(null, file);
+    }
+    if (file !== null) {
+      return file;
+    }
+    if (path.startsWith('/assets/')) {
+      return new Response('Not found.', { status: 404 });
+    }
+  }
+
+  return event.request.method === 'HEAD' ? headPage(url) : renderPage(event);
+}
+
+addEventListener('fetch', (event) => event.respondWith(handleRequest(event)));
 ```
 
-Three things here are for Compute:
+Four things here are for Compute:
 
 - **`URL.canParse()`**: `@angular/platform-server` calls it to resolve the
   request URL, and StarlingMonkey doesn't have it. Without it, every page
@@ -164,10 +218,19 @@ Three things here are for Compute:
   with status 1, reported as an error on every request. The response itself is
   complete either way. `event.waitUntil()` keeps the instance for
   that one more task.
-- **The template**: `fallback: false` makes `serveRequest()` return `null` for
-  every path without a file, so those go to the renderer. `index.html` is
-  published as a hidden file (step 6), so `serveRequest()` never sends it, and
-  `loadTemplate` reads it with `includeHidden`.
+- **The template**: with `spaFile: false` and `notFoundPageFile: false`
+  (step 6), `serveRequest()` returns `null` for every path without a file, so
+  those go to the renderer, and a missing file under `/assets/` gets a `404`
+  instead of a page. `index.html` is published with the other files, and the
+  static publisher would serve it as is at `/index.html`, so the entry sends
+  that path to the renderer before `serveRequest()`. It compares the path
+  decoded the way the publisher decodes it, so `/%69ndex.html` is rendered too;
+  `/INDEX.HTML` matches no file and is rendered anyway.
+- **`HEAD`**: Compute never cancels a JavaScript body that nobody reads. A
+  `HEAD` request would render the whole page for nothing, and the instance would
+  then exit with status 1. The entry answers it with the page's status and
+  headers and no body, without rendering, and drops the body of a file the same
+  way.
 
 `allowedHosts` must list every hostname the service answers for, the
 `*.edgecompute.app` one included: Angular's SSR host guard rejects any other
@@ -246,13 +309,11 @@ The second says what to publish, and how the files are served:
 /** @type {import('@fastly/compute-js-static-publish').PublishContentConfig} */
 const config = {
   rootDir: './dist/client',
-  // The template the server renders into: stored, but never served as a file.
-  hiddenItems: ['/index.html'],
   server: {
     // Hashed by Vite, so cached for a long time.
     staticItems: ['/assets/'],
     allowedEncodings: ['br', 'gzip'],
-    // Every path without a file goes on to the renderer.
+    // A path without a file gets no response here (`null`): the server renders it.
     spaFile: false,
     notFoundPageFile: false,
     autoExt: [],
@@ -263,7 +324,9 @@ const config = {
 export default config;
 ```
 
-Hidden files need the static publisher 8.1 or later.
+The example uses the static publisher 8.0.2. Its 8.1 releases can also store a
+file without serving it (`hiddenItems`), which would keep the template out of
+the served files; the routing in step 4 does the same job with 8.0.
 
 ## 7. `fastly.toml`
 
@@ -314,6 +377,10 @@ that runs the server side: `vite dev` alone serves the app without SSR.
 
 ## 9. Deploy
 
+> [!WARNING]
+> Unverified: no real deployment has been made. These are the steps from
+> Fastly's documentation, not ones run against a Fastly account.
+
 With the Fastly CLI logged in:
 
 ```bash
@@ -343,6 +410,12 @@ What the example used in Viceroy, against
 The CPU time was measured on a laptop, not on Fastly's hardware. A page with a
 lot more to render can reach 50 ms. The whole stream, slowest request
 included, has to end within the request's maximum duration.
+
+A client that goes away mid-stream doesn't stop the render. Compute never
+cancels the response body, so the page renders to its end, and the instance
+then exits with status 1: the log shows "JS event loop terminated without
+completing the request" for every aborted request. Nothing is sent and nothing
+else is affected, but the request still costs its full render.
 
 ## Stream something
 

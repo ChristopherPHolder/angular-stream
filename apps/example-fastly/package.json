@@ -16,7 +16,7 @@
     "@angular/core": "22.3.0-rc.0",
     "@angular/platform-browser": "22.3.0-rc.0",
     "@angular/platform-server": "22.3.0-rc.0",
-    "@fastly/compute-js-static-publish": "^8.1.1",
+    "@fastly/compute-js-static-publish": "^8.0.2",
     "@push-based/angular-stream-core": "workspace:*",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
