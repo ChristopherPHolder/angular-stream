@@ -206,6 +206,9 @@ importers:
       '@angular-stream/design-system':
         specifier: workspace:*
         version: link:../../libs/design-system
+      '@angular-stream/press-kit':
+        specifier: workspace:*
+        version: link:../../press-kit
       '@angular/common':
         specifier: 22.3.0-rc.0
         version: 22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2)
@@ -267,6 +270,9 @@ importers:
       '@angular-stream/design-system':
         specifier: workspace:*
         version: link:../../libs/design-system
+      '@angular-stream/press-kit':
+        specifier: workspace:*
+        version: link:../../press-kit
       '@angular/common':
         specifier: 22.3.0-rc.0
         version: 22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2)
@@ -322,6 +328,9 @@ importers:
 
   apps/movies:
     dependencies:
+      '@angular-stream/press-kit':
+        specifier: workspace:*
+        version: link:../../press-kit
       '@angular/common':
         specifier: 22.3.0-rc.0
         version: 22.3.0-rc.0(@angular/core@22.3.0-rc.0(@angular/compiler@22.3.0-rc.0)(rxjs@7.8.2))(rxjs@7.8.2)
@@ -446,6 +455,8 @@ importers:
       vite-plus:
         specifier: 1.8.0
         version: 1.8.0(@types/node@20.19.43)(@vitest/browser-preview@5.1.1)(@vitest/ui@5.1.1)(@voidzero-dev/vite-plus-core@8.3.8001(@types/node@20.19.43)(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(yaml@2.9.0))(esbuild@0.28.2)(sass@1.108.0)(typescript@6.0.3)(vitest@5.1.1)(yaml@2.9.0)
+
+  press-kit: {}
 
 packages:
 

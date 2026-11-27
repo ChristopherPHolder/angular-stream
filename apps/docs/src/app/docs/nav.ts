@@ -121,6 +121,12 @@ export const DOCS: DocSection[] = [
         description: 'What does not work yet, and why.',
         load: () => import('../../content/reference/limitations.md'),
       },
+      {
+        slug: 'press-kit',
+        title: 'Press kit',
+        description: 'The angular-stream logo: the files, the colours and how to use them.',
+        load: () => import('../../content/reference/press-kit.md'),
+      },
     ],
   },
 ];

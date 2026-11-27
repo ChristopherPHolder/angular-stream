@@ -604,6 +604,11 @@ pre.mermaid[data-processed] {
   margin: 0;
 }
 
+.home-mark {
+  display: block;
+  margin: 0 0 var(--space-5) calc(-1 * var(--space-1-5));
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -674,4 +679,71 @@ pre.mermaid[data-processed] {
 
 .bottom a:hover {
   color: var(--color-primary-700);
+}
+
+/* Press kit: each version of the logo on the background it is made for. */
+
+.logo-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: var(--space-4);
+  margin: 0 0 var(--space-6);
+}
+
+.logo-tiles--four {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
+}
+
+.logo-tile {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.logo-tile img {
+  display: block;
+  width: auto;
+  max-width: calc(100% - 2 * var(--space-6));
+  height: auto;
+  max-height: 3.5rem;
+  margin: auto;
+  padding-block: var(--space-8);
+  box-sizing: content-box;
+}
+
+.logo-tile img.logo-tile-tall {
+  max-height: 7rem;
+  padding-block: var(--space-6);
+}
+
+.logo-tile--dark {
+  background: var(--color-neutral-950);
+}
+
+.logo-tile figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--color-neutral-600);
+}
+
+.logo-tile figcaption span {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.prose .swatch {
+  display: block;
+  width: var(--space-6);
+  height: var(--space-6);
+  border-radius: var(--radius-md);
 }

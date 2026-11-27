@@ -4,7 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 // `?no-inline`: Vite would inline an asset this small as a data: URI, which NgOptimizedImage rejects.
-import logo from '@angular-stream/design-system/pushbased-logo.svg?no-inline';
+import logo from '@angular-stream/press-kit/symbol/angular-stream-symbol.svg?no-inline';
 import { DOCS } from './docs/nav';
 import { DEMO, MOVIES, REPO } from './links';
 
@@ -16,7 +16,8 @@ import { DEMO, MOVIES, REPO } from './links';
     <header class="top">
       <div class="top-inner">
         <a class="brand text-card-title" routerLink="/">
-          <img [ngSrc]="logo" alt="PushBased" width="86" height="32" priority />
+          <!-- Decorative: the name is the text next to it. -->
+          <img [ngSrc]="logo" alt="" width="32" height="32" priority />
           angular-stream <span>docs</span>
         </a>
         <nav class="top-nav text-link-mono" aria-label="Site">
@@ -68,6 +69,7 @@ import { DEMO, MOVIES, REPO } from './links';
           <a [href]="demo">The demo</a>
           <a [href]="movies">Angular Movies, a real app</a>
           <a [href]="repo">Source on GitHub</a>
+          <a routerLink="/docs/reference/press-kit">Press kit</a>
           <a href="https://push-based.io/">PushBased</a>
         </nav>
       </div>

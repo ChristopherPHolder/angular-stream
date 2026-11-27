@@ -2,6 +2,7 @@ packages:
   - apps/*
   - packages/*
   - libs/*
+  - press-kit
 
 # Vite+ ships its own Vite build; every package that asks for `vite` gets it.
 overrides:

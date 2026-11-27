@@ -70,8 +70,9 @@ together; the short version:
   runtime and client, runtime-agnostic) and `packages/cloudflare`
   (`@push-based/angular-stream-cloudflare`: `createStreamingWorker()`) are
   published to npm. `apps/docs` is the documentation site (prerendered,
-  GitHub Pages) and `libs/design-system` (`@angular-stream/design-system`,
-  private) the design system the demo and the docs share.
+  GitHub Pages), `libs/design-system` (`@angular-stream/design-system`,
+  private) the design system the demo and the docs share, and `press-kit`
+  (`@angular-stream/press-kit`, private) the logo.
 - **Toolchain**: Nx runs the tasks (`pnpm nx <target> <project>`,
   `run-many`, `affected`); targets are inferred from each `package.json`'s
   scripts, which call Vite+ (`vp`). Angular is compiled by
@@ -134,6 +135,13 @@ together; the short version:
   `.pb-*` component classes and `.text-*` type styles; never hard-code colours,
   spacing or radii. `apps/cloudflare-demo/src/styles.css` maps the demo's meaning colours
   (`--server`, `--placeholder`, `--chunk`, `--hydrated`) onto its state scales.
+- **Logo**: `press-kit/` is the one copy of the logo, and its `README.md` says
+  which file is for what. The demo and the docs import the symbol from it
+  (`@angular-stream/press-kit/...`), and the docs publish the folder under
+  `press-kit/` and show it on the "Press kit" page. Each app's `public/`
+  holds copies of `press-kit/favicon/`'s `favicon.ico`, `favicon.svg` and
+  `apple-touch-icon.png`. Do not redraw, recolour or inline the logo; add a
+  file to the kit instead.
 - **Server entry**: each Worker app's `src/worker.ts`, a Workers `fetch` handler. It
   runs in workerd: no `node:fs`, no `window`, no Node globals. Check any new
   server-side dependency against that before reaching for it.
