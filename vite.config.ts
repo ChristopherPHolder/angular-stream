@@ -25,6 +25,10 @@ export default defineConfig({
               sourceTag: 'runtime:cloudflare',
               onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:cloudflare'],
             },
+            {
+              sourceTag: 'runtime:bun',
+              onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:bun'],
+            },
           ],
         },
       ],
