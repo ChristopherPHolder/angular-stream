@@ -60,7 +60,8 @@ export class DocPage {
       return;
     }
     const anchor = (event.target as Element | null)?.closest('a');
-    if (!anchor || anchor.target !== '') {
+    // A `download` link is a file of the press kit, not a page.
+    if (!anchor || anchor.target !== '' || anchor.hasAttribute('download')) {
       return;
     }
     const url = new URL(anchor.href);

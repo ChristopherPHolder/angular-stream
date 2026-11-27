@@ -2,7 +2,7 @@ import { NgOptimizedImage, PlatformLocation } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 // `?no-inline`: Vite would inline an asset this small as a data: URI, which NgOptimizedImage rejects.
-import logo from '@angular-stream/design-system/pushbased-logo.svg?no-inline';
+import logo from '@angular-stream/press-kit/symbol/angular-stream-symbol.svg?no-inline';
 import { EventLog } from './event-log';
 
 const REPO = 'https://github.com/push-based/angular-stream';
@@ -33,7 +33,8 @@ function currentPage(path: string): string | null {
     <header class="top">
       <div class="top-inner">
         <a class="brand text-card-title" href="/">
-          <img [ngSrc]="logo" alt="PushBased" width="86" height="32" priority />
+          <!-- Decorative: the name is the text next to it. -->
+          <img [ngSrc]="logo" alt="" width="32" height="32" priority />
           angular-stream <span>demo</span>
         </a>
         <!-- Plain links: every page load should be a fresh streamed response. -->

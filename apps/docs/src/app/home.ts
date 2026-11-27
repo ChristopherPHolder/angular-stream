@@ -1,11 +1,15 @@
+import { NgOptimizedImage } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+// `?no-inline`: Vite would inline an asset this small as a data: URI, which NgOptimizedImage rejects.
+import symbol from '@angular-stream/press-kit/symbol/angular-stream-symbol.svg?no-inline';
 import { DOCS } from './docs/nav';
 import { DEMO } from './links';
 
 @Component({
   selector: 'docs-home',
   template: `
+    <img class="home-mark" [ngSrc]="symbol" alt="" width="96" height="96" priority />
     <p class="text-subtitle eyebrow">Angular · SSR · Streaming</p>
     <h1 class="text-hero-title">Streamed hydration for Angular</h1>
     <p class="text-lead lede">
@@ -37,9 +41,10 @@ import { DEMO } from './links';
     </div>
   `,
   host: { class: 'home' },
-  imports: [RouterLink],
+  imports: [NgOptimizedImage, RouterLink],
 })
 export class Home {
+  protected readonly symbol = symbol;
   protected readonly docs = DOCS;
   protected readonly demo = DEMO;
 }

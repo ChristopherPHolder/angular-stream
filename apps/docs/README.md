@@ -55,5 +55,10 @@ highlighter ships to the browser:
   (`../../../../../packages/core/src/server/handler.ts`), which becomes a link
   to it on GitHub. A link to a file that does not exist fails the build.
 
+A page may also hold HTML. The repository's `press-kit/` folder is published
+under `press-kit/` (`press-kit.ts`), so `<img src="press-kit/...">` shows one of
+its files and `<a href="press-kit/..." download>` links one; these paths are not
+checked by the build.
+
 Styles use the PushBased design system (`libs/design-system`); see its
 `README.md`. Keep to its tokens, `.pb-*` classes and `.text-*` type styles.

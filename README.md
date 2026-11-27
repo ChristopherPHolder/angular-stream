@@ -1,4 +1,9 @@
-# angular-stream
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="press-kit/logo/angular-stream-logo-on-dark.svg" />
+    <img src="press-kit/logo/angular-stream-logo.svg" alt="angular-stream" width="420" />
+  </picture>
+</h1>
 
 Streamed server-side rendering for Angular. The browser starts hydrating the
 page while the response is still arriving. The repo holds the packages, their
@@ -51,6 +56,7 @@ everything under `packages/` is published to npm under `@push-based/`:
 | `packages/core`        | `@push-based/angular-stream-core`: the streaming renderer, its inline runtime and the client.          |
 | `packages/cloudflare`  | `@push-based/angular-stream-cloudflare`: `createStreamingWorker()`, over the Workers `ASSETS` binding. |
 | `libs/design-system`   | `@angular-stream/design-system`: the PushBased design system the demo and the docs share. Private.     |
+| `press-kit`            | The logo in every form: symbol, lockups, favicons and the social preview, with how to use them.        |
 | `nx.json`              | Task defaults, cache inputs and outputs, and the release group.                                        |
 | `vite.config.ts`       | Workspace-wide lint (module boundaries included) and format settings.                                  |
 
