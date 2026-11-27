@@ -109,7 +109,19 @@ if (import.meta.env.PROD) {
       }
     },
   });
-  app.use((ctx, next) => (ctx.path.endsWith('.html') ? next() : files(ctx, next)));
+  app.use((ctx, next) => {
+    // Decoded and lowercased as koa-send (and a case-insensitive disk) would see it,
+    // so `/index%2Ehtml` and `/INDEX.HTML` are pages too.
+    let decoded = ctx.path;
+    try {
+      decoded = decodeURIComponent(ctx.path);
+    } catch {
+      // Malformed: koa-send answers it.
+    }
+    return decoded.toLowerCase().endsWith('.html') ? next() : files(ctx, next);
+  });
+  // A hashed file that no longer exists (an old chunk after a deploy) is a 404, not a page.
+  app.use((ctx, next) => (ctx.path.startsWith('/assets/') ? ctx.throw(404) : next()));
 }
 
 app.use(page);

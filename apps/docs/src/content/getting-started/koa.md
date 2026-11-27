@@ -13,7 +13,7 @@ npm install @push-based/angular-stream-core@next @push-based/angular-stream-node
 npm install -D @types/koa @types/koa-static
 ```
 
-`koa-compress` 5 ships its own types.
+`koa-compress` 5.2 and later ship their own types.
 
 ## 1. The browser config
 
@@ -164,7 +164,19 @@ if (import.meta.env.PROD) {
       }
     },
   });
-  app.use((ctx, next) => (ctx.path.endsWith('.html') ? next() : files(ctx, next)));
+  app.use((ctx, next) => {
+    // Decoded and lowercased as koa-send (and a case-insensitive disk) would see it,
+    // so `/index%2Ehtml` and `/INDEX.HTML` are pages too.
+    let decoded = ctx.path;
+    try {
+      decoded = decodeURIComponent(ctx.path);
+    } catch {
+      // Malformed: koa-send answers it.
+    }
+    return decoded.toLowerCase().endsWith('.html') ? next() : files(ctx, next);
+  });
+  // A hashed file that no longer exists (an old chunk after a deploy) is a 404, not a page.
+  app.use((ctx, next) => (ctx.path.startsWith('/assets/') ? ctx.throw(404) : next()));
 }
 
 app.use(page);
@@ -240,8 +252,9 @@ it does the same for `/index.html`, so both are rendered as pages. Files in
 mounted in the build: in `vite dev`, Vite serves the files.
 
 `koa-static` goes after `koa-compress`, so scripts and styles are compressed
-too, and after the API routes, so a file can't shadow one. A request for a
-file that doesn't exist falls through to `page` and is rendered.
+too, and after the API routes, so a file can't shadow one. A missing file
+under `/assets/`, such as an old hashed chunk after a deploy, gets a `404`;
+any other path that isn't a file falls through to `page` and is rendered.
 
 ## 4. Vite
 
