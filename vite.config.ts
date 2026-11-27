@@ -31,6 +31,10 @@ export default defineConfig({
             },
             // Hono on Workers sits in front of the Cloudflare adapter.
             {
+              sourceTag: 'runtime:aws-lambda',
+              onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:aws-lambda'],
+            },
+            {
               sourceTag: 'runtime:deno',
               onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:deno'],
             },
