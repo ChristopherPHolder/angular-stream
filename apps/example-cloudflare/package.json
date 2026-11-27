@@ -1,0 +1,39 @@
+{
+  "name": "example-cloudflare",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vp dev",
+    "build": "vp build",
+    "preview": "vp preview"
+  },
+  "dependencies": {
+    "@angular-stream/stream-example": "workspace:*",
+    "@angular/common": "22.3.0-rc.0",
+    "@angular/compiler": "22.3.0-rc.0",
+    "@angular/core": "22.3.0-rc.0",
+    "@angular/platform-browser": "22.3.0-rc.0",
+    "@angular/platform-server": "22.3.0-rc.0",
+    "@push-based/angular-stream-cloudflare": "workspace:*",
+    "@push-based/angular-stream-core": "workspace:*",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/compiler-cli": "22.3.0-rc.0",
+    "@cloudflare/vite-plugin": "^1.67.0",
+    "@push-based/vite-plugin-ngp": "^0.4.3",
+    "@types/node": "^20.19.43",
+    "typescript": "~6.0.2",
+    "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8001",
+    "vite-plus": "1.8.0",
+    "wrangler": "^4.156.1"
+  },
+  "nx": {
+    "tags": [
+      "type:app",
+      "runtime:cloudflare"
+    ]
+  }
+}

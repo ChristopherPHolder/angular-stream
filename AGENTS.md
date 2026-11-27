@@ -73,6 +73,14 @@ together; the short version:
   GitHub Pages), `libs/design-system` (`@angular-stream/design-system`,
   private) the design system the demo and the docs share, and `press-kit`
   (`@angular-stream/press-kit`, private) the logo.
+- **Runtime examples**: each adapter has one `apps/example-<runtime>` (private,
+  not deployed) that renders the same page, `libs/stream-example`
+  (`@angular-stream/stream-example`): a shell sent at once and one widget whose
+  in-process fake API answers 2 s later. An example holds only `index.html`,
+  `src/main.ts`, `src/app/app.config*.ts` and its server entry;
+  `apps/example-cloudflare` is the reference to copy. It streams when the
+  shell arrives at once and the widget's `<template data-ngs>` chunk about 2 s
+  later (`curl -N`); anything else means something buffered.
 - **Toolchain**: Nx runs the tasks (`pnpm nx <target> <project>`,
   `run-many`, `affected`); targets are inferred from each `package.json`'s
   scripts, which call Vite+ (`vp`). Angular is compiled by

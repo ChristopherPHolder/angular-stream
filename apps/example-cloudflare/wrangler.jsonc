@@ -1,0 +1,15 @@
+/**
+ * The Cloudflare Workers example. Not deployed: it's the reference the other
+ * apps/example-* follow. `html_handling: "none"` sends every navigation to the
+ * Worker, which renders it into `/index.html`.
+ */
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "angular-stream-example",
+  "main": "./src/worker.ts",
+  "compatibility_date": "2026-09-07",
+  "assets": {
+    "binding": "ASSETS",
+    "html_handling": "none",
+  },
+}
