@@ -18,6 +18,8 @@ and on `@nestjs/platform-fastify` through the Fastify adapter,
 
 ```bash
 npm install @push-based/angular-stream-core@next @push-based/angular-stream-nestjs@next
+# On @nestjs/platform-fastify only:
+npm install @push-based/angular-stream-fastify@next
 ```
 
 ```ts

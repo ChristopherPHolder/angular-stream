@@ -1057,6 +1057,9 @@ importers:
       '@push-based/angular-stream-core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@push-based/angular-stream-fastify':
+        specifier: workspace:*
+        version: link:../../packages/fastify
       '@push-based/angular-stream-nestjs':
         specifier: workspace:*
         version: link:../../packages/nestjs
@@ -1576,9 +1579,6 @@ importers:
       '@push-based/angular-stream-core':
         specifier: workspace:*
         version: link:../core
-      '@push-based/angular-stream-fastify':
-        specifier: workspace:*
-        version: link:../fastify
       '@push-based/angular-stream-node':
         specifier: workspace:*
         version: link:../node
@@ -1607,6 +1607,9 @@ importers:
       '@nestjs/platform-fastify':
         specifier: ^12.6.0
         version: 12.6.3(@fastify/static@10.1.10)(@nestjs/common@12.6.3(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@10.2.2))(@nestjs/core@12.6.3)(rxjs@7.8.2)
+      '@push-based/angular-stream-fastify':
+        specifier: workspace:*
+        version: link:../fastify
       '@types/node':
         specifier: ^20.19.43
         version: 20.19.43

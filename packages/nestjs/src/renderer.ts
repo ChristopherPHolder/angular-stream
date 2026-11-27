@@ -2,7 +2,7 @@ import type { OnApplicationBootstrap, OnModuleInit } from '@nestjs/common';
 import type { AbstractHttpAdapter, ApplicationConfig, HttpAdapterHost } from '@nestjs/core';
 import type { FastifyInstance } from 'fastify';
 import { addExpressRenderer } from './express';
-import { addFastifyRenderer } from './fastify';
+import type { addFastifyRenderer } from './fastify';
 import type { AngularStreamModuleOptions } from './options';
 import { globalPrefix } from './prefix';
 
@@ -17,6 +17,9 @@ const PLATFORMS = ['express', 'fastify'];
  * whatever order Nest initializes the modules in, and a page only renders for
  * a request none of them took.
  *
+ * On Fastify a module can't add a catch-all route of its own (`ServeStaticModule`
+ * does, and the app fails to start): Fastify refuses duplicate routes.
+ *
  * On `@nestjs/platform-express`, that order is what puts the render route
  * after the others. On `@nestjs/platform-fastify`, the most specific route
  * answers wherever it was added, and adding the route last keeps it after
@@ -24,6 +27,8 @@ const PLATFORMS = ['express', 'fastify'];
  */
 export class AngularStreamRenderer implements OnModuleInit, OnApplicationBootstrap {
   private registered = false;
+  /** Loaded on Fastify only, so an Express app needs no Fastify packages. */
+  private addFastify: typeof addFastifyRenderer | undefined;
 
   constructor(
     private readonly adapterHost: HttpAdapterHost,
@@ -31,7 +36,7 @@ export class AngularStreamRenderer implements OnModuleInit, OnApplicationBootstr
     private readonly options: AngularStreamModuleOptions,
   ) {}
 
-  onModuleInit(): void {
+  async onModuleInit(): Promise<void> {
     const adapter = this.adapterHost.httpAdapter;
     // An application context (`NestFactory.createApplicationContext()`) has no HTTP server.
     if (adapter === undefined) {
@@ -41,6 +46,19 @@ export class AngularStreamRenderer implements OnModuleInit, OnApplicationBootstr
     if (!PLATFORMS.includes(type)) {
       throw new Error(
         `[angular-stream] AngularStreamModule renders pages on @nestjs/platform-express or @nestjs/platform-fastify; this application runs on '${type}'.`,
+      );
+    }
+
+    if (type === 'fastify') {
+      // Nest awaits this hook before it adds its 404 handler, so the wrap below still comes first.
+      this.addFastify = await import('./fastify').then(
+        (module) => module.addFastifyRenderer,
+        (error: unknown) => {
+          throw new Error(
+            '[angular-stream] On @nestjs/platform-fastify, AngularStreamModule needs @push-based/angular-stream-fastify: npm install @push-based/angular-stream-fastify@next',
+            { cause: error },
+          );
+        },
       );
     }
 
@@ -66,8 +84,8 @@ export class AngularStreamRenderer implements OnModuleInit, OnApplicationBootstr
   private register(adapter: AbstractHttpAdapter): void {
     this.registered = true;
     const prefix = globalPrefix(this.config);
-    if (adapter.getType() === 'fastify') {
-      addFastifyRenderer(adapter.getInstance<FastifyInstance>(), this.options, prefix);
+    if (adapter.getType() === 'fastify' && this.addFastify !== undefined) {
+      this.addFastify(adapter.getInstance<FastifyInstance>(), this.options, prefix);
     } else {
       addExpressRenderer(adapter, this.options, prefix);
     }

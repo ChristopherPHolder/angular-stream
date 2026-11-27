@@ -278,6 +278,11 @@ route last, right before Nest's 404 handler, so `ServeStaticModule`'s files,
 `GraphQLModule`'s endpoint and anything else a module adds when the app
 initializes are answered first.
 
+This is Express only. On Fastify, `ServeStaticModule` always adds a `GET *`
+route, whatever `exclude` says, and Fastify refuses to start with two
+catch-all routes (`FST_ERR_DUPLICATED_ROUTE`). Use `staticDir` or
+`@fastify/static` there; see [Fastify](#fastify).
+
 ## 10. What Nest sees of a page
 
 Pages aren't controller routes. The render route is added after everything
@@ -321,11 +326,12 @@ trigger: read [Making something stream](../guides/making-something-stream.md).
 The same module renders pages on `@nestjs/platform-fastify`, with the same
 options and the same results: the API keeps `/api`, an unknown `/api/...`
 gets Nest's `404`, a missing file under `/assets/` is a `404`, and a bad
-`Host` is a `400`. Steps 1 to 3 and 5 to 8 don't change. Install the adapter,
-and `@fastify/compress` if you compress in Node:
+`Host` is a `400`. Every step but static files (step 9) stays the same.
+Install the Nest adapter, the stream's Fastify adapter, which the module loads
+only on Fastify, and `@fastify/compress` if you compress in Node:
 
 ```bash
-npm install @nestjs/platform-fastify @fastify/compress
+npm install @nestjs/platform-fastify @push-based/angular-stream-fastify@next @fastify/compress
 ```
 
 ### The server entry
@@ -394,10 +400,12 @@ socket (`reply.hijack()`), so `@fastify/compress` doesn't compress it, and
 headers that Fastify hooks set with `reply.header()` aren't sent with it.
 Headers that `app.use()` middleware sets are.
 
-To compress the browser build too, leave `staticDir` out and register
-`@fastify/static` in `src/server.ts`:
+To compress the browser build too, leave `staticDir` out, install
+`@fastify/static` (`npm install @fastify/static`), and register it in
+`src/server.ts`:
 
 ```ts
+import { fileURLToPath } from 'node:url';
 import fastifyStatic from '@fastify/static';
 
 await app.register(fastifyStatic, {

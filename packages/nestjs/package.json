@@ -38,7 +38,6 @@
   },
   "dependencies": {
     "@push-based/angular-stream-core": "workspace:*",
-    "@push-based/angular-stream-fastify": "workspace:*",
     "@push-based/angular-stream-node": "workspace:*"
   },
   "peerDependencies": {
@@ -47,6 +46,7 @@
     "@nestjs/core": "^12.0.0",
     "@nestjs/platform-express": "^12.0.0",
     "@nestjs/platform-fastify": "^12.0.0",
+    "@push-based/angular-stream-fastify": "workspace:*",
     "vite": ">=7"
   },
   "devDependencies": {
@@ -58,6 +58,7 @@
     "@nestjs/core": "^12.6.0",
     "@nestjs/platform-express": "^12.6.0",
     "@nestjs/platform-fastify": "^12.6.0",
+    "@push-based/angular-stream-fastify": "workspace:*",
     "@types/node": "^20.19.43",
     "fastify": "5.12.8",
     "reflect-metadata": "^0.2.2",
@@ -77,6 +78,9 @@
       "optional": true
     },
     "@nestjs/platform-fastify": {
+      "optional": true
+    },
+    "@push-based/angular-stream-fastify": {
       "optional": true
     },
     "vite": {

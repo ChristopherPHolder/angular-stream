@@ -26,7 +26,8 @@ function withRenderer(module: DynamicModule): DynamicModule {
 }
 
 /**
- * Streams the Angular application from a Nest app on `@nestjs/platform-express`.
+ * Streams the Angular application from a Nest app on `@nestjs/platform-express` or
+ * `@nestjs/platform-fastify`.
  *
  * Every `GET` and `HEAD` that nothing else answers, neither a controller nor
  * middleware another module adds when the app initializes, is rendered as a

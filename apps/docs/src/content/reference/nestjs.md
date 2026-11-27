@@ -7,7 +7,9 @@ The NestJS module, for `@nestjs/platform-express` and
 Fastify on the [Fastify adapter](fastify.md)'s route handler. It depends on
 [`@push-based/angular-stream-core`](core.md), whose browser providers the app
 still needs. It needs `@nestjs/common` and `@nestjs/core` 12, and one of
-`@nestjs/platform-express` and `@nestjs/platform-fastify` 12. For the whole
+`@nestjs/platform-express` and `@nestjs/platform-fastify` 12. On Fastify,
+install `@push-based/angular-stream-fastify` too: it's an optional peer, loaded
+only there, so an Express app installs nothing from Fastify. For the whole
 setup, see [NestJS](../getting-started/nestjs.md).
 
 Two entry points: `@push-based/angular-stream-nestjs` for the server, and
@@ -52,8 +54,9 @@ When the app initializes, the module adds its render route last: right
 before Nest's own 404 and error handlers. On Express, that is one middleware;
 on Fastify, a route with the same steps (see [On Fastify](#on-fastify)). That
 is after the controllers' routes, and after whatever other modules add when
-they initialize (`ServeStaticModule`, `GraphQLModule`), whichever order Nest
-runs their `onModuleInit` hooks in. For each request that reaches it, in
+they initialize (`GraphQLModule`, and `ServeStaticModule` on Express),
+whichever order Nest runs their `onModuleInit` hooks in. On Fastify, another
+catch-all `/*` route can't be added at all: Fastify refuses duplicate routes. For each request that reaches it, in
 order:
 
 1. Under the global prefix (`app.setGlobalPrefix('api')`), the request is
@@ -263,7 +266,9 @@ Three ways to serve the browser build, `dist/client`:
   every `GET` that isn't a file with `index.html`, so nothing is rendered. Turn
   that off with `exclude: ['/{*any}']` and pass
   `serveStaticOptions: { index: false }`. Where it is imported doesn't matter:
-  its middleware always comes before the render route.
+  its middleware always comes before the render route. Express only: on
+  Fastify it always adds a `GET *` route, and the app fails to start with
+  `FST_ERR_DUPLICATED_ROUTE`.
 
 In each case a missing file under `/assets/` is a `404`.
 
