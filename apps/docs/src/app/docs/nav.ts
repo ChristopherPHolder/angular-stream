@@ -104,6 +104,13 @@ export const DOCS: DocSection[] = [
           'Stream an Angular app from AWS Lambda through a streaming Function URL and CloudFront.',
         load: () => import('../../content/getting-started/aws-lambda.md'),
       },
+      {
+        slug: 'fastly-compute',
+        title: 'Fastly Compute',
+        description:
+          'Stream an Angular app from Fastly Compute, with its files in a KV Store, from the app config to the deploy.',
+        load: () => import('../../content/getting-started/fastly-compute.md'),
+      },
     ],
   },
   {
