@@ -1,0 +1,4 @@
+# Nitro build output, one folder per preset family.
+.output/
+.vercel/
+.netlify/

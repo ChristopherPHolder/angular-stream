@@ -41,6 +41,10 @@ export default defineConfig({
               sourceTag: 'runtime:service-worker',
               onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:service-worker'],
             },
+            {
+              sourceTag: 'runtime:nitro',
+              onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:nitro'],
+            },
           ],
         },
       ],

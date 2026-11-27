@@ -69,6 +69,13 @@ export const DOCS: DocSection[] = [
           'Stream an Angular app from a Vercel Function, from the app config to the Build Output Vercel deploys.',
         load: () => import('../../content/getting-started/vercel.md'),
       },
+      {
+        slug: 'nitro',
+        title: 'Nitro',
+        description:
+          'Stream an Angular app from a Nitro server, deployed with any of its presets: Node, Vercel, Netlify and more.',
+        load: () => import('../../content/getting-started/nitro.md'),
+      },
     ],
   },
   {
@@ -142,6 +149,13 @@ export const DOCS: DocSection[] = [
         description:
           'The API of @push-based/angular-stream-cloudflare: a Worker fetch handler over the ASSETS binding.',
         load: () => import('../../content/reference/cloudflare.md'),
+      },
+      {
+        slug: 'nitro',
+        title: 'angular-stream-nitro',
+        description:
+          'The API of @push-based/angular-stream-nitro: an h3 handler, and a Vite plugin that gives it the template.',
+        load: () => import('../../content/reference/nitro.md'),
       },
       {
         slug: 'limitations',
