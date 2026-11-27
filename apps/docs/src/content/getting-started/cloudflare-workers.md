@@ -46,6 +46,7 @@ export const config = mergeApplicationConfig(appConfig, {
 ## 3. The Worker
 
 ```ts title="src/worker.ts"
+import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
 import { createStreamingWorker } from '@push-based/angular-stream-cloudflare';
 import { App } from './app/app';
 import { config } from './app/app.config.server';
@@ -53,12 +54,18 @@ import { config } from './app/app.config.server';
 export default createStreamingWorker({
   rootComponent: App,
   config,
+  eventDispatchContract,
   allowedHosts: ['localhost', 'my-app.example.workers.dev'],
 }) satisfies ExportedHandler<Env>;
 ```
 
 `allowedHosts` must list every hostname the Worker answers for: Angular's SSR
 host guard rejects any other `host` header, and the Worker answers `403`.
+
+`eventDispatchContract` is for `withEventReplay()`. The Worker renders into the
+built `index.html`, which doesn't carry the script Angular needs to queue the
+clicks made before the page hydrates, so the Worker adds it. Leave it out and
+those clicks are lost; the Worker logs a warning when that happens.
 
 ## 4. Wrangler
 

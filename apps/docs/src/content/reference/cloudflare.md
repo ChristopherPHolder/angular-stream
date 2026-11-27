@@ -21,6 +21,8 @@ interface StreamingAppOptions {
   config: ApplicationConfig;
   /** Every hostname the Worker answers for. */
   allowedHosts: readonly string[];
+  /** The contents of @angular/core/event-dispatch-contract.min.js, for withEventReplay(). */
+  eventDispatchContract?: string;
 }
 ```
 
@@ -30,12 +32,19 @@ fetched as `/index.html` through the `ASSETS` binding. Export it as the
 Worker's default export:
 
 ```ts title="src/worker.ts"
+import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
+
 export default createStreamingWorker({
   rootComponent: App,
   config,
+  eventDispatchContract,
   allowedHosts: ['localhost', 'my-app.example.workers.dev'],
 }) satisfies ExportedHandler<Env>;
 ```
+
+The built `index.html` has no event dispatch contract, so pass
+`eventDispatchContract` for `withEventReplay()`; see
+[`createStreamingHandler()`](core.md#createstreaminghandler).
 
 Set `assets.html_handling` to `"none"` in `wrangler.jsonc`, so that static
 assets are served before a request reaches the Worker and every navigation

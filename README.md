@@ -79,11 +79,13 @@ providers: [
 ];
 
 // src/worker.ts
+import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
 import { createStreamingWorker } from '@push-based/angular-stream-cloudflare';
 
 export default createStreamingWorker({
   rootComponent: App,
   config, // the server ApplicationConfig
+  eventDispatchContract, // for withEventReplay()
   allowedHosts: ['localhost', 'my-app.example.workers.dev'],
 }) satisfies ExportedHandler<Env>;
 ```

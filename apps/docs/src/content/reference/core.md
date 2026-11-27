@@ -91,6 +91,8 @@ interface StreamingHandlerOptions<Context = void> {
   config: ApplicationConfig;
   /** Every hostname the server answers for. */
   allowedHosts: readonly string[];
+  /** The contents of @angular/core/event-dispatch-contract.min.js, for withEventReplay(). */
+  eventDispatchContract?: string;
   /** Fetches the built index.html. A response that isn't ok turns into a 404. */
   loadTemplate(request: Request, context: Context): Promise<Response>;
 }
@@ -103,7 +105,8 @@ request it:
 
 1. applies Angular's host guard, answering `403` for a host not in
    `allowedHosts`;
-2. loads the template with `loadTemplate`, answering `404` if that fails;
+2. loads the template with `loadTemplate`, answering `404` if that fails, and
+   adds `eventDispatchContract` to it;
 3. streams the route into it with `renderStreamingAngular()`;
 4. if streaming throws before its first flush, renders the page buffered
    instead, with `createBufferedRender()`.
@@ -112,6 +115,22 @@ request it:
 such as a Worker's `env`, and is passed through to `loadTemplate`. Every request
 that reaches the handler is treated as a page request: serve static assets
 before it.
+
+`eventDispatchContract` is what `withEventReplay()` needs to queue the clicks
+made before the page hydrates. Angular's server renderer only sets up replay
+when the template already holds Angular's event dispatch contract script; when
+it doesn't, early clicks are lost without an error. The Angular CLI and ngp add
+that script to the template a server renders into, but a template your server
+fetches itself, such as the built `index.html` behind a Worker's `ASSETS`
+binding, doesn't have it. Pass the file's contents and the handler puts the
+script right after `<body>`, unless the template has it already. With Vite:
+
+```ts
+import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
+```
+
+When the page has listeners to replay but no contract, the renderer logs a
+warning, once.
 
 ### `renderStreamingAngular()`
 

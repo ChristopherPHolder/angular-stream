@@ -3,8 +3,13 @@
  *
  * ngp builds the browser app into dist/client and the server entry
  * (src/main.server.ts) into dist/server. This renders each route the entry
- * lists into dist/client/index.html and writes it next to it, as
+ * lists into dist/server/index.server.html and writes it to dist/client, as
  * `<route>.html`, which GitHub Pages serves for the extensionless URL.
+ *
+ * index.server.html is the built index.html plus Angular's event dispatch
+ * contract, which `withEventReplay()` needs to queue the clicks made before
+ * the page hydrates. Rendered into dist/client/index.html, the pages would
+ * lose those clicks without an error.
  * `404` becomes 404.html, Pages' page for every unknown path.
  *
  * `DOCS_BASE` must match the one the build ran with.
@@ -29,7 +34,7 @@ interface ServerEntry {
 }
 const entry = (await import(path.join(serverDir, entryFile))) as ServerEntry;
 
-const template = await readFile(path.join(client, 'index.html'), 'utf8');
+const template = await readFile(path.join(serverDir, 'index.server.html'), 'utf8');
 
 for (const route of entry.PRERENDERED_ROUTES) {
   const html = await entry.default(base + route, template);

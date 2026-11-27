@@ -107,6 +107,7 @@ export async function renderStreamingAngular({
     const { shell, tail } = splitOpenBodyDocument(
       await ɵrenderInternal(platformRef, applicationRef),
     );
+    warnIfEventReplayIsLost(serverDocument);
     const stream = new HydrationStream(applicationRef, serverDocument);
     const init = stream.begin(requestTracker.pending());
     const styles = new ComponentStyles(serverDocument, shell);
@@ -286,6 +287,30 @@ export function takeEntryScripts(document: Document): string {
   }
 
   return markup;
+}
+
+let warnedAboutEventReplay = false;
+
+/**
+ * `withEventReplay()` marks the page's listeners with `jsaction`, but only
+ * queues early clicks if the template carried the event dispatch contract.
+ * Angular says nothing when it didn't, so say it here, once.
+ */
+function warnIfEventReplayIsLost(document: Document): void {
+  if (
+    warnedAboutEventReplay ||
+    document.getElementById('ng-event-dispatch-contract') !== null ||
+    document.querySelector('[jsaction]') === null
+  ) {
+    return;
+  }
+
+  warnedAboutEventReplay = true;
+  console.warn(
+    '[ssr] withEventReplay() is on, but the template has no event dispatch contract, so ' +
+      'clicks made before hydration are lost. Pass `eventDispatchContract` (the contents of ' +
+      "'@angular/core/event-dispatch-contract.min.js') to the handler.",
+  );
 }
 
 /**

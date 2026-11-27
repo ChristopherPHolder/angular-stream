@@ -18,6 +18,20 @@ export interface StreamingAppOptions {
    * request whose `host` header isn't listed, with NG05706.
    */
   allowedHosts: readonly string[];
+  /**
+   * The contents of `@angular/core/event-dispatch-contract.min.js`, for
+   * `withEventReplay()`.
+   *
+   * Angular's server renderer only sets up event replay when the template
+   * already holds this script: it adds the `__jsaction_bootstrap(...)` call
+   * after it, or removes it when the page has nothing to replay. Without it,
+   * clicks made before hydration are lost, silently. The handler puts it right
+   * after `<body>` unless the template has it already, as a template built by
+   * the Angular CLI or ngp's `index.server.html` does.
+   *
+   * With Vite: `import contract from '@angular/core/event-dispatch-contract.min.js?raw'`.
+   */
+  eventDispatchContract?: string;
 }
 
 /**
@@ -41,6 +55,34 @@ export type StreamingHandler<Context = void> = (
   request: Request,
   context: Context,
 ) => Promise<Response>;
+
+const EVENT_DISPATCH_CONTRACT_ID = 'ng-event-dispatch-contract';
+
+/**
+ * `document` with the event dispatch contract in a script right after
+ * `<body>`, where the Angular CLI puts it, so it runs before anything a user
+ * could click exists. Unchanged without a contract, without a `<body>` tag, or
+ * when the template has the script already.
+ */
+function withEventDispatchContract(document: string, contract: string | undefined): string {
+  if (!contract || document.includes(`id="${EVENT_DISPATCH_CONTRACT_ID}"`)) {
+    return document;
+  }
+
+  // Looked for after `</head>`, so `<body` in a head script's text isn't taken for the tag.
+  const from = Math.max(0, document.search(/<\/head\s*>/i));
+  const match = /<body\b[^>]*>/i.exec(document.slice(from));
+  if (match === null) {
+    return document;
+  }
+
+  const at = from + match.index + match[0].length;
+  return (
+    document.slice(0, at) +
+    `<script type="text/javascript" id="${EVENT_DISPATCH_CONTRACT_ID}">${contract}</script>` +
+    document.slice(at)
+  );
+}
 
 /**
  * Buffered render: one string, once the application is stable.
@@ -106,7 +148,10 @@ export function createStreamingHandler<Context = void>(
       return new Response('Not found.', { status: 404 });
     }
 
-    const document = await template.text();
+    const document = withEventDispatchContract(
+      await template.text(),
+      options.eventDispatchContract,
+    );
 
     try {
       return await renderStreamingAngular({

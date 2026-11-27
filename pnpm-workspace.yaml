@@ -41,3 +41,4 @@ minimumReleaseAgeExclude:
   - '@nx/nx-win32-x64-msvc@24.1.0'
   - '@nx/workspace@24.1.0'
   - nx@24.1.0
+  - '@push-based/vite-plugin-ngp@0.4.3'

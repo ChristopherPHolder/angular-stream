@@ -30,7 +30,7 @@
   "devDependencies": {
     "@angular/compiler-cli": "22.3.0-rc.0",
     "@cloudflare/vite-plugin": "^1.67.0",
-    "@push-based/vite-plugin-ngp": "^0.4.1",
+    "@push-based/vite-plugin-ngp": "^0.4.3",
     "@types/node": "^20.19.43",
     "sass": "^1.95.0",
     "typescript": "~6.0.2",
