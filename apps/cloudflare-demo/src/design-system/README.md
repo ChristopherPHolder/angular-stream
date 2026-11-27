@@ -1,11 +1,11 @@
 # PushBased
 
-> **In this repo:** a copy of the PushBased design system for `apps/demo`. Only
+> **In this repo:** a copy of the PushBased design system for `apps/cloudflare-demo`. Only
 > `tokens.css`, `components/components.css` and the component READMEs are kept;
 > the React components, `tokens.json` and `preview.html` are left out. The
 > Google Fonts `@import` is removed from `components.css` because
-> `apps/demo/index.html` loads Geist itself, and the logo lives at
-> `apps/demo/public/pushbased-logo.svg`.
+> `apps/cloudflare-demo/index.html` loads Geist itself, and the logo lives at
+> `apps/cloudflare-demo/public/pushbased-logo.svg`.
 
 Fast, maintainable web apps, built by Angular and Nx experts.
 

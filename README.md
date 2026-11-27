@@ -24,7 +24,8 @@ server bundle running directly in workerd, static assets served by Cloudflare's
 | --------- | ------------------------------------------------------------------------ |
 | Framework | Angular 22 (standalone, zoneless, signal-based APIs)                     |
 | Compiler  | [`@push-based/vite-plugin-ngp`][ngp] — Angular's Rust/TS preprocessor    |
-| Toolchain | [Vite+][vite-plus] (`vp`): Vite 8, Oxlint, Oxfmt, task runner            |
+| Toolchain | [Vite+][vite-plus] (`vp`): Vite 8, Oxlint, Oxfmt, library packing        |
+| Workspace | [Nx][nx] (task graph, cache, `affected`, release) over pnpm workspaces   |
 | SSR       | Streamed, with hydration starting before the response ends; see below    |
 | Host      | Cloudflare Workers via [`@cloudflare/vite-plugin`][cfvite]               |
 | State     | [`@rx-angular/state`](https://www.rx-angular.io/)                        |
@@ -34,24 +35,34 @@ server bundle running directly in workerd, static assets served by Cloudflare's
 [ngp]: https://github.com/push-based/vite-plugin-ngp
 [cfvite]: https://developers.cloudflare.com/workers/vite-plugin/
 [vite-plus]: https://viteplus.dev/guide/
+[nx]: https://nx.dev/
 
 ## Layout
 
-An npm-workspaces monorepo, laid out the way `vp create vite:monorepo` sets one
-up:
+An Nx workspace over pnpm workspaces. Apps are private and deploy as Workers;
+everything under `packages/` is published to npm under `@push-based/`:
 
-| Path                 | What                                                                                      |
-| -------------------- | ----------------------------------------------------------------------------------------- |
-| `apps/movies`        | The TMDB movie browser. Deployed as the `angular-stream` Worker.                          |
-| `apps/demo`          | Streamed hydration, step by step, with no external API. The `angular-stream-demo` Worker. |
-| `packages/streaming` | `@angular-stream/streaming`: the streaming renderer, its inline runtime and the client.   |
-| `vite.config.ts`     | Workspace-wide lint, format and task-cache settings.                                      |
+| Path                   | What                                                                                                   |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ |
+| `apps/movies`          | The TMDB movie browser. Deployed as the `angular-stream` Worker.                                       |
+| `apps/cloudflare-demo` | Streamed hydration, step by step, with no external API. The `angular-stream-demo` Worker.              |
+| `packages/core`        | `@push-based/angular-stream-core`: the streaming renderer, its inline runtime and the client.          |
+| `packages/cloudflare`  | `@push-based/angular-stream-cloudflare`: `createStreamingWorker()`, over the Workers `ASSETS` binding. |
+| `nx.json`              | Task defaults, cache inputs and outputs, and the release group.                                        |
+| `vite.config.ts`       | Workspace-wide lint (module boundaries included) and format settings.                                  |
 
-`@angular-stream/streaming` ships TypeScript source; ngp compiles it with the
-app that imports it, like the app's own code. An app needs two things from it:
+The core is runtime-agnostic: it speaks web `Request`, `Response` and streams,
+and nothing else. A runtime adapter only says how to fetch `index.html` and what
+the server entry looks like; `packages/cloudflare` is a single call to
+the core's `createStreamingHandler()`. More adapters (`@angular/build` +
+`@angular/ssr`, Node, Fastly, …) follow the same shape.
+
+An app needs two things:
 
 ```ts
 // src/app/app.config.ts
+import { provideStreamHydration, streamHttpInterceptor } from '@push-based/angular-stream-core';
+
 providers: [
   provideHttpClient(withInterceptors([streamHttpInterceptor /* , ... */])),
   provideClientHydration(/* ... */),
@@ -59,12 +70,26 @@ providers: [
 ];
 
 // src/worker.ts
+import { createStreamingWorker } from '@push-based/angular-stream-cloudflare';
+
 export default createStreamingWorker({
   rootComponent: App,
   config, // the server ApplicationConfig
   allowedHosts: ['localhost', 'my-app.example.workers.dev'],
 }) satisfies ExportedHandler<Env>;
 ```
+
+Inside this repo, the apps import the packages' TypeScript source (each
+package's `exports` points at `src/`) and ngp compiles it with the app, so
+`dev` never waits on a package build. Published packages are built with
+`vp pack` to ESM and `.d.ts`; `publishConfig` swaps `exports` over to `dist/`
+when pnpm packs them. The packages carry no Angular decorators, so they need no
+partial compilation and work in any Angular build.
+
+**Module boundaries.** Each `package.json` carries Nx tags, and
+`nx/enforce-module-boundaries` (run by Oxlint in `vp check`) holds them:
+packages never import an app, the core (`runtime:agnostic`) never imports an
+adapter, and an adapter imports only the core.
 
 ## Requirements
 
@@ -74,44 +99,56 @@ toolchain more than a normal Angular app:
 - **macOS or Linux (glibc), x64 or arm64.** Elsewhere — Alpine included — set
   `engine: 'wasm'` in the `ngp()` options. Windows is untested outside WSL 2.
 - **Node 26.**
+- **pnpm.** `packageManager` in `package.json` names the version; Vite+ and
+  Corepack both pick it up.
 - **Every `@angular/*` package pinned to exactly `22.3.0-rc.0`.** ngp imports
-  private APIs from `@angular/compiler-cli`, so no other version works. This is
-  also why `.npmrc` sets `legacy-peer-deps`: npm never matches a prerelease
-  against a plain range like `>=22.0.0`, so the Angular libraries' peer ranges
-  fail to resolve even though they are compatible.
+  private APIs from `@angular/compiler-cli`, so no other version works. pnpm
+  warns about, but accepts, the Angular libraries' peer ranges, which never
+  match a prerelease.
 
 ## Getting started
 
 ```bash
-npm install
-npm run dev        # the movie browser
-npm run dev:demo   # the demo
+pnpm install
+pnpm dev          # the movie browser
+pnpm dev:demo     # the demo
 ```
 
 The dev server runs each Worker in workerd, so SSR behaves as it does in
 production. Run one app at a time: both start workerd's inspector on port 9232,
-and the second fails silently. The first install prompts to approve native
-install scripts (`esbuild`, `workerd`, `@parcel/watcher`, `fsevents`); they are
-already recorded under `allowScripts` in `package.json`.
+and the second fails silently. The native install scripts pnpm blocks by
+default (`esbuild`, `workerd`, `@parcel/watcher`, `fsevents`, `nx`) are allowed
+under `allowBuilds` in `pnpm-workspace.yaml`.
 
 At the root:
 
-| Script             | What it does                                               |
-| ------------------ | ---------------------------------------------------------- |
-| `npm run dev`      | `vp run movies#dev`                                        |
-| `npm run dev:demo` | `vp run demo#dev`                                          |
-| `npm run build`    | `vp run -r build`: every app, with Vite+'s task cache      |
-| `npm run ready`    | `vp check` (format, lint, type-aware lint), then the build |
+| Script          | What it does                                                           |
+| --------------- | ---------------------------------------------------------------------- |
+| `pnpm dev`      | `nx run movies:dev`                                                    |
+| `pnpm dev:demo` | `nx run cloudflare-demo:dev`                                           |
+| `pnpm build`    | `nx run-many -t build`: every app and package, with Nx's task cache    |
+| `pnpm ready`    | `vp check` (format, lint, type-aware lint, boundaries), then the build |
 
-In each app (`npm run <script> -w movies`, or `vp -C apps/movies <command>`):
+Nx infers each project's targets from its `package.json` scripts, so run them
+as `pnpm nx <target> <project>` (`pnpm nx build movies`), or across the
+workspace with `pnpm nx run-many -t <target>` and `pnpm nx affected -t <target>`.
 
-| Script       | What it does                                         |
+In each app:
+
+| Target       | What it does                                         |
 | ------------ | ---------------------------------------------------- |
 | `dev`        | `vp dev`: Vite dev server, Worker in workerd         |
 | `build`      | Client bundle to `dist/client`, Worker to `dist/ssr` |
-| `preview`    | Serves the built output in workerd                   |
+| `preview`    | Builds, then serves the output in workerd            |
 | `deploy`     | Builds, then `wrangler deploy`                       |
 | `cf-typegen` | Regenerates `worker-configuration.d.ts`              |
+
+In each package:
+
+| Target      | What it does                                  |
+| ----------- | --------------------------------------------- |
+| `build`     | `vp pack`: ESM and `.d.ts` to `dist/`         |
+| `typecheck` | `tsc --noEmit` against the strict base config |
 
 ### TMDB credentials
 
@@ -122,11 +159,13 @@ TMDB key. To use your own, copy `environment.local.example.ts` to
 
 ## Continuous deployment
 
-`.github/workflows/ci.yml` checks and builds every pull request and every push
-to `main`, and deploys both Workers on pushes to `main` only. `vp check` fails
-on formatting and lint errors; each build also runs ngp's type check and the
-bundle budgets, so a type error or an oversized bundle fails CI before anything
-ships.
+`.github/workflows/ci.yml` runs `vp check` on every pull request and every
+push to `main`, then builds and type checks the projects the change affects
+(`nx affected`). On pushes to `main` it deploys the affected apps; a change to
+a package counts as a change to every app that uses it. `vp check` fails on
+formatting, lint and boundary errors; each app build also runs ngp's type check
+and the bundle budgets, so a type error or an oversized bundle fails CI before
+anything ships.
 
 Two repository secrets are required for the deploy steps:
 
@@ -137,10 +176,27 @@ Two repository secrets are required for the deploy steps:
 
 Until they are set, pull requests still build; only the deploy steps fail.
 
-Deploying by hand is `npm run deploy -w movies` (or `-w demo`). Either way
+Deploying by hand is `pnpm nx deploy movies` (or `cloudflare-demo`). Either way
 `wrangler` reads the config that `vp build` generated (`dist/ssr/wrangler.json`,
 reached through the app's `.wrangler/deploy/config.json`) rather than the app's
 `wrangler.jsonc`, whose `main` points at TypeScript source.
+
+## Releasing the packages
+
+`nx release` versions everything under `packages/` as one group: core and
+adapters share a version, because they share the wire format. Versions and
+changelogs come from conventional commits; tags are `v<version>`.
+
+`.github/workflows/release.yml` runs it by hand (Actions → Release → Run
+workflow), with `dry-run` on by default. It builds the packages, bumps the
+versions, writes the changelogs, commits, tags, creates the GitHub release and
+publishes to npm on the `next` dist-tag with provenance. The first run needs
+`first-release`. It requires an `NPM_TOKEN` secret with publish rights on the
+`@push-based` scope.
+
+The packages use private Angular APIs (`ɵ`-prefixed), so their Angular peer
+range is narrow (`~22.3.0-rc.0`) and every Angular minor needs a check and a
+release.
 
 ## How the pieces fit
 
@@ -152,14 +208,15 @@ paths. `/assets/*` and `/favicon.ico` are served directly; every navigation
 falls through to the Worker.
 
 **`src/worker.ts`** is `createStreamingWorker()` from
-`@angular-stream/streaming/server`. It applies Angular's host guard
+`@push-based/angular-stream-cloudflare`, a thin layer over the core's
+`createStreamingHandler()`. It applies Angular's host guard
 (`allowedHosts` must list every hostname the Worker answers for), fetches
 `/index.html` through the `ASSETS` binding and streams the route into it. In dev
 that binding is backed by the Vite dev server, so the template already carries
 Vite's transforms. If the streaming renderer fails before its first byte, the
 Worker falls back to a buffered `renderApplication`.
 
-**`packages/streaming/src/server/`** is the renderer: it sends a hydratable
+**`packages/core/src/server/`** is the renderer: it sends a hydratable
 shell as soon as the route's structure exists and streams the rest. See
 [Streamed hydration](#streamed-hydration).
 
@@ -247,9 +304,9 @@ inside a block.
 - `window.__ngs` is the inline runtime. If it is missing, the Worker fell back
   to the buffered render; the server logs
   `[ssr] streaming render failed before commit`.
-- Check hydration under `npm run dev`. Angular only checks node matches in
+- Check hydration under `pnpm dev`. Angular only checks node matches in
   dev mode.
-- To see the steps one at a time, run the demo (`npm run dev:demo`). `/example`
+- To see the steps one at a time, run the demo (`pnpm dev:demo`). `/example`
   streams one widget and shows the code for it; `/walkthrough` and `/inspect`
   show each flush and each hydration as it happens.
 - Request each page at least twice on the same server process. NG0600 from
@@ -259,11 +316,13 @@ More in [Verifying a change](docs/streamed-hydration.md#verifying-a-change).
 
 ### Where things live
 
-All under `packages/streaming/src/`:
+All under `packages/core/src/`. The Cloudflare entry, `createStreamingWorker()`,
+is `packages/cloudflare/src/index.ts`: the handler, with the template read from
+`ASSETS`.
 
 | File                                   | Role                                                                            |
 | -------------------------------------- | ------------------------------------------------------------------------------- |
-| `server/worker.ts`                     | `createStreamingWorker()`: host guard, template, stream, buffered fallback      |
+| `server/handler.ts`                    | `createStreamingHandler()`: host guard, template, stream, buffered fallback     |
 | `server/streaming-angular-renderer.ts` | The response: shell, then a flush per finished request                          |
 | `server/hydration-stream.ts`           | Re-annotates the app each flush and cuts out the blocks that changed            |
 | `server/defer-blocks.ts`               | Renders `hydrate` blocks on the server between change detection passes          |

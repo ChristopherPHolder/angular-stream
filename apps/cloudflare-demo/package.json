@@ -1,5 +1,5 @@
 {
-  "name": "demo",
+  "name": "cloudflare-demo",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -7,17 +7,18 @@
     "dev": "vp dev",
     "build": "vp build",
     "preview": "vp preview",
-    "deploy": "vp build && wrangler deploy",
+    "deploy": "wrangler deploy",
     "cf-typegen": "wrangler types"
   },
   "dependencies": {
-    "@angular-stream/streaming": "*",
     "@angular/common": "22.3.0-rc.0",
     "@angular/compiler": "22.3.0-rc.0",
     "@angular/core": "22.3.0-rc.0",
     "@angular/platform-browser": "22.3.0-rc.0",
     "@angular/platform-server": "22.3.0-rc.0",
     "@angular/router": "22.3.0-rc.0",
+    "@push-based/angular-stream-cloudflare": "workspace:*",
+    "@push-based/angular-stream-core": "workspace:*",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -28,7 +29,13 @@
     "@types/node": "^20.19.43",
     "typescript": "~6.0.2",
     "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8001",
-    "wrangler": "^4.156.1",
-    "vite-plus": "1.8.0"
+    "vite-plus": "1.8.0",
+    "wrangler": "^4.156.1"
+  },
+  "nx": {
+    "tags": [
+      "type:app",
+      "runtime:cloudflare"
+    ]
   }
 }

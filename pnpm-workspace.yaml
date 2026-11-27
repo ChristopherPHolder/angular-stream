@@ -1,0 +1,41 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Vite+ ships its own Vite build; every package that asks for `vite` gets it.
+overrides:
+  vite: npm:@voidzero-dev/vite-plus-core@8.3.8001
+
+peerDependencyRules:
+  allowedVersions:
+    # ngp also depends on TypeScript 7 under the alias `typescript7`, and pnpm
+    # counts that as its `typescript` peer. ngp loads TypeScript through
+    # @angular/compiler-cli, which gets 6.0, so the mismatch is only reported.
+    '@push-based/vite-plugin-ngp>typescript': '7'
+    # Vite+ bundles Vitest, which asks for newer Node types than the apps use.
+    'vitest>@types/node': '20'
+
+# Native postinstalls pnpm blocks by default. Without them workerd has no
+# binary and Nx has no native task hasher.
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+  fsevents: true
+  nx: true
+  workerd: true
+
+minimumReleaseAgeExclude:
+  - '@nx/devkit@24.1.0'
+  - '@nx/js@24.1.0'
+  - '@nx/nx-darwin-arm64@24.1.0'
+  - '@nx/nx-darwin-x64@24.1.0'
+  - '@nx/nx-freebsd-x64@24.1.0'
+  - '@nx/nx-linux-arm-gnueabihf@24.1.0'
+  - '@nx/nx-linux-arm64-gnu@24.1.0'
+  - '@nx/nx-linux-arm64-musl@24.1.0'
+  - '@nx/nx-linux-x64-gnu@24.1.0'
+  - '@nx/nx-linux-x64-musl@24.1.0'
+  - '@nx/nx-win32-arm64-msvc@24.1.0'
+  - '@nx/nx-win32-x64-msvc@24.1.0'
+  - '@nx/workspace@24.1.0'
+  - nx@24.1.0

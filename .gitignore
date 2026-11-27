@@ -55,3 +55,7 @@ opensrc/
 # Claude Code
 .claude/worktrees
 .claude/settings.local.json
+
+# Nx
+.nx/cache
+.nx/workspace-data

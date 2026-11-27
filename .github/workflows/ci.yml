@@ -6,6 +6,7 @@ on:
   pull_request:
 
 permissions:
+  actions: read
   contents: read
 
 # One run per branch. Superseded pull request runs are dropped; pushes to main
@@ -21,45 +22,44 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Full history, so `nx affected` can compare against the base commit.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Reads the pnpm version from `packageManager` in package.json.
+      - uses: pnpm/action-setup@v4
 
       # ngp requires Node 26.
       - uses: actions/setup-node@v4
         with:
           node-version: 26
-          cache: npm
+          cache: pnpm
 
-      # `.npmrc` sets legacy-peer-deps, because Angular is pinned to the
-      # prerelease ngp was built against and npm never matches a prerelease
-      # against a plain peer range. `allowScripts` in package.json covers the
-      # native postinstalls npm 11 blocks by default (esbuild, workerd,
-      # @parcel/watcher, fsevents) — without them workerd has no binary.
-      - run: npm ci
+      # `allowBuilds` in pnpm-workspace.yaml covers the native postinstalls
+      # pnpm blocks by default (esbuild, workerd, @parcel/watcher, nx).
+      - run: pnpm install --frozen-lockfile
 
-      # Formatting (Oxfmt) and lint (Oxlint, type-aware) for the whole workspace.
-      - run: npx vp check
+      # Formatting (Oxfmt), lint (Oxlint, type-aware) and module boundaries for
+      # the whole workspace.
+      - run: pnpm exec vp check
 
-      # Builds every app through Vite+'s task runner. Each build also runs
-      # ngp's template and TypeScript type check and the bundle budgets, so a
-      # type error or an oversized bundle fails CI.
-      - run: npx vp run -r build
+      # Sets NX_BASE and NX_HEAD: the PR's base, or on main the last commit
+      # whose CI run succeeded, so a failed deploy is retried on the next push.
+      - uses: nrwl/nx-set-shas@v4
 
-      # `vp build` writes each app's dist/ssr/wrangler.json and points wrangler
-      # at it through the app's .wrangler/deploy/config.json, so this deploys
-      # the built Worker rather than the app's wrangler.jsonc, whose `main` is
-      # TypeScript source.
-      - name: Deploy movies to Cloudflare Workers
+      # Builds and type checks the projects this change affects. Each app build
+      # also runs ngp's template and TypeScript type check and the bundle
+      # budgets, so a type error or an oversized bundle fails CI.
+      - run: pnpm exec nx affected -t build typecheck
+
+      # Each app's `deploy` target runs `wrangler deploy` after its build.
+      # `vp build` writes dist/ssr/wrangler.json and points wrangler at it
+      # through .wrangler/deploy/config.json, so this deploys the built Worker
+      # rather than the app's wrangler.jsonc, whose `main` is TypeScript source.
+      - name: Deploy affected apps to Cloudflare Workers
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        working-directory: apps/movies
-        run: npx wrangler deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      - name: Deploy demo to Cloudflare Workers
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        working-directory: apps/demo
-        run: npx wrangler deploy
+        run: pnpm exec nx affected -t deploy --parallel=1
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

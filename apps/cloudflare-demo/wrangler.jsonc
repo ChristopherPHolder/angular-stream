@@ -3,7 +3,7 @@
  * every navigation to the Worker, which renders it into `/index.html`.
  */
 {
-  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "angular-stream-demo",
   "main": "./src/worker.ts",
   "compatibility_date": "2026-09-07",

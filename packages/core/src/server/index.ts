@@ -1,9 +1,10 @@
 export {
-  type AssetsBinding,
   type StreamingAppOptions,
+  type StreamingHandler,
+  type StreamingHandlerOptions,
   createBufferedRender,
-  createStreamingWorker,
-} from './worker';
+  createStreamingHandler,
+} from './handler';
 export {
   type StreamingAngularRenderOptions,
   renderStreamingAngular,
