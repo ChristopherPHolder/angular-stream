@@ -93,7 +93,11 @@ page. Leave `staticDir` out when something in front already serves the files,
 such as `express.static`, Nginx or a CDN.
 
 With Connect or Express, use the handler as middleware: `app.use(handler)`.
-An error is then passed to `next`, for the app's error handler.
+It renders every `GET` and `HEAD` that reaches it as a page, so mount the
+routes that answer those, such as an API, before it. Other methods are passed
+on to `next()`, and so is an error, for the app's error handler. Default-export
+the app rather than the handler then; see
+[What the server entry default-exports](../reference/node.md#what-the-server-entry-default-exports).
 
 ## 4. Vite
 
@@ -118,9 +122,9 @@ plus the event dispatch contract.
 `angularStreamNode()` is for `vite dev`. It sends each page request to the
 handler your server entry default-exports, with `index.html` as the dev server
 transforms it, so the page loads Vite's client and your sources, and SSR
-streams as it does in production. List it before ngp: ngp's own dev SSR would
-otherwise answer page requests with a page rendered all at once. In a build
-the plugin does nothing.
+streams as it does in production. List it before ngp, or the dev server
+refuses to start: ngp's own dev SSR would otherwise answer page requests first,
+and call the handler the wrong way. In a build the plugin does nothing.
 
 ## 5. Develop
 

@@ -98,11 +98,14 @@ compressed response still arrives in pieces.
 The rule is the same for all of them: anything that holds a response to
 inspect, rewrite, compress or cache it may hold the whole of it.
 
-- The handler sends `Cache-Control: no-store` with every page, since a cached
-  copy of a partial response would be worse than none. A CDN shouldn't cache
-  it, but a CDN that rewrites HTML on the way (inserting scripts, minifying,
-  obfuscating email addresses) may need the whole page first. Turn those
-  features off for pages, or check that they stream.
+- A streamed page carries `Cache-Control: no-store`, since a cached copy of a
+  partial response would be worse than none, so a CDN shouldn't cache it. The
+  buffered page sent when streaming fails before its first byte carries no
+  `Cache-Control` at all, and a CDN may cache it by its own defaults; if that
+  matters, add a no-cache rule for pages at the CDN. A CDN that rewrites HTML
+  on the way (inserting scripts, minifying, obfuscating email addresses) may
+  need the whole page first. Turn those features off for pages, or check that
+  they stream.
 - A proxy that speaks HTTP/1.0 to the server gets the response without chunked
   encoding, closed at the end instead. That still streams, but costs a
   connection per request; speak HTTP/1.1 to Node where you can.
