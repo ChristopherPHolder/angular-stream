@@ -1,5 +1,5 @@
 import type { DynamicModule, Provider } from '@nestjs/common';
-import { HttpAdapterHost, ModuleRef } from '@nestjs/core';
+import { ApplicationConfig, HttpAdapterHost } from '@nestjs/core';
 import {
   ANGULAR_STREAM_OPTIONS,
   ASYNC_OPTIONS_TYPE,
@@ -15,10 +15,10 @@ const RENDERER: Provider = {
   provide: AngularStreamRenderer,
   useFactory: (
     adapterHost: HttpAdapterHost,
-    moduleRef: ModuleRef,
+    config: ApplicationConfig,
     options: AngularStreamModuleOptions,
-  ) => new AngularStreamRenderer(adapterHost, moduleRef, options),
-  inject: [HttpAdapterHost, ModuleRef, ANGULAR_STREAM_OPTIONS],
+  ) => new AngularStreamRenderer(adapterHost, config, options),
+  inject: [HttpAdapterHost, ApplicationConfig, ANGULAR_STREAM_OPTIONS],
 };
 
 function withRenderer(module: DynamicModule): DynamicModule {
@@ -28,16 +28,18 @@ function withRenderer(module: DynamicModule): DynamicModule {
 /**
  * Streams the Angular application from a Nest app on `@nestjs/platform-express`.
  *
- * Every `GET` and `HEAD` that no controller answers is rendered as a page,
- * except under the global prefix (`app.setGlobalPrefix('api')`), which stays
- * the API's: an unknown `/api/...` gets Nest's 404. With `staticDir`, files in
- * the browser build are served first.
+ * Every `GET` and `HEAD` that nothing else answers, neither a controller nor
+ * middleware another module adds when the app initializes, is rendered as a
+ * page, except under the global prefix (`app.setGlobalPrefix('api')`), which
+ * stays the API's: an unknown `/api/...` gets Nest's 404. With `staticDir`,
+ * files in the browser build are served first. A missing file under
+ * `/assets/` is a 404, not a page.
  *
- * Pages aren't controller routes, so guards, interceptors, pipes and exception
- * filters don't run for them, and nothing of Nest's buffers or rewrites a
- * response that has started. An error before the response starts (a bad
- * `Host` is a 400) goes to Nest's exception filters; one after it cuts the
- * connection, as the Node adapter does.
+ * Pages aren't controller routes, so guards, interceptors and pipes don't run
+ * for them, and nothing of Nest's buffers or rewrites a response that has
+ * started. An error before the response starts (a bad `Host` is a 400) goes to
+ * Nest's exception filters; one after it cuts the connection, as the Node
+ * adapter does.
  */
 export class AngularStreamModule extends ConfigurableModuleClass {
   static override forRoot(options: typeof OPTIONS_TYPE): DynamicModule {

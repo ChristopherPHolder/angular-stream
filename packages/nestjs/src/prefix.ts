@@ -1,20 +1,11 @@
-import type { ModuleRef } from '@nestjs/core';
+import type { ApplicationConfig } from '@nestjs/core';
 
 /**
  * The app's global prefix (`app.setGlobalPrefix('api')`) as a path, `/api`, or
  * `null` without one.
- *
- * Nest keeps it in the `ApplicationConfig`, which isn't a provider; the
- * container that holds it is reachable from a `ModuleRef`.
  */
-export function globalPrefix(moduleRef: ModuleRef): string | null {
-  const container = (
-    moduleRef as unknown as {
-      container?: { applicationConfig?: { getGlobalPrefix?: () => string } };
-    }
-  ).container;
-  const prefix = container?.applicationConfig?.getGlobalPrefix?.() ?? '';
-  const trimmed = prefix.replace(/^\/+|\/+$/g, '');
+export function globalPrefix(config: ApplicationConfig): string | null {
+  const trimmed = config.getGlobalPrefix().replace(/^\/+|\/+$/g, '');
   return trimmed === '' ? null : `/${trimmed}`;
 }
 
