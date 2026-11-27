@@ -74,7 +74,10 @@ export function streamingTemplate(): Plugin {
         }
         const page = bundle[TEMPLATE_KEY];
         if (page?.type !== 'asset') {
-          return;
+          // Without it every page would answer 404 in production, with nothing to say why.
+          this.error(
+            `[angular-stream] streamingTemplate(): the client build has no top-level ${TEMPLATE_KEY} to render pages into.`,
+          );
         }
         write(String(page.source));
         delete bundle[TEMPLATE_KEY];
@@ -86,14 +89,16 @@ export function streamingTemplate(): Plugin {
       const update = async () =>
         write(await server.transformIndexHtml('/index.html', readFileSync(file, 'utf8')));
 
+      const updateLogged = () =>
+        update().catch((error: unknown) => server.config.logger.error(String(error)));
+
       server.watcher.add(file);
       server.watcher.on('change', (changed) => {
         if (resolve(changed) === file) {
-          update().catch((error: unknown) => server.config.logger.error(String(error)));
+          void updateLogged();
         }
       });
-
-      return update;
+      void updateLogged();
     },
   };
 }

@@ -1,12 +1,17 @@
 ```bash
 npm install @push-based/angular-stream-nitro@next unstorage
-npm install -D nitro
+npm install -D nitro@3.0.261103-rc
 ```
 
 The Nitro adapter: an h3 event handler, and a Vite plugin that gives it the
 template. It depends on [`@push-based/angular-stream-core`](core.md), whose
 browser providers the app still needs, and on Nitro 3 with its Vite plugin. For
 the whole setup, see [Nitro](../getting-started/nitro.md).
+
+Nitro 3 is a release candidate. Nitro numbers its release candidates by date
+(`3.0.261103-rc`), and no version range can follow them, so the package asks
+for exactly the one it was checked with, and moves with each new one.
+`unstorage` 2, which Nitro's storage needs, is still a beta.
 
 ## `defineStreamingHandler()`
 

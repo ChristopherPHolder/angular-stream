@@ -5,7 +5,7 @@ the setup `apps/example-nitro` uses: Angular compiled by ngp through Vite,
 Nitro's Vite plugin building the server, static files served by Nitro or the
 host's CDN, and every other request rendered by the streaming handler.
 
-It needs Nitro 3, whose Vite plugin is what builds the server here. For a
+It needs Nitro 3, whose Vite plugin is what builds the server here. Nitro 3 is a release candidate. Nitro numbers its release candidates by date (`3.0.261103-rc`), and no version range can follow them, so the package asks for exactly the one it was checked with, and moves with each new one. `unstorage` 2, which Nitro's storage needs, is still a beta. For a
 single host that has its own adapter, such as
 [Cloudflare Workers](cloudflare-workers.md), that adapter is lighter.
 
@@ -13,7 +13,7 @@ single host that has its own adapter, such as
 
 ```bash
 npm install @push-based/angular-stream-core@next @push-based/angular-stream-nitro@next unstorage
-npm install -D nitro
+npm install -D nitro@3.0.261103-rc
 ```
 
 `unstorage` is what Nitro reads server assets through; the handler reads the
@@ -80,6 +80,13 @@ which renders the route into the template.
 
 `allowedHosts` must list every hostname the server answers for: Angular's SSR
 host guard rejects any other `host` header, and the handler answers `403`.
+Nitro's server ignores `X-Forwarded-Host` and `X-Forwarded-Proto` unless its
+`trustProxy` option is on, so behind a proxy the check sees the `host` header
+the proxy sends. List preview hostnames too, with a wildcard such as
+`*.vercel.app`.
+
+A missing file under `/assets/` answers `404`; any other path that isn't a
+file, `/nope.png` included, is rendered as a page.
 
 `eventDispatchContract` is for `withEventReplay()`. The built `index.html`
 doesn't carry the script Angular needs to queue the clicks made before the page
@@ -164,11 +171,12 @@ local runtime. A CDN or proxy in front of the server can still buffer; see
 Two presets buffer as Nitro ships them, going by their runtime code (not run):
 
 - `aws_lambda` returns the whole body in one Lambda result. Nitro's
-  `awsLambda: { streaming: true }` switches to `streamifyResponse`, which needs
-  a Lambda Function URL with response streaming.
+  `awsLambda: { streaming: true }` switches to `streamifyResponse`, which
+  streams through a Lambda Function URL, or through an API Gateway REST API
+  with [response streaming](https://docs.aws.amazon.com/apigateway/latest/developerguide/response-transfer-mode-lambda.html).
 - `azure_swa` (Azure Static Web Apps) reads the body whole with Functions v3,
   and with v4 hands it to Azure Functions without turning on
-  `enableHttpStream`.
+  [`enableHttpStream`](https://learn.microsoft.com/en-us/azure/azure-functions/node-http-stream).
 
 ## Nitro or srvx?
 

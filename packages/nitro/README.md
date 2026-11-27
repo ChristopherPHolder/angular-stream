@@ -8,8 +8,10 @@
 
 # @push-based/angular-stream-nitro
 
-Streamed server-side rendering for Angular on Nitro, and so on every host Nitro
-has a preset for: Node, Bun, Deno, Vercel, Netlify, Cloudflare and more. The
+Streamed server-side rendering for Angular on Nitro, deployable with any of
+Nitro's presets: Node, Bun, Deno, Vercel, Netlify, Cloudflare and more. It
+streams on the presets the docs list as checked; a few, such as `aws_lambda`,
+buffer as Nitro ships them. The
 browser starts hydrating the page while the response is still arriving. This
 is the Nitro adapter of
 [`@push-based/angular-stream-core`](https://www.npmjs.com/package/@push-based/angular-stream-core):
@@ -18,8 +20,13 @@ is the Nitro adapter of
 
 ```bash
 npm install @push-based/angular-stream-core@next @push-based/angular-stream-nitro@next unstorage
-npm install -D nitro
+npm install -D nitro@3.0.261103-rc
 ```
+
+Nitro 3 is a release candidate. Nitro numbers its release candidates by date
+(`3.0.261103-rc`), and no version range can follow them, so the package asks
+for exactly the one it was checked with, and moves with each new one.
+`unstorage` 2, which Nitro's storage needs, is still a beta.
 
 ```ts
 // src/server.ts
