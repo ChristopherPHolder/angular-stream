@@ -32,18 +32,27 @@ its own data is there, in whatever order that happens.
 | Package                                                               | What it is                                                                                                |
 | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | [`@push-based/angular-stream-core`](../reference/core.md)             | The renderer, its inline runtime and the client. Runtime-agnostic: web `Request`, `Response` and streams. |
+| [`@push-based/angular-stream-node`](../reference/node.md)             | `createNodeHandler()`: a Node request handler for `node:http`, Express, Connect and Koa.                  |
+| [`@push-based/angular-stream-fastify`](../reference/fastify.md)       | `angularStream`: a Fastify plugin that streams every page route.                                          |
+| [`@push-based/angular-stream-nestjs`](../reference/nestjs.md)         | `AngularStreamModule`: a Nest module, on Express or on Fastify.                                           |
 | [`@push-based/angular-stream-cloudflare`](../reference/cloudflare.md) | `createStreamingWorker()`: a Cloudflare Worker `fetch` handler over the `ASSETS` binding.                 |
+| [`@push-based/angular-stream-aws-lambda`](../reference/aws-lambda.md) | `createStreamingLambda()`: a response-streaming handler for a Lambda Function URL.                        |
+| [`@push-based/angular-stream-nitro`](../reference/nitro.md)           | `defineStreamingHandler()`: an h3 handler for a Nitro server.                                             |
 
 An app uses both halves of the core: providers in its browser config, and a
-server entry that streams. The server entry is where runtimes differ, so each
-runtime gets a small adapter over the core's
-[`createStreamingHandler()`](../reference/core.md#createstreaminghandler).
-Cloudflare Workers is the first.
+server entry that streams. The server entry is where runtimes differ. A runtime
+that hands the server a web `Request` and takes a `Response` back (Hono, Deno,
+Bun, Fastly Compute, Vercel, Netlify, Azure Functions) needs only the core's
+[`createStreamingHandler()`](../reference/core.md#createstreaminghandler). The
+others get a small adapter over it, which is what the rest of the packages are.
 
 ## Where to go next
 
-- [Installation](installation.md): what the packages need.
-- [Cloudflare Workers](cloudflare-workers.md): stream an app from a Worker.
+- [Installation](installation.md): what the packages need, and which of them
+  your runtime takes.
+- Your runtime's setup page, from [the table there](installation.md#install) or
+  under "Runtimes" in the contents: the whole setup, from the app config to
+  running it.
 - [Making something stream](../guides/making-something-stream.md): which parts
   of a template stream, and how to write them.
 - [Why stream out of order](../concepts/why-stream-out-of-order.md): what it

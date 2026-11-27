@@ -200,13 +200,62 @@ pre.mermaid {
   overflow-y: auto;
 }
 
-.sidebar-section {
-  margin: var(--space-6) 0 var(--space-2);
+/* A section folds: its title is the <summary> of a <details>. */
+.sidebar-section + .sidebar-section {
+  margin-top: var(--space-3);
+}
+
+.sidebar-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 0;
+  padding-block: var(--space-2);
   color: var(--color-text-muted);
 }
 
-.sidebar-section:first-of-type {
-  margin-top: 0;
+summary.sidebar-title {
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  list-style: none;
+}
+
+summary.sidebar-title::-webkit-details-marker {
+  display: none;
+}
+
+summary.sidebar-title:hover {
+  color: var(--color-text-heading);
+}
+
+/* A chevron: down when the section is closed, up when it is open. */
+summary.sidebar-title::after {
+  content: '';
+  flex: none;
+  width: var(--space-1-5);
+  height: var(--space-1-5);
+  margin-right: var(--space-1);
+  border: solid currentColor;
+  border-width: 0 2px 2px 0;
+  transform: translateY(-25%) rotate(45deg);
+}
+
+details[open] > summary.sidebar-title::after {
+  transform: translateY(25%) rotate(-135deg);
+}
+
+/* A group within a section: "Node and its frameworks". */
+.sidebar-group {
+  margin: var(--space-3) 0 var(--space-1);
+  color: var(--color-text-heading);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+}
+
+.sidebar-title + .sidebar-group {
+  margin-top: var(--space-1);
 }
 
 .sidebar ul {
@@ -305,10 +354,18 @@ pre.mermaid {
       transform 0.15s ease-out;
   }
 
-  /* A finger needs more to aim at than a pointer: 44px a link. */
-  .sidebar a {
+  /* A finger needs more to aim at than a pointer: 44px a link or a title. */
+  .sidebar a,
+  .sidebar-title {
     padding-block: var(--space-3);
+  }
+
+  .sidebar a {
     font-size: 1rem;
+  }
+
+  .sidebar-group {
+    font-size: 0.8125rem;
   }
 
   .sidebar-elsewhere {
@@ -345,6 +402,42 @@ pre.mermaid {
 
 .doc-header h1 {
   margin: 0;
+}
+
+/* Under a setup page's title: what it installs, the app that is it, its API page. */
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-8);
+  margin: var(--space-5) 0 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-subtle);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.facts dt {
+  margin-bottom: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.facts dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+}
+
+.facts code {
+  overflow-wrap: anywhere;
+}
+
+.facts-note {
+  color: var(--color-text-muted);
 }
 
 /* A long identifier in a heading wraps instead of widening the page. */
@@ -801,37 +894,80 @@ pre.mermaid[data-processed] svg {
   margin: var(--space-8) 0 var(--space-12);
 }
 
+.home-section {
+  margin-bottom: var(--space-12);
+}
+
+.home h2 {
+  margin: 0;
+}
+
+.home-group {
+  margin: var(--space-6) 0 var(--space-3);
+  color: var(--color-text-muted);
+}
+
+/* One runtime a tile: its name, and what it installs besides the core. */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 9.5rem), 1fr));
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  height: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-heading);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.tile:hover {
+  border-color: var(--color-primary-600);
+  color: var(--color-primary-700);
+}
+
+.tile span {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 400;
+}
+
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
   gap: var(--space-5);
 }
 
 /* The design system's card is 300px wide at most; here the grid sizes it. */
 .cards .pb-card {
   max-width: none;
-}
-
-.cards h2 {
-  margin: 0 0 var(--space-3);
+  padding: var(--space-6);
 }
 
 .cards ul {
   list-style: none;
-  margin: 0;
+  margin: var(--space-2) 0 0;
   padding: 0;
 }
 
 .cards li {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: var(--space-3);
   font-size: 0.875rem;
   line-height: 1.25rem;
 }
 
-.cards li span {
-  color: var(--color-text-muted);
+.cards li a {
+  display: block;
+  padding-block: var(--space-1-5);
 }
 
 /* Footer. */

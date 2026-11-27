@@ -144,7 +144,9 @@ together; the short version:
 - **Docs vs demo**: the demo shows (interactive pages, live streams); the docs
   explain (written pages: getting started, guides, how it works, API). Written
   explanation goes in `apps/docs/src/content/`, not in the demo or the README.
-  A docs page is a Markdown file plus an entry in `src/app/docs/nav.ts`; read
+  A docs page is a Markdown file plus an entry in `src/app/docs/nav.ts`; a
+  runtime's setup page is listed under "Runtimes" there, with its `runtime`
+  facts (its adapter, if any, and its example app). Read
   `apps/docs/README.md` for the Markdown extras and how links work. The docs
   are static: `vp build` plus `scripts/prerender.ts`, no Worker, so nothing
   there may depend on a request.

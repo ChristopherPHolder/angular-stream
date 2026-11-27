@@ -22,20 +22,44 @@ import { DEMO } from './links';
       >
       <a class="pb-btn pb-btn-ghost" [href]="demo">See it in the demo</a>
     </p>
+
+    <!-- The one choice every reader makes: where the app runs. -->
+    @for (section of runtimes; track section.id) {
+      <section class="home-section" [attr.aria-labelledby]="'home-' + section.id">
+        <h2 class="text-section-title" [id]="'home-' + section.id">Pick your runtime</h2>
+        <p class="lede">{{ section.description }}</p>
+        @for (group of section.groups; track $index) {
+          <h3 class="home-group text-subtitle">{{ group.title }}</h3>
+          <ul class="tiles">
+            @for (page of group.pages; track page.slug) {
+              <li>
+                <a class="tile" [routerLink]="['/docs', page.dir, page.slug]">
+                  {{ page.title }}
+                  <span>{{
+                    page.runtime?.adapter ? page.runtime?.adapter + ' adapter' : 'core only'
+                  }}</span>
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+
     <div class="cards">
-      @for (section of docs; track section.slug) {
-        <section class="pb-card" [attr.aria-labelledby]="'home-' + section.slug">
-          <div class="pb-card-body">
-            <h2 class="pb-card-title" [id]="'home-' + section.slug">{{ section.title }}</h2>
-            <ul>
-              @for (page of section.pages; track page.slug) {
+      @for (section of sections; track section.id) {
+        <section class="pb-card" [attr.aria-labelledby]="'home-' + section.id">
+          <h2 class="pb-card-title" [id]="'home-' + section.id">{{ section.title }}</h2>
+          <p class="pb-card-body">{{ section.description }}</p>
+          <ul>
+            @for (group of section.groups; track $index) {
+              @for (page of group.pages; track page.dir + '/' + page.slug) {
                 <li>
-                  <a [routerLink]="['/docs', section.slug, page.slug]">{{ page.title }}</a>
-                  <span>{{ page.description }}</span>
+                  <a [routerLink]="['/docs', page.dir, page.slug]">{{ page.title }}</a>
                 </li>
               }
-            </ul>
-          </div>
+            }
+          </ul>
         </section>
       }
     </div>
@@ -45,6 +69,13 @@ import { DEMO } from './links';
 })
 export class Home {
   protected readonly symbol = symbol;
-  protected readonly docs = DOCS;
   protected readonly demo = DEMO;
+
+  /** The sections whose pages are alternatives: shown as a choice, group by group. */
+  protected readonly runtimes = DOCS.filter((section) => section.alternatives);
+
+  /** The sections read in order, as a card each. The press kit is in the footer. */
+  protected readonly sections = DOCS.filter(
+    (section) => !section.alternatives && section.id !== 'about',
+  );
 }
