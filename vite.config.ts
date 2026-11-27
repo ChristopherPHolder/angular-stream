@@ -37,6 +37,10 @@ export default defineConfig({
               sourceTag: 'runtime:vercel',
               onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:vercel'],
             },
+            {
+              sourceTag: 'runtime:service-worker',
+              onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:service-worker'],
+            },
           ],
         },
       ],
