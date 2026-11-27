@@ -299,4 +299,5 @@ a few lines of Vite config that send it the API's requests as well.
 Koa's is `app.callback()`. Fastify and NestJS build their own request handling
 on top of `node:http`: export a function that passes `req` and `res` to the app
 once it is ready, rather than the app object, and make sure the raw request
-reaches `createTemplateLoader()`.
+reaches `createTemplateLoader()`. For Fastify, see
+[The server entry in dev](fastify.md#the-server-entry-in-dev).
