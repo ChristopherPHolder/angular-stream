@@ -7,12 +7,11 @@ import {
   afterNextRender,
   afterRenderEffect,
   computed,
-  effect,
   inject,
   input,
   signal,
 } from '@angular/core';
-import { DomSanitizer, Meta } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { REPO } from '../links';
 import type { ResolvedDoc } from './doc.resolver';
@@ -57,9 +56,6 @@ export class DocPage {
   protected readonly status = signal('');
 
   constructor() {
-    const meta = inject(Meta);
-    effect(() => meta.updateTag({ name: 'description', content: this.doc().page.description }));
-
     // Sequence diagrams are drawn in the browser, on the pages that have one.
     afterRenderEffect(() => {
       this.doc();
