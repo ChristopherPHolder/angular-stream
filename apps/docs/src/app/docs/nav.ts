@@ -62,6 +62,13 @@ export const DOCS: DocSection[] = [
           'Stream an Angular app from Deno with Deno.serve, deploy it to Deno Deploy, and what Supabase Edge Functions allow.',
         load: () => import('../../content/getting-started/deno.md'),
       },
+      {
+        slug: 'vercel',
+        title: 'Vercel',
+        description:
+          'Stream an Angular app from a Vercel Function, from the app config to the Build Output Vercel deploys.',
+        load: () => import('../../content/getting-started/vercel.md'),
+      },
     ],
   },
   {

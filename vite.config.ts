@@ -33,6 +33,10 @@ export default defineConfig({
               sourceTag: 'runtime:deno',
               onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:deno'],
             },
+            {
+              sourceTag: 'runtime:vercel',
+              onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:vercel'],
+            },
           ],
         },
       ],
