@@ -20,9 +20,13 @@ hydration as it happens, and a real TMDB-backed movie browser.
   the same technique on a real app.
 
 Most Angular SSR guides target a Node server and the Angular CLI. This repo
-takes the other path: Angular compiled by [ngp][ngp] through Vite, with the
-server bundle running directly in workerd, static assets served by Cloudflare's
-`ASSETS` binding, and every navigation falling through to the rendering Worker.
+compiles Angular with [ngp][ngp] through Vite instead, and streams from any
+server that speaks web `Request` and `Response`: Cloudflare Workers, Node and
+its frameworks (Express, Fastify, NestJS, Koa), Hono, Deno, Bun, Fastly
+Compute, Vercel, Netlify, AWS Lambda, Azure Functions, and the hosts Nitro
+deploys to. The two apps run as Cloudflare Workers: the server bundle runs
+directly in workerd, static assets are served by Cloudflare's `ASSETS` binding,
+and every navigation falls through to the rendering Worker.
 
 ## Stack
 
@@ -33,7 +37,7 @@ server bundle running directly in workerd, static assets served by Cloudflare's
 | Toolchain | [Vite+][vite-plus] (`vp`): Vite 8, Oxlint, Oxfmt, library packing        |
 | Workspace | [Nx][nx] (task graph, cache, `affected`, release) over pnpm workspaces   |
 | SSR       | Streamed, with hydration starting before the response ends; see below    |
-| Host      | Cloudflare Workers via [`@cloudflare/vite-plugin`][cfvite]               |
+| Host      | The apps: Cloudflare Workers via [`@cloudflare/vite-plugin`][cfvite]     |
 | State     | [`@rx-angular/state`](https://www.rx-angular.io/)                        |
 | Icons     | [`@push-based/ngx-fast-svg`](https://github.com/push-based/ngx-fast-svg) |
 | Data      | TMDB REST API (v3 + v4)                                                  |
@@ -45,8 +49,9 @@ server bundle running directly in workerd, static assets served by Cloudflare's
 
 ## Layout
 
-An Nx workspace over pnpm workspaces. Apps are private and deploy as Workers;
-everything under `packages/` is published to npm under `@push-based/`:
+An Nx workspace over pnpm workspaces. Apps are private; `movies` and
+`cloudflare-demo` deploy as Workers. Everything under `packages/` is published
+to npm under `@push-based/`:
 
 | Path                   | What                                                                                                   |
 | ---------------------- | ------------------------------------------------------------------------------------------------------ |
@@ -55,6 +60,13 @@ everything under `packages/` is published to npm under `@push-based/`:
 | `apps/docs`            | The documentation site: Angular, prerendered by ngp, published to GitHub Pages.                        |
 | `packages/core`        | `@push-based/angular-stream-core`: the streaming renderer, its inline runtime and the client.          |
 | `packages/cloudflare`  | `@push-based/angular-stream-cloudflare`: `createStreamingWorker()`, over the Workers `ASSETS` binding. |
+| `packages/node`        | `@push-based/angular-stream-node`: `node:http`, Connect and Express, with a Vite plugin for dev.       |
+| `packages/fastify`     | `@push-based/angular-stream-fastify`: a Fastify plugin, and the route handler it is built on.          |
+| `packages/nestjs`      | `@push-based/angular-stream-nestjs`: a Nest module, on `platform-express` or `platform-fastify`.       |
+| `packages/aws-lambda`  | `@push-based/angular-stream-aws-lambda`: a response-streaming handler for a Lambda Function URL.       |
+| `packages/nitro`       | `@push-based/angular-stream-nitro`: an h3 handler and a Vite plugin, for every Nitro preset.           |
+| `apps/example-*`       | One small app per runtime, all rendering `libs/stream-example`. Built in CI, not deployed.             |
+| `libs/stream-example`  | `@angular-stream/stream-example`: the page every example renders, a shell and one slow widget.         |
 | `libs/design-system`   | `@angular-stream/design-system`: the PushBased design system the demo and the docs share. Private.     |
 | `press-kit`            | The logo in every form: symbol, lockups, favicons and the social preview, with how to use them.        |
 | `nx.json`              | Task defaults, cache inputs and outputs, and the release group.                                        |
@@ -63,8 +75,12 @@ everything under `packages/` is published to npm under `@push-based/`:
 The core is runtime-agnostic: it speaks web `Request`, `Response` and streams,
 and nothing else. A runtime adapter only says how to fetch `index.html` and what
 the server entry looks like; `packages/cloudflare` is a single call to
-the core's `createStreamingHandler()`. More adapters (`@angular/build` +
-`@angular/ssr`, Node, Fastly, …) follow the same shape.
+the core's `createStreamingHandler()`. A runtime that already hands the server
+a web `Request` (Hono, Deno, Bun, Fastly, Vercel, Netlify, Azure Functions)
+needs no adapter at all: its docs page is a recipe around the core. The
+packages are for the ones that don't (Node and its frameworks, AWS Lambda) and
+for Nitro. Each runtime's docs page is listed under
+[Installation](https://push-based.github.io/angular-stream/docs/getting-started/installation).
 
 An app needs two things:
 
@@ -100,7 +116,9 @@ partial compilation and work in any Angular build.
 **Module boundaries.** Each `package.json` carries Nx tags, and
 `nx/enforce-module-boundaries` (run by Oxlint in `vp check`) holds them:
 packages never import an app or a private lib, the core (`runtime:agnostic`)
-never imports an adapter, and an adapter imports only the core. `libs/` holds
+never imports an adapter, and an adapter imports only the core, except where
+it is built on another one (Fastify and NestJS on the Node adapter, NestJS on
+the Fastify one). `libs/` holds
 code shared by the apps that is never published.
 
 ## Requirements

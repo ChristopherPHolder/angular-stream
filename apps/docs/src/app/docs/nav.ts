@@ -42,88 +42,11 @@ export const DOCS: DocSection[] = [
         load: () => import('../../content/getting-started/installation.md'),
       },
       {
-        slug: 'cloudflare-workers',
-        title: 'Cloudflare Workers',
-        description:
-          'Stream an Angular app from a Cloudflare Worker, from the app config to the deploy.',
-        load: () => import('../../content/getting-started/cloudflare-workers.md'),
-      },
-      {
-        slug: 'bun',
-        title: 'Bun',
-        description:
-          'Stream an Angular app from Bun.serve(), or from Elysia, from the app config to production.',
-        load: () => import('../../content/getting-started/bun.md'),
-      },
-      {
-        slug: 'deno',
-        title: 'Deno',
-        description:
-          'Stream an Angular app from Deno with Deno.serve, deploy it to Deno Deploy, and what Supabase Edge Functions allow.',
-        load: () => import('../../content/getting-started/deno.md'),
-      },
-      {
-        slug: 'vercel',
-        title: 'Vercel',
-        description:
-          'Stream an Angular app from a Vercel Function, from the app config to the Build Output Vercel deploys.',
-        load: () => import('../../content/getting-started/vercel.md'),
-      },
-      {
-        slug: 'nitro',
-        title: 'Nitro',
-        description:
-          'Stream an Angular app from a Nitro server, deployed with any of its presets: Node, Vercel, Netlify and more.',
-        load: () => import('../../content/getting-started/nitro.md'),
-      },
-      {
-        slug: 'hono',
-        title: 'Hono',
-        description:
-          'Stream an Angular app from Hono on Node, Bun, Deno or Cloudflare Workers, next to your API routes.',
-        load: () => import('../../content/getting-started/hono.md'),
-      },
-      {
         slug: 'node',
         title: 'Node',
         description:
           'Stream an Angular app from Node with node:http, Express or Connect, from the app config to running it in production.',
         load: () => import('../../content/getting-started/node.md'),
-      },
-      {
-        slug: 'koa',
-        title: 'Koa',
-        description:
-          'Stream an Angular app from Koa, with koa-static, koa-compress and your API routes, from the app config to running it in production.',
-        load: () => import('../../content/getting-started/koa.md'),
-      },
-      {
-        slug: 'azure-functions',
-        title: 'Azure Functions',
-        description:
-          'Stream an Angular app from Azure Functions, from the app config to the deploy.',
-        load: () => import('../../content/getting-started/azure-functions.md'),
-      },
-      {
-        slug: 'aws-lambda',
-        title: 'AWS Lambda',
-        description:
-          'Stream an Angular app from AWS Lambda through a streaming Function URL and CloudFront.',
-        load: () => import('../../content/getting-started/aws-lambda.md'),
-      },
-      {
-        slug: 'fastly-compute',
-        title: 'Fastly Compute',
-        description:
-          'Stream an Angular app from Fastly Compute, with its files in a KV Store, from the app config to the deploy.',
-        load: () => import('../../content/getting-started/fastly-compute.md'),
-      },
-      {
-        slug: 'netlify',
-        title: 'Netlify',
-        description:
-          'Stream an Angular app from a Netlify Function or an Edge Function, from the app config to the deploy.',
-        load: () => import('../../content/getting-started/netlify.md'),
       },
       {
         slug: 'express',
@@ -145,6 +68,83 @@ export const DOCS: DocSection[] = [
         description:
           'Stream an Angular app from a NestJS app on platform-express or platform-fastify, next to its controllers, from the app config to running it in production.',
         load: () => import('../../content/getting-started/nestjs.md'),
+      },
+      {
+        slug: 'koa',
+        title: 'Koa',
+        description:
+          'Stream an Angular app from Koa, with koa-static, koa-compress and your API routes, from the app config to running it in production.',
+        load: () => import('../../content/getting-started/koa.md'),
+      },
+      {
+        slug: 'cloudflare-workers',
+        title: 'Cloudflare Workers',
+        description:
+          'Stream an Angular app from a Cloudflare Worker, from the app config to the deploy.',
+        load: () => import('../../content/getting-started/cloudflare-workers.md'),
+      },
+      {
+        slug: 'hono',
+        title: 'Hono',
+        description:
+          'Stream an Angular app from Hono on Node, Bun, Deno or Cloudflare Workers, next to your API routes.',
+        load: () => import('../../content/getting-started/hono.md'),
+      },
+      {
+        slug: 'deno',
+        title: 'Deno',
+        description:
+          'Stream an Angular app from Deno with Deno.serve, deploy it to Deno Deploy, and what Supabase Edge Functions allow.',
+        load: () => import('../../content/getting-started/deno.md'),
+      },
+      {
+        slug: 'bun',
+        title: 'Bun',
+        description:
+          'Stream an Angular app from Bun.serve(), or from Elysia, from the app config to production.',
+        load: () => import('../../content/getting-started/bun.md'),
+      },
+      {
+        slug: 'fastly-compute',
+        title: 'Fastly Compute',
+        description:
+          'Stream an Angular app from Fastly Compute, with its files in a KV Store, from the app config to the deploy.',
+        load: () => import('../../content/getting-started/fastly-compute.md'),
+      },
+      {
+        slug: 'vercel',
+        title: 'Vercel',
+        description:
+          'Stream an Angular app from a Vercel Function, from the app config to the Build Output Vercel deploys.',
+        load: () => import('../../content/getting-started/vercel.md'),
+      },
+      {
+        slug: 'netlify',
+        title: 'Netlify',
+        description:
+          'Stream an Angular app from a Netlify Function or an Edge Function, from the app config to the deploy.',
+        load: () => import('../../content/getting-started/netlify.md'),
+      },
+      {
+        slug: 'aws-lambda',
+        title: 'AWS Lambda',
+        description:
+          'Stream an Angular app from AWS Lambda through a streaming Function URL and CloudFront.',
+        load: () => import('../../content/getting-started/aws-lambda.md'),
+      },
+      {
+        slug: 'azure-functions',
+        title: 'Azure Functions',
+        description:
+          'Stream an Angular app from Azure Functions, from the app config to the deploy.',
+        load: () => import('../../content/getting-started/azure-functions.md'),
+      },
+      {
+        slug: 'nitro',
+        title: 'Nitro',
+        description:
+          'Stream an Angular app from a Nitro server, deployed with any of its presets: Node, Vercel, Netlify and more.',
+        load: () => import('../../content/getting-started/nitro.md'),
       },
     ],
   },
