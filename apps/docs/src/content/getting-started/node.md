@@ -98,6 +98,8 @@ routes that answer those, such as an API, before it. Other methods are passed
 on to `next()`, and so is an error, for the app's error handler. Default-export
 the app rather than the handler then; see
 [What the server entry default-exports](../reference/node.md#what-the-server-entry-default-exports).
+The whole Express setup, with `express.static()`, API routes and
+`compression`, is on [Express](express.md).
 
 ## 4. Vite
 

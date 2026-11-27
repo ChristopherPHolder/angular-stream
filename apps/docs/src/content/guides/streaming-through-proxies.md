@@ -56,6 +56,9 @@ it.
   every chunk, so `app.use(compression())` in front of the handler streams
   compressed pages with nothing more to do. Without the flush, the same
   response arrives in one piece when the last block is done.
+  [Express](../getting-started/express.md#7-check-that-it-streams-compressed)
+  shows where it goes among the other middleware, both responses as `curl`
+  sees them, and how to leave pages out of it.
 - **Other middleware built on Node's `zlib`** (`@fastify/compress`,
   `koa-compress` and others) has to flush after each write as well. zlib does
   that when the stream is created with `flush: zlib.constants.Z_SYNC_FLUSH`
