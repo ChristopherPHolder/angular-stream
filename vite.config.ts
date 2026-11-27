@@ -45,6 +45,10 @@ export default defineConfig({
               sourceTag: 'runtime:nitro',
               onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:nitro'],
             },
+            {
+              sourceTag: 'runtime:hono',
+              onlyDependOnLibsWithTags: ['runtime:agnostic', 'runtime:hono'],
+            },
           ],
         },
       ],
