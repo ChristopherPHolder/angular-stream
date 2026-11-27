@@ -48,6 +48,13 @@ export const DOCS: DocSection[] = [
           'Stream an Angular app from a Cloudflare Worker, from the app config to the deploy.',
         load: () => import('../../content/getting-started/cloudflare-workers.md'),
       },
+      {
+        slug: 'bun',
+        title: 'Bun',
+        description:
+          'Stream an Angular app from Bun.serve(), or from Elysia, from the app config to production.',
+        load: () => import('../../content/getting-started/bun.md'),
+      },
     ],
   },
   {
