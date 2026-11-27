@@ -1,4 +1,4 @@
-import { NgOptimizedImage } from '@angular/common';
+import { Location, NgOptimizedImage } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
@@ -11,7 +11,8 @@ import { DEMO, MOVIES, REPO } from './links';
 @Component({
   selector: 'app-root',
   template: `
-    <a class="skip-link" href="#content">Skip to content</a>
+    <!-- Qualified with the current path: a bare #content resolves against the base href. -->
+    <a class="skip-link" [href]="skipLink()" (click)="main.focus()">Skip to content</a>
     <header class="top">
       <div class="top-inner">
         <a class="brand text-card-title" routerLink="/">
@@ -56,7 +57,7 @@ import { DEMO, MOVIES, REPO } from './links';
           }
         </div>
       </nav>
-      <main id="content" tabindex="-1">
+      <main id="content" tabindex="-1" #main>
         <router-outlet />
       </main>
     </div>
@@ -84,12 +85,20 @@ export class App {
   /** The contents on a phone, where they collapse behind a button. */
   protected readonly menuOpen = signal(false);
 
+  /** `<current path>#content`, relative to the base href like every other link. */
+  protected readonly skipLink = signal('#content');
+
   constructor() {
+    const location = inject(Location);
     inject(Router)
       .events.pipe(
         filter((event) => event instanceof NavigationEnd),
         takeUntilDestroyed(),
       )
-      .subscribe(() => this.menuOpen.set(false));
+      .subscribe(() => {
+        this.menuOpen.set(false);
+        // The path in the address bar, which an unknown page keeps.
+        this.skipLink.set(location.path().replace(/^\//, '') + '#content');
+      });
   }
 }
