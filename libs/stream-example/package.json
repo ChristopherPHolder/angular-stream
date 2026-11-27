@@ -1,0 +1,24 @@
+{
+  "name": "@angular-stream/stream-example",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The smallest page that streams: one slow widget. Every runtime example (apps/example-*) renders it, so they differ only in their server entry.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "peerDependencies": {
+    "@angular/common": "22.3.0-rc.0",
+    "@angular/core": "22.3.0-rc.0",
+    "rxjs": "~7.8.0"
+  },
+  "nx": {
+    "tags": [
+      "type:lib",
+      "runtime:agnostic"
+    ]
+  }
+}
