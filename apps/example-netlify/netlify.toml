@@ -1,0 +1,13 @@
+# The Netlify example. Not deployed: it follows apps/example-cloudflare.
+#
+# The site's base directory is the repository root, where pnpm installs the
+# workspace, and its package directory is apps/example-netlify, where this
+# file is. Paths here are relative to the base directory.
+[build]
+command = "pnpm nx build example-netlify"
+publish = "apps/example-netlify/dist/client"
+# For the Edge Function instead: "pnpm nx build:edge example-netlify".
+edge_functions = "apps/example-netlify/dist/netlify/edge-functions"
+
+[functions]
+directory = "apps/example-netlify/dist/netlify/functions"
