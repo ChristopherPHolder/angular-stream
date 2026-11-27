@@ -208,6 +208,7 @@ On Node, `zlib` does that with `Z_SYNC_FLUSH`:
 
 ```ts
 import { Readable } from 'node:stream';
+import type { ReadableStream as NodeReadableStream } from 'node:stream/web';
 import { constants, createGzip } from 'node:zlib';
 
 app.use(async (c, next) => {
@@ -217,7 +218,9 @@ app.use(async (c, next) => {
     return;
   }
   const gzip = createGzip({ flush: constants.Z_SYNC_FLUSH });
-  c.res = new Response(Readable.toWeb(Readable.fromWeb(c.res.body).pipe(gzip)), c.res);
+  // Node's web stream types and the DOM's differ, though they're the same object at runtime.
+  const body = Readable.fromWeb(c.res.body as NodeReadableStream).pipe(gzip);
+  c.res = new Response(Readable.toWeb(body) as ReadableStream, c.res);
   c.res.headers.set('content-encoding', 'gzip');
   c.res.headers.delete('content-length');
   c.res.headers.append('vary', 'accept-encoding');
