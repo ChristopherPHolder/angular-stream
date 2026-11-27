@@ -281,6 +281,7 @@ export const DOCS: DocSection[] = [
             title: 'Service Worker (experimental)',
             description:
               'Render and stream every navigation from a Service Worker in the browser, offline included, and what that costs.',
+            runtime: { examples: ['example-service-worker'] },
             load: () => import('../../content/guides/service-worker.md'),
           },
         ],
