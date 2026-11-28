@@ -13,19 +13,30 @@ There is no adapter package for Azure: the function converts the request and
 the response itself, in a few lines, and hands the rest to
 [`createStreamingHandler()`](../reference/core.md#createstreaminghandler).
 
-## 1. The browser config
+## Before you start
+
+<!-- include ../_shared/before-you-start.md -->
+
+## 1. Install
+
+```bash
+npm install @push-based/angular-ssr-stream-core@next @azure/functions
+npm install -D @types/node
+```
+
+Running it locally takes
+[Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local),
+installed on their own.
+
+## 2. The browser config
 
 <!-- include ../_shared/browser-config.md -->
 
-## 2. The server config
+## 3. The server config
 
 <!-- include ../_shared/server-config.md -->
 
-## 3. The function
-
-```bash
-npm install @azure/functions
-```
+## 4. The function
 
 ```ts title="src/functions/ssr.ts"
 import { readFile } from 'node:fs/promises';
@@ -90,7 +101,7 @@ the connection chunk by chunk.
 
 The `{*path}` route sends every path, `/` included, to the function. Static
 assets never reach it: they are served by the host in front
-([step 7](#7-static-assets)). The core renders a page for whatever reaches it.
+([step 7](#10-static-assets)). The core renders a page for whatever reaches it.
 
 The function answers `GET` and `HEAD`. A method the function doesn't take falls
 through to the Functions host, and at `/` the host answers with its own landing
@@ -125,12 +136,9 @@ function app only accepts the request if that hostname is also bound to it as a
 custom domain, so add the domain to the function app as well as to Front Door,
 and list it in `allowedHosts`.
 
-`eventDispatchContract` is for `withEventReplay()`. The function renders into
-the built `index.html`, which doesn't carry the script Angular needs to queue
-the clicks made before the page hydrates, so the handler adds it. Leave it out
-and those clicks are lost.
+<!-- include ../_shared/event-replay.md -->
 
-## 4. The function app
+## 5. The function app
 
 A function app on the v4 programming model is a folder with a `host.json` and a
 `package.json` whose `main` names the files that register functions:
@@ -173,7 +181,7 @@ ends up once you add one. Commit a `local.settings.example.json` and copy it:
 }
 ```
 
-## 5. Vite
+## 6. Vite
 
 ```ts title="vite.config.ts"
 import { ngp } from '@push-based/vite-plugin-ngp';
@@ -209,10 +217,15 @@ own dependencies included, so the deployed app needs no `node_modules`. The one
 module left out is `@azure/functions-core`: it isn't a package you install,
 the Functions worker provides it when `@azure/functions` asks for it.
 
-## 6. Run it locally
+## 7. Develop
 
-[Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local)
-run the Functions host on your machine, with no Azure account:
+`vite dev` serves the app client-side, without the function: Angular renders it
+in the browser and logs NG0505, as there is no hydration data. To see it
+stream, build it and run it under Core Tools.
+
+## 8. Build and run locally
+
+Core Tools run the Functions host on your machine, with no Azure account:
 
 ```bash
 cp local.settings.example.json local.settings.json
@@ -222,22 +235,20 @@ func start   # http://localhost:7071
 
 `func start` serves the function but not the assets, so the page renders and
 streams, but doesn't hydrate: every path, `/assets/*.js` included, is rendered
-as a page. Check the stream with `curl`:
+as a page. To see the page hydrate locally, put something in front of
+`func start` that serves `dist/client` and passes every other path on to port
+7071 without buffering, the way Front Door does in production.
 
-```bash
-curl -sN http://localhost:7071/
-```
+## 9. Check that it streams
 
-The shell, with each `@defer` block's placeholder, arrives at once, and each
-block's `<template data-ngs>` chunk follows as its data comes in. A response
-that arrives in one piece means something buffered: check `enableHttpStream`
-first.
+With `func start` running:
 
-To see the page hydrate locally, put something in front of `func start` that
-serves `dist/client` and passes every other path on to port 7071 without
-buffering, the way Front Door does in production.
+<!-- include ../_shared/check-it-streams.md url=http://localhost:7071/ -->
 
-## 7. Static assets
+On Azure Functions, a page that arrives in one piece most often means
+`enableHttpStream` isn't set.
+
+## 10. Static assets
 
 The function renders pages only. Everything else in `dist/client`, the
 `assets/` folder and the icons, goes to a static host, with navigations routed
@@ -251,7 +262,7 @@ to the function:
   routes with caching on, and never a chunked response, so it doesn't hold the
   page back to compress it. A chunked response over 8 MB isn't supported.
   Point the function app's health probe at `/`: with `HEAD`, the default, it
-  gets the status of a real render ([step 3](#3-the-function)).
+  gets the status of a real render ([step 3](#4-the-function)).
 - **Azure Static Web Apps, for the assets only.** A linked function app is
   reachable only under `/api`, its routes can only be redirected or secured,
   not rewritten to, and it has to keep the `/api` prefix this setup removes. So
@@ -260,7 +271,7 @@ to the function:
 
 Keep `index.html` out of the static host: it is the template, not a page.
 
-## 8. Deploy
+## 11. Deploy
 
 Deploy what you built, not the sources: `host.json`, `package.json`,
 `dist/server` and `dist/client/index.html`. The bundle carries its
@@ -320,6 +331,6 @@ Node 22 and gets no newer versions. Node 26 is in preview, on Linux only
 > `node_modules`. It hasn't yet been checked against a deployed function app or
 > through Front Door.
 
-## 9. Stream something
+## 12. Stream something
 
 <!-- include ../_shared/stream-something.md -->

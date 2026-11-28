@@ -6,20 +6,26 @@ app's catch-all, after the browser build and the API routes, with
 [`apps/example-express`](../../../../../apps/example-express/src/server.ts) in
 the repository uses, on Express 5.
 
+## Before you start
+
+<!-- include ../_shared/before-you-start.md -->
+
+## 1. Install
+
 ```bash
 npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-node@next express compression
-npm install -D @types/express @types/compression
+npm install -D @types/node @types/express @types/compression
 ```
 
-## 1. The browser config
+## 2. The browser config
 
 <!-- include ../_shared/browser-config.md -->
 
-## 2. The server config
+## 3. The server config
 
 <!-- include ../_shared/server-config.md -->
 
-## 3. The server
+## 4. The server
 
 ```ts title="src/server.ts"
 import { fileURLToPath } from 'node:url';
@@ -112,14 +118,13 @@ The file is built to `dist/server/server.js`, so both URLs are relative to
 that: the template is `dist/server/index.server.html`, and the browser build
 is `dist/client`.
 
-`allowedHosts` must list every hostname the server answers for: Angular's SSR
-host guard rejects any other `host` header, and the server answers `403`.
-Behind a proxy that rewrites the host, see
-[`trustProxy`](../reference/node.md#createnodehandler).
+<!-- include ../_shared/allowed-hosts.md -->
 
-`eventDispatchContract` is for `withEventReplay()`. The handler adds it to the
-template unless it's there already, so a click made before the page hydrates is
-queued and replayed.
+<!-- include ../_shared/event-replay.md -->
+
+Behind a proxy that rewrites the host, see
+[`trustProxy`](../reference/node.md#createnodehandler). A `Host` header that
+can't be parsed at all is a `400`, passed to `next()` before the check.
 
 The module default-exports the Express app, not the handler: in dev, the Vite
 plugin calls that export for each page, so pages go through the same
@@ -157,7 +162,7 @@ trace whenever `NODE_ENV` isn't `production`. An error after the
 first byte can't change the response any more: the handler cuts the
 connection, and the error doesn't reach `next()`.
 
-## 4. Vite
+## 5. Vite
 
 ```ts title="vite.config.ts"
 import { angularStreamNode } from '@push-based/angular-ssr-stream-node/vite';
@@ -190,7 +195,7 @@ sees it, so the API answers in dev as it does in production. `'/api'` matches
 `/api` and `/api/hello`, not `/api.json`; list one prefix for each your API
 routes use. In a build the plugin does nothing.
 
-## 5. Develop
+## 6. Develop
 
 ```bash
 vite dev   # http://localhost:5173
@@ -208,7 +213,7 @@ a route that picks pages by their path, such as `app.get('/admin',
 requireLogin)`, only matches in production. Middleware that has to run for some pages in dev too
 can be mounted without a path and read `req.originalUrl`.
 
-## 6. Build and run
+## 7. Build and run
 
 ```json title="package.json"
 {
@@ -230,24 +235,14 @@ Vite left out of the bundle, so run it where the app's `node_modules` are, or
 install the production dependencies next to `dist/` in your image. Angular is
 bundled.
 
-## 7. Check that it streams, compressed
+## 8. Check that it streams
 
-Ask for the page the way a browser does, compressed, and time when the shell
-and the widget arrive:
+<!-- include ../_shared/check-it-streams.md url=http://localhost:3000/ -->
 
-```bash
-curl -sN --compressed http://localhost:3000/ | perl -MTime::HiRes=time -ne '
-  BEGIN { $t0 = time }
-  printf "%5d ms  %s\n", (time - $t0) * 1000, $& if /data-placeholder|<template data-ngs="\w+"/'
-```
+### Compressed
 
-```text
-    2 ms  data-placeholder
- 2011 ms  <template data-ngs="d0"
-```
-
-That's the example: the shell at once, and the widget's chunk two seconds
-later, when its data is there, both gzipped. Per read from the socket:
+A browser asks for the page compressed, and that is where Express setups
+usually stop streaming. Run the check again the way a browser asks:
 
 ```bash
 curl -sN --compressed -o /dev/null --trace-time --trace-ascii - http://localhost:3000/ | grep 'Recv data'
@@ -266,13 +261,8 @@ so far, and the handler calls that after every chunk; that is the whole setup.
 It works the same for `gzip`, `deflate` and `br`, whichever the browser asks
 for.
 
-When nothing flushes, the response looks like this instead: the plain request
-still streams, and the compressed one arrives in one piece, at the end.
-
-```text
- 2004 ms  data-placeholder
- 2005 ms  <template data-ngs="d0"
-```
+When nothing flushes, the plain request still streams, and the compressed one
+arrives in one piece, at the end:
 
 ```text
 20:23:52.251394 <= Recv data, 15 bytes (0xf)
@@ -304,13 +294,13 @@ app.use(
 );
 ```
 
-## 8. Behind a proxy
+## 9. Behind a proxy
 
 A proxy or a CDN in front of Express can hold the response back as well. The
 handler sends `X-Accel-Buffering: no` for Nginx; for the rest, read
 [Streaming through proxies](../guides/streaming-through-proxies.md), and run
 the check above against each hop.
 
-## 9. Stream something
+## 10. Stream something
 
 <!-- include ../_shared/stream-something.md -->

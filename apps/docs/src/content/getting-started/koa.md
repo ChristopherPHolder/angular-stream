@@ -8,22 +8,28 @@ Node adapter's Vite plugin for `vite dev`.
 [`apps/example-koa`](../../../../../apps/example-koa/src/server.ts) in the
 repository is this setup, as written here.
 
+## Before you start
+
+<!-- include ../_shared/before-you-start.md -->
+
+## 1. Install
+
 ```bash
 npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-node@next koa koa-static koa-compress
-npm install -D @types/koa @types/koa-static
+npm install -D @types/node @types/koa @types/koa-static
 ```
 
 `koa-compress` 5.2 and later ship their own types.
 
-## 1. The browser config
+## 2. The browser config
 
 <!-- include ../_shared/browser-config.md -->
 
-## 2. The server config
+## 3. The server config
 
 <!-- include ../_shared/server-config.md -->
 
-## 3. The server
+## 4. The server
 
 ```ts title="src/server.ts"
 import type { IncomingMessage } from 'node:http';
@@ -182,7 +188,7 @@ stays in charge of the response:
 
 - A logger or any other middleware around `page` sees the real status.
 - `koa-compress` compresses the stream, and flushes each chunk with the
-  options above (see [Compression](#7-compression)).
+  options above (see [Compression](#9-compression)).
 - An error thrown before the response starts goes through Koa's error
   handling, and your own `try`/`catch` middleware if you have one: a
   `BadRequestError` becomes a `400`, anything else a `500`.
@@ -200,12 +206,9 @@ itself and passes a Node stream.
 
 ### The rest of the server
 
-`allowedHosts` must list every hostname the server answers for: Angular's SSR
-host guard rejects any other `host` header, and the server answers `403`.
+<!-- include ../_shared/allowed-hosts.md -->
 
-`eventDispatchContract` is for `withEventReplay()`. The renderer adds it to
-the template unless it's there already, so a click made before the page
-hydrates is queued and replayed.
+<!-- include ../_shared/event-replay.md -->
 
 `page` renders every `GET` and `HEAD` that reaches it, so mount whatever
 answers those first: API routes, like `/api/hello` here, and `koa-static`.
@@ -224,7 +227,7 @@ too, and after the API routes, so a file can't shadow one. A missing file
 under `/assets/`, such as an old hashed chunk after a deploy, gets a `404`;
 any other path that isn't a file falls through to `page` and is rendered.
 
-## 4. Vite
+## 5. Vite
 
 ```ts title="vite.config.ts"
 import { angularStreamNode } from '@push-based/angular-ssr-stream-node/vite';
@@ -259,7 +262,7 @@ header, before Vite sees it, so `/api/hello` answers in dev as it does in
 production. It matches `/api` and `/api/hello`, not `/api.json`; list one
 prefix for each your API uses.
 
-## 5. Develop
+## 6. Develop
 
 ```bash
 vite dev   # http://localhost:5173
@@ -270,7 +273,7 @@ and any other middleware in front of `page`, and `/api/hello` is answered by
 the same app. `import.meta.env.PROD` is `false` there, so `src/server.ts`
 neither mounts `koa-static` nor starts a server of its own.
 
-## 6. Build and run
+## 7. Build and run
 
 ```json title="package.json"
 {
@@ -292,49 +295,31 @@ leaves out of the bundle, so run it where the app's `node_modules` are, or
 install the production dependencies next to `dist/` in your image. Angular is
 bundled.
 
-Check that it streams before you put anything in front of it:
+## 8. Check that it streams
 
-```bash
-curl -sN -o /dev/null --trace-time --trace-ascii - http://localhost:3000/ | grep 'Recv data'
-```
+Before you put anything in front of the server:
 
-```text
-20:25:40.944026 <= Recv data, 3057 bytes (0xbf1)
-20:25:42.949025 <= Recv data, 788 bytes (0x314)
-20:25:42.949179 <= Recv data, 19 bytes (0x13)
-20:25:42.949415 <= Recv data, 5 bytes (0x5)
-```
+<!-- include ../_shared/check-it-streams.md url=http://localhost:3000/ -->
 
-That's the example: the shell at once, and two seconds later the widget's
-chunk, followed by the end of the page and the closing chunk. One line for the
-whole page means something buffered it; see
-[Checking that a response streams](../guides/streaming-through-proxies.md#checking-that-a-response-streams).
-
-## 7. Compression
+## 9. Compression
 
 `koa-compress` passes the body through a zlib stream, and a zlib stream holds
 its output until it has enough to compress well. For a page, that is all of
 it. Without the `flush` options, `app.use(compress())` sends the shell
-compressed, but only when the last block is done:
+compressed, but only when the last block is done. Run the check with
+`--compressed` and the whole page arrives at the end:
 
 ```bash
-curl -sN --compressed http://localhost:3000/ | perl -MTime::HiRes=time -ne '
-  BEGIN { $t0 = time }
-  printf "%5d ms  %s\n", (time - $t0) * 1000, $& if /data-placeholder|<template data-ngs="\w+"/'
+curl -sN --compressed -o /dev/null --trace-time --trace-ascii - http://localhost:3000/ | grep 'Recv data'
 ```
 
 ```text
- 2010 ms  data-placeholder
- 2012 ms  <template data-ngs="d0"
+20:23:54.256175 <= Recv data, 1858 bytes (0x742)
 ```
 
 With a `flush` for each encoding, as in the server above, zlib flushes after
-every write, and each chunk leaves as soon as it is compressed:
-
-```text
-    2 ms  data-placeholder
- 2008 ms  <template data-ngs="d0"
-```
+every write, and each chunk leaves as soon as it is compressed: the shell at
+once, the chunk when its data is there.
 
 Give every encoding the middleware can pick its flush: `Z_SYNC_FLUSH` for
 gzip and deflate, `BROTLI_OPERATION_FLUSH` for Brotli and `ZSTD_e_flush` for
@@ -350,7 +335,7 @@ pages in Node at all: set `ctx.compress = false` in `page` and leave it to the
 proxy in front. See
 [Compression middleware](../guides/streaming-through-proxies.md#compression-middleware).
 
-## 8. Behind a proxy
+## 10. Behind a proxy
 
 A proxy or a CDN can hold the response back until it is complete, and the
 page then arrives all at once. `page` sends `X-Accel-Buffering: no` for Nginx;
@@ -363,6 +348,6 @@ Behind a proxy that rewrites the host or ends TLS, pass
 `allowedHosts`. Koa's own `app.proxy` only changes what `ctx.host` and
 `ctx.protocol` say; the renderer doesn't read those.
 
-## 9. Stream something
+## 11. Stream something
 
 <!-- include ../_shared/stream-something.md -->

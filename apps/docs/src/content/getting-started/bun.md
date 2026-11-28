@@ -8,14 +8,18 @@ This is the setup of
 [`apps/example-bun`](../../../../../apps/example-bun/src/server.ts), checked
 with Bun 1.4.5.
 
+## Before you start
+
+<!-- include ../_shared/before-you-start.md -->
+
 ## 1. Install
 
 ```bash
 bun add @push-based/angular-ssr-stream-core@next
+bun add -d @types/bun
 ```
 
-The core is all a Bun server needs. Vite and ngp still need Node 26 for the
-build; see [Installation](installation.md).
+The core is all a Bun server needs. The build still runs on Node.
 
 ## 2. The browser config
 
@@ -83,15 +87,11 @@ disk, so there's nothing to guard against `..` in it.
 A missing file under `/assets/`, such as an old hashed chunk after a deploy,
 gets a `404` rather than a page.
 
-`allowedHosts` must list every hostname the server answers for: Angular's SSR
-host guard rejects any other `host` header, and the server answers `403`.
+<!-- include ../_shared/allowed-hosts.md -->
 
-`eventDispatchContract` is for `withEventReplay()`. The built `index.html`
-doesn't carry the script Angular needs to queue the clicks made before the
-page hydrates, so the handler adds it. Leave it out and those clicks are lost.
+<!-- include ../_shared/event-replay.md -->
 
-For the types of `Bun`, add `@types/bun` to the app's devDependencies and
-`"bun"` to `types` in `tsconfig.app.json`.
+For the types of `Bun`, add `"bun"` to `types` in `tsconfig.app.json`.
 
 ## 5. Vite
 
@@ -123,33 +123,38 @@ as a string, which is the buffered render this server avoids.
 `resolve.noExternal: true` bundles every dependency into the server build, so
 `dist/` runs on its own, without `node_modules`.
 
-## 6. Build and run
-
-```bash
-vite build                   # client to dist/client, server to dist/server
-bun dist/server/server.js    # http://localhost:3000
-```
-
-The build runs on Node; Bun is only needed to run the result. For production,
-ship `dist/` and run the same command, with `PORT` set if 3000 isn't the port.
-
-To check that it streams, request a page with `curl -N` and note when each part
-arrives. For the example, the shell (with the widget's placeholder) comes at
-once and the widget's `<template data-ngs>` chunk 2 seconds later. Bun writes
-each chunk of the `ReadableStream` body as it is enqueued, with nothing to
-configure. A response that arrives all at once means something in front of Bun
-buffered it.
-
-## 7. Development
+## 6. Develop
 
 `vite dev` doesn't run `src/server.ts`: it serves `index.html` as it is, and
 Angular renders the app in the browser, with HMR but without the stream, and
 with a console warning (NG0505) that there was nothing to hydrate. To see the
-stream, build and run it with Bun as above.
+stream, build and run it with Bun, below.
 
 `vite build --watch` with `bun --watch dist/server/server.js` doesn't work
 either: each rebuild empties `dist/server`, and Bun restarts while the file is
 missing and stops with `Module not found`.
+
+## 7. Build and run
+
+```bash
+vite build                                     # client to dist/client, server to dist/server
+NODE_ENV=production bun dist/server/server.js  # http://localhost:3000, or $PORT
+```
+
+The build runs on Node; Bun is only needed to run the result. For production,
+ship `dist/` and run the same command. Without `NODE_ENV=production`,
+`Bun.serve()` starts in its development mode.
+
+## 8. Check that it streams
+
+<!-- include ../_shared/check-it-streams.md url=http://localhost:3000/ -->
+
+Bun writes each chunk of the `ReadableStream` body as it is enqueued, with
+nothing to configure.
+
+## 9. Stream something
+
+<!-- include ../_shared/stream-something.md -->
 
 ## Elysia
 
@@ -179,8 +184,6 @@ explicitly if the build has more files than that. `assets` is relative to the wo
 server from the app's folder.
 
 Unlike the `Bun.serve()` version above, this serves `/index.html` itself as a
-plain file. Checked with Elysia 1.4.32 and `@elysiajs/static` 1.4.12.
-
-## Stream something
-
-<!-- include ../_shared/stream-something.md -->
+plain file, the bare template, and renders a page for a missing file under
+`/assets/` instead of answering `404`. Checked with Elysia 1.4.32 and
+`@elysiajs/static` 1.4.12.

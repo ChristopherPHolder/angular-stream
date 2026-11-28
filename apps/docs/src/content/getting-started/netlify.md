@@ -6,15 +6,28 @@ function, which streams the page. The setup below is the one
 uses. There is no Netlify package: the function is
 `createStreamingHandler()` from the core, and the rest is build configuration.
 
-## 1. The browser config
+## Before you start
+
+<!-- include ../_shared/before-you-start.md -->
+
+## 1. Install
+
+```bash
+npm install @push-based/angular-ssr-stream-core@next
+npm install -D @types/node @netlify/functions netlify-cli
+```
+
+`@netlify/functions` is only needed for its types.
+
+## 2. The browser config
 
 <!-- include ../_shared/browser-config.md -->
 
-## 2. The server config
+## 3. The server config
 
 <!-- include ../_shared/server-config.md -->
 
-## 3. The function
+## 4. The function
 
 A Netlify Function takes a web `Request` and a `Context` and returns a
 `Response`, which is what `createStreamingHandler()` is. Netlify streams a
@@ -67,9 +80,7 @@ included: Angular's SSR host guard rejects any other `host` header, and the
 function answers `403`. `*.netlify.app` covers the site's Netlify address and
 its deploy previews.
 
-`eventDispatchContract` is for `withEventReplay()`: the built `index.html`
-doesn't carry the script Angular needs to queue the clicks made before the page
-hydrates, so the handler adds it.
+<!-- include ../_shared/event-replay.md -->
 
 The template is the built `index.html`, as a string inside the function
 (`virtual:template`, below). Nothing is read from disk or fetched per request,
@@ -83,15 +94,13 @@ declare module 'virtual:template' {
 }
 ```
 
-`@netlify/functions` is only needed for its types: `pnpm add -D @netlify/functions`.
-
 > [!NOTE]
 > `netlify serve` (netlify-cli 27.20.1) ignores a Netlify Function's
 > `excludedPath`, so locally `/assets/missing.js` is rendered as a page. The
 > excluded paths are in the function's manifest, and `netlify deploy` uploads
 > them with it.
 
-## 4. Vite
+## 5. Vite
 
 Netlify doesn't run Vite, so the build has to hand it a function it can deploy
 as it is: one module, with Angular compiled and every dependency bundled in.
@@ -271,72 +280,82 @@ declare module 'virtual:public-paths' {
 }
 ```
 
-## 5. netlify.toml
+## 6. netlify.toml
 
 ```toml title="netlify.toml"
 [build]
-command = "pnpm nx build example-netlify"
-publish = "apps/example-netlify/dist/function/client"
+command = "npm run build"
+publish = "dist/function/client"
 
 [build.environment]
 NODE_VERSION = "26"
 
 [functions]
-directory = "apps/example-netlify/dist/function/netlify/functions"
+directory = "dist/function/netlify/functions"
 ```
 
-The example lives in a pnpm workspace, so the site's base directory is the
-repository root, where the workspace installs, and its package directory is
-`apps/example-netlify`, where `netlify.toml` is. Paths in it are relative to the
-base directory. In a repository with one app at its root, they are
-`dist/function/client` and `dist/function/netlify/functions`, and the command is
-`vite build`. The example's `build` script builds both variants, so its
-command builds the Edge Function too. `netlify.toml` names only the
+with `"build": "vite build"` in `package.json`. `netlify.toml` names only the
 Function's folders, so only the Function is deployed.
 
-`NODE_VERSION` is the Node.js version the build runs on. Netlify installs any
-version nvm can, and defaults to Node.js 24
+`NODE_VERSION` is the Node.js version the build runs on, which ngp needs to
+be 26. Netlify installs any version nvm can, and defaults to Node.js 24
 ([Manage dependencies](https://docs.netlify.com/build/configure-builds/manage-dependencies/)).
-This workspace needs 26. The function then runs on the build's version if AWS
-Lambda offers it as a runtime, and on Node.js 24 otherwise
+The function then runs on the build's version if AWS Lambda offers it as a
+runtime, and on Node.js 24 otherwise
 ([Functions configuration](https://docs.netlify.com/build/functions/configuration/)).
 The bundled function streams the same under Node.js 24.
 
-## 6. Build and deploy
+In a monorepo, the site's base directory is the repository root, where the
+workspace installs, and its package directory is the app's folder, where
+`netlify.toml` is. Paths in it are then relative to the base directory
+(`apps/my-app/dist/function/client`), and the command builds the app from the
+root. The package directory can only be set in the Netlify UI:
+**Project configuration > Developer settings > Continuous deployment > Build
+settings > Package directory**. Netlify reads `netlify.toml` from the package
+directory, then the base directory, then the repository root
+([Monorepos](https://docs.netlify.com/build/configure-builds/monorepos/)), so
+without it the build never reads the app's `netlify.toml`.
+[`apps/example-netlify/netlify.toml`](../../../../../apps/example-netlify/netlify.toml)
+is set up that way.
+
+## 7. Develop
 
 ```bash
-pnpm nx build example-netlify   # dist/function (and dist/edge, the Edge Function)
-netlify serve --filter example-netlify
+vite dev   # http://localhost:5173
+```
+
+The plugin in the Vite config hands each page to the function, so pages stream
+in dev as they do on Netlify.
+
+## 8. Build and deploy
+
+```bash
+vite build        # dist/function: the browser app and the function
+netlify serve     # http://localhost:8888
 ```
 
 `netlify serve` runs the build command, packages the function the way a deploy
-does, and serves the result on `http://localhost:8888`, without an account or a
-linked site. It is the closest local check of what Netlify will run.
-
-To deploy from the command line, run this at the repository root:
+does, and serves the result, without an account or a linked site. It is the
+closest local check of what Netlify will run. To deploy from the command line:
 
 ```bash
-netlify deploy --build --filter example-netlify
+netlify deploy --build
 ```
 
-`--filter` picks the app's package directory, as for `netlify serve`. A site
-built by Netlify from the repository needs its package directory as well, and
-that can only be set in the Netlify UI: **Project configuration > Developer
-settings > Continuous deployment > Build settings > Package directory**, set to
-`apps/example-netlify`. Netlify reads `netlify.toml` from the package directory,
-then the base directory, then the repository root
-([Monorepos](https://docs.netlify.com/build/configure-builds/monorepos/)).
-Without the package directory, the build never reads
-`apps/example-netlify/netlify.toml`.
+In a monorepo, run both at the repository root with `--filter <package name>`,
+which picks the app's package directory.
 
-> [!NOTE]
-> The example streams under `netlify serve`: the shell arrives at once and the
-> widget's chunk about 2 s later. It hasn't been timed against a deployed site
-> yet, so whether anything between Netlify's CDN and the browser buffers the
-> response is still open. Check with `curl -N` against your deploy, as
-> [Debugging and verifying](../guides/debugging.md) describes.
+## 9. Check that it streams
 
-## 7. Stream something
+With `netlify serve` running:
+
+<!-- include ../_shared/check-it-streams.md url=http://localhost:8888/ -->
+
+The example streams under `netlify serve`. It hasn't been timed against a
+deployed site yet, so whether anything between Netlify's CDN and the browser
+buffers the response is still open: run the same command against your deploy.
+
+## 10. Stream something
 
 <!-- include ../_shared/stream-something.md -->
 
@@ -396,9 +415,9 @@ What changes:
 
   ```toml title="netlify.toml"
   [build]
-  command = "pnpm nx build example-netlify"
-  publish = "apps/example-netlify/dist/edge/client"
-  edge_functions = "apps/example-netlify/dist/edge/netlify/edge-functions"
+  command = "vite build --mode edge"
+  publish = "dist/edge/client"
+  edge_functions = "dist/edge/netlify/edge-functions"
   
   [build.environment]
   NODE_VERSION = "26"
@@ -417,4 +436,4 @@ What changes:
   default; choose the edge when the page renders well within it.
 
 `@netlify/edge-functions` is only needed for its types:
-`pnpm add -D @netlify/edge-functions`.
+`npm install -D @netlify/edge-functions`.

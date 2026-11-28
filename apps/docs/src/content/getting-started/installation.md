@@ -110,6 +110,24 @@ version of each.
 The packages ship ESM and type declarations, and carry no Angular decorators,
 so they need no Angular compilation of their own.
 
+## Developing
+
+What the dev server does differs by runtime. Where it doesn't stream, it serves
+the app client-side: Angular renders it in the browser and logs NG0505, as
+there is no hydration data. Build and run it to see the stream there.
+
+| Runtime                                                  | Dev server                                  | Streams in dev             |
+| -------------------------------------------------------- | ------------------------------------------- | -------------------------- |
+| Angular CLI                                              | `ng serve`                                  | Yes                        |
+| Node, Express, Fastify, NestJS, Koa                      | `vite dev`, with the Node plugin            | Yes                        |
+| Cloudflare Workers, Hono                                 | `vite dev`                                  | Yes                        |
+| Netlify, Nitro                                           | `vite dev`                                  | Yes                        |
+| Deno                                                     | `vite build --watch` and `deno run --watch` | Yes, as a production build |
+| Bun, Vercel, AWS Lambda, Azure Functions, Fastly Compute | `vite dev`                                  | No: client-side only       |
+| Service Worker                                           | `vite dev`                                  | No: client-side only       |
+
+Each runtime's page has a "Develop" step with the details.
+
 The hosted platforms (Vercel, Netlify, AWS Lambda, Azure Functions, Fastly
 Compute, Deno Deploy, and Nitro's presets for them) have been checked locally,
 with each platform's own tooling or a stand-in for it, but not yet on a real

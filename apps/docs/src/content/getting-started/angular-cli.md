@@ -6,6 +6,8 @@ rendered: as a stream, instead of all at once.
 
 Starting from a fresh `ng new my-app --ssr`, that takes changes to four files,
 and a fifth, `angular.json`, for the hosts it answers on in production.
+On Angular 19.2, 20.3 or 21.2, two more apply; see
+[Angular 19 to 21](#angular-19-to-21).
 
 ## 1. Install
 
@@ -126,21 +128,23 @@ ng build
 node dist/my-app/server/server.mjs   # http://localhost:4000, or $PORT
 ```
 
-Check that it streams before you put anything in front of it:
+## 8. Check that it streams
 
-```bash
-curl -sN -o /dev/null --trace-time --trace-ascii - http://localhost:4000/ | grep 'Recv data'
-```
+Before you put anything in front of the server:
 
-```text
-07:51:38.138747 <= Recv data, 3557 bytes (0xde5)
-07:51:40.145185 <= Recv data, 807 bytes (0x327)
-```
+<!-- include ../_shared/check-it-streams.md url=http://localhost:4000/ -->
 
-That's the example: the shell at once, and the widget's chunk two seconds
-later, when its data is there. One line for the whole page means something
-buffered it; see
-[Checking that a response streams](../guides/streaming-through-proxies.md#checking-that-a-response-streams).
+## 9. Behind a proxy
+
+A proxy, a CDN or compression middleware can hold the response back until it
+is complete, and the page then arrives all at once. Streamed responses carry
+`X-Accel-Buffering: no` for Nginx; for the rest, read
+[Streaming through proxies](../guides/streaming-through-proxies.md).
+
+## 10. Stream something
+
+Nothing streams until a template has a `@defer` block with a `hydrate`
+trigger: read [Making something stream](../guides/making-something-stream.md).
 
 ## What `@angular/ssr` still does
 
@@ -181,15 +185,3 @@ The steps above are for Angular 22, which `ng new` gives you today. On 19.2,
   it may still have a `bootstrap` that takes no argument: add it.
 - **On 19**, zoneless is `provideExperimentalZonelessChangeDetection()`. Zone.js
   works as well.
-
-## 8. Behind a proxy
-
-A proxy, a CDN or compression middleware can hold the response back until it
-is complete, and the page then arrives all at once. Streamed responses carry
-`X-Accel-Buffering: no` for Nginx; for the rest, read
-[Streaming through proxies](../guides/streaming-through-proxies.md).
-
-## 9. Stream something
-
-Nothing streams until a template has a `@defer` block with a `hydrate`
-trigger: read [Making something stream](../guides/making-something-stream.md).

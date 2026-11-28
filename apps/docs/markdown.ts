@@ -121,16 +121,22 @@ export interface SearchEntry {
 
 /**
  * A line that is replaced by another file's Markdown: a step several pages
- * share, written once. The path is relative to the page, like a link.
+ * share, written once. The path is relative to the page, like a link. It may be
+ * followed by values for the file's `{{name}}` slots, as `name=value` (no
+ * spaces in the value): `<!-- include ../_shared/check-it-streams.md url=http://localhost:3000/ -->`.
  */
-const INCLUDE = /^<!-- include (\S+) -->$/gm;
+const INCLUDE = /^<!-- include (\S+)((?: [\w-]+=\S+)*) -->$/gm;
+
+/** A slot in an included file, filled from the include line. */
+const SLOT = /\{\{([\w-]+)\}\}/g;
 
 /**
- * Puts each included file in the place of its `<!-- include … -->` line. The
- * text is inlined before it is rendered, so its links resolve from the page
- * that includes it: keep included files one folder down from `contentDir`,
- * like the pages, and the same relative link works from both. An included file
- * cannot include another.
+ * Puts each included file in the place of its `<!-- include … -->` line, with
+ * its slots filled. The text is inlined before it is rendered, so its links
+ * resolve from the page that includes it: keep included files one folder down
+ * from `contentDir`, like the pages, and the same relative link works from
+ * both. An included file cannot include another. A slot left without a value,
+ * or a value for no slot, fails the build.
  */
 export function withIncludes(
   source: string,
@@ -138,13 +144,35 @@ export function withIncludes(
   options: MarkdownOptions,
 ): { source: string; included: string[] } {
   const included: string[] = [];
-  const whole = source.replace(INCLUDE, (_, target: string) => {
+  const whole = source.replace(INCLUDE, (_, target: string, args: string) => {
+    const where = path.relative(options.repoRoot, file);
     const absolute = path.resolve(path.dirname(file), target);
     if (!existsSync(absolute)) {
-      throw new Error(`${path.relative(options.repoRoot, file)}: nothing to include at ${target}`);
+      throw new Error(`${where}: nothing to include at ${target}`);
     }
     included.push(absolute);
-    return readFileSync(absolute, 'utf8').trim();
+    const values = new Map(
+      args
+        .trim()
+        .split(' ')
+        .filter(Boolean)
+        .map((pair) => [pair.slice(0, pair.indexOf('=')), pair.slice(pair.indexOf('=') + 1)]),
+    );
+    const unused = new Set(values.keys());
+    const text = readFileSync(absolute, 'utf8')
+      .trim()
+      .replace(SLOT, (_slot, name: string) => {
+        const value = values.get(name);
+        if (value === undefined) {
+          throw new Error(`${where}: ${target} needs a value for {{${name}}}`);
+        }
+        unused.delete(name);
+        return value;
+      });
+    if (unused.size > 0) {
+      throw new Error(`${where}: ${target} has no slot for ${[...unused].join(', ')}`);
+    }
+    return text;
   });
   return { source: whole, included };
 }
