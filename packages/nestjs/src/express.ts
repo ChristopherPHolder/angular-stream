@@ -6,7 +6,7 @@ import {
   type StaticHandler,
   createNodeHandler,
   createStaticHandler,
-} from '@push-based/angular-stream-node';
+} from '@push-based/angular-ssr-stream-node';
 import { toNestError } from './errors';
 import type { AngularStreamModuleOptions } from './options';
 import { isUnderPrefix } from './prefix';

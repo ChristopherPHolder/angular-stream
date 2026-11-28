@@ -233,7 +233,7 @@ function escapeHtml(text: string): string {
 
 /**
  * Lets a long identifier in inline code wrap after a separator
- * (`@push-based/<wbr>angular-stream-node`, `app.<wbr>component.<wbr>html`)
+ * (`@push-based/<wbr>angular-ssr-stream-node`, `app.<wbr>component.<wbr>html`)
  * instead of in the middle of a word. Only between a word and a letter, so
  * `22.3.0`, `...` and `.html` stay whole, and only in a long one: a short one
  * (`/api/hello`, `src/server.ts`) reads better moved to the next line whole.

@@ -2,7 +2,7 @@ import { NgOptimizedImage } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 // `?no-inline`: Vite would inline an asset this small as a data: URI, which NgOptimizedImage rejects.
-import symbol from '@angular-stream/press-kit/symbol/angular-stream-symbol.svg?no-inline';
+import symbol from '@angular-ssr-stream/press-kit/symbol/angular-ssr-stream-symbol.svg?no-inline';
 import { DOCS } from './docs/nav';
 import { HomeRace } from './home-race';
 import { DEMO } from './links';
@@ -22,7 +22,7 @@ import { DEMO } from './links';
         <p class="text-subtitle eyebrow">Streamed hydration for Angular</p>
         <h1 class="text-hero-title">Don't make the whole page wait for its slowest part</h1>
         <p class="text-lead lede">
-          angular-stream sends a server-rendered Angular page straight away and streams the slow
+          angular-ssr-stream sends a server-rendered Angular page straight away and streams the slow
           parts into it as they finish, in the same response. Angular hydrates each part as it
           lands.
         </p>
@@ -52,7 +52,7 @@ import { DEMO } from './links';
     </section>
 
     <section class="home-section" aria-labelledby="home-how">
-      <h2 class="text-section-title" id="home-how">What angular-stream does</h2>
+      <h2 class="text-section-title" id="home-how">What angular-ssr-stream does</h2>
       <p class="home-text">
         The server keeps the response open and adds to it. There is no second request and no
         fetching from the browser.

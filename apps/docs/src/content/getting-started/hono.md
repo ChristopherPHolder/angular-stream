@@ -11,7 +11,7 @@ Node setup and
 the Workers one, as written here.
 
 ```bash
-npm install @push-based/angular-stream-core@next hono @hono/node-server
+npm install @push-based/angular-ssr-stream-core@next hono @hono/node-server
 npm install -D @hono/vite-dev-server
 ```
 
@@ -33,7 +33,7 @@ import { fileURLToPath } from 'node:url';
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
-import { createStreamingHandler } from '@push-based/angular-stream-core/server';
+import { createStreamingHandler } from '@push-based/angular-ssr-stream-core/server';
 import { type Context, Hono } from 'hono';
 import type { ViteDevServer } from 'vite';
 import { App } from './app/app';
@@ -213,14 +213,14 @@ CDN that buffers or compresses without flushing undoes streaming just as
 ## Cloudflare Workers
 
 On Workers, compose with
-[`@push-based/angular-stream-cloudflare`](../reference/cloudflare.md) instead of
+[`@push-based/angular-ssr-stream-cloudflare`](../reference/cloudflare.md) instead of
 calling the core yourself: `createStreamingWorker()` already loads the template
 through the `ASSETS` binding. Hono routes your API, and the rest goes to the
 Worker's `fetch`:
 
 ```ts title="src/worker.ts"
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { createStreamingWorker } from '@push-based/angular-stream-cloudflare';
+import { createStreamingWorker } from '@push-based/angular-ssr-stream-cloudflare';
 import { Hono } from 'hono';
 import { App } from './app/app';
 import { config } from './app/app.config.server';

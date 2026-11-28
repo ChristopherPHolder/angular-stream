@@ -1,10 +1,23 @@
 {
-  "name": "@push-based/angular-stream-cloudflare",
+  "name": "@push-based/angular-ssr-stream-cloudflare",
   "version": "0.0.0",
   "description": "Streamed SSR for Angular on Cloudflare Workers: a Worker fetch handler over the ASSETS binding.",
+  "keywords": [
+    "angular",
+    "ssr",
+    "server-side-rendering",
+    "streaming",
+    "streamed-ssr",
+    "hydration",
+    "incremental-hydration",
+    "cloudflare",
+    "cloudflare-workers",
+    "workers"
+  ],
+  "homepage": "https://push-based.github.io/angular-ssr-stream/docs/reference/cloudflare",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/push-based/angular-stream.git",
+    "url": "git+https://github.com/push-based/angular-ssr-stream.git",
     "directory": "packages/cloudflare"
   },
   "type": "module",
@@ -32,7 +45,7 @@
     }
   },
   "dependencies": {
-    "@push-based/angular-stream-core": "workspace:*"
+    "@push-based/angular-ssr-stream-core": "workspace:*"
   },
   "peerDependencies": {
     "@angular/core": "~22.3.0-rc.0"

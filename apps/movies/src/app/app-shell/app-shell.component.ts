@@ -15,7 +15,7 @@ import { DarkModeToggleComponent } from '../ui/component/dark-mode-toggle/dark-m
 import { LazyDirective } from '../shared/cdk/lazy/lazy.directive';
 import { FastSvgComponent } from '@push-based/ngx-fast-svg';
 import { toSignal } from '@angular/core/rxjs-interop';
-import streamSymbol from '@angular-stream/press-kit/symbol/angular-stream-symbol.svg';
+import streamSymbol from '@angular-ssr-stream/press-kit/symbol/angular-ssr-stream-symbol.svg';
 
 type Actions = {
   loadAccountMenu: void;

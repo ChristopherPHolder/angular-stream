@@ -23,7 +23,7 @@ Import `AngularStreamModule` into your root module, next to your controllers:
 ```ts title="src/app.module.ts"
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
 import { Module } from '@nestjs/common';
-import { AngularStreamModule } from '@push-based/angular-stream-nestjs';
+import { AngularStreamModule } from '@push-based/angular-ssr-stream-nestjs';
 import { HelloController } from './api/hello.controller';
 import { HelloService } from './api/hello.service';
 import { App } from './app/app';
@@ -83,7 +83,7 @@ When the options come from somewhere else, such as `ConfigService`, use
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import { createRequestListener } from '@push-based/angular-stream-nestjs';
+import { createRequestListener } from '@push-based/angular-ssr-stream-nestjs';
 import { AppModule } from './app.module';
 
 const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -138,7 +138,7 @@ however your app compiles them.
 ## 6. Vite
 
 ```ts title="vite.config.ts"
-import { angularStreamNest } from '@push-based/angular-stream-nestjs/vite';
+import { angularStreamNest } from '@push-based/angular-ssr-stream-nestjs/vite';
 import { ngp } from '@push-based/vite-plugin-ngp';
 import { defineConfig } from 'vite';
 
@@ -298,7 +298,7 @@ Install the Nest adapter, the stream's Fastify adapter, which the module loads
 only on Fastify, and `@fastify/compress` if you compress in Node:
 
 ```bash
-npm install @nestjs/platform-fastify @push-based/angular-stream-fastify@next @fastify/compress
+npm install @nestjs/platform-fastify @push-based/angular-ssr-stream-fastify@next @fastify/compress
 ```
 
 ### The server entry
@@ -308,7 +308,7 @@ import 'reflect-metadata';
 import fastifyCompress from '@fastify/compress';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
-import { createRequestListener } from '@push-based/angular-stream-nestjs';
+import { createRequestListener } from '@push-based/angular-ssr-stream-nestjs';
 import { AppModule } from './app.module';
 
 const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());

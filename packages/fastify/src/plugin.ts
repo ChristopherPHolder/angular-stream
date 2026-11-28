@@ -4,8 +4,8 @@ import type { ReadableStream as NodeReadableStream } from 'node:stream/web';
 import {
   type StreamingAppOptions,
   createStreamingHandler,
-} from '@push-based/angular-stream-core/server';
-import { createTemplateLoader, toWebRequest } from '@push-based/angular-stream-node';
+} from '@push-based/angular-ssr-stream-core/server';
+import { createTemplateLoader, toWebRequest } from '@push-based/angular-ssr-stream-node';
 import type {
   FastifyPluginAsync,
   FastifyReply,
@@ -96,7 +96,7 @@ export const angularStream: FastifyPluginAsync<AngularStreamOptions> = async (fa
 
 Object.assign(angularStream, {
   // What Fastify names the plugin in its errors and in `printPlugins()`.
-  [Symbol.for('plugin-meta')]: { name: '@push-based/angular-stream-fastify', fastify: '5.x' },
+  [Symbol.for('plugin-meta')]: { name: '@push-based/angular-ssr-stream-fastify', fastify: '5.x' },
 });
 
 /**

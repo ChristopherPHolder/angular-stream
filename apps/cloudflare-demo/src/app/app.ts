@@ -2,11 +2,11 @@ import { NgOptimizedImage, PlatformLocation } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 // `?no-inline`: Vite would inline an asset this small as a data: URI, which NgOptimizedImage rejects.
-import logo from '@angular-stream/press-kit/symbol/angular-stream-symbol.svg?no-inline';
+import logo from '@angular-ssr-stream/press-kit/symbol/angular-ssr-stream-symbol.svg?no-inline';
 import { EventLog } from './event-log';
 
-const REPO = 'https://github.com/push-based/angular-stream';
-const DOCS = 'https://push-based.github.io/angular-stream/';
+const REPO = 'https://github.com/push-based/angular-ssr-stream';
+const DOCS = 'https://push-based.github.io/angular-ssr-stream/';
 
 /** The pages, in the order to read them: from the idea to the detail. */
 const PAGES = [
@@ -35,7 +35,7 @@ function currentPage(path: string): string | null {
         <a class="brand text-card-title" href="/">
           <!-- Decorative: the name is the text next to it. -->
           <img [ngSrc]="logo" alt="" width="32" height="32" priority />
-          angular-stream <span>demo</span>
+          angular-ssr-stream <span>demo</span>
         </a>
         <!-- Plain links: every page load should be a fresh streamed response. -->
         <nav class="top-nav text-link-mono" aria-label="Pages">
@@ -45,7 +45,7 @@ function currentPage(path: string): string | null {
             }}</a>
           }
         </nav>
-        <a class="top-repo" [href]="repo" aria-label="angular-stream on GitHub">
+        <a class="top-repo" [href]="repo" aria-label="angular-ssr-stream on GitHub">
           <svg viewBox="0 0 16 16" width="24" height="24" aria-hidden="true" focusable="false">
             <path
               fill="currentColor"
@@ -70,7 +70,9 @@ function currentPage(path: string): string | null {
       <div class="bottom-inner">
         <p>Streamed server-side rendering for Angular, on Cloudflare Workers.</p>
         <nav aria-label="Elsewhere">
-          <a href="https://angular-stream.chris-holder.workers.dev/">Angular Movies, a real app</a>
+          <a href="https://angular-ssr-stream-movies.chris-holder.workers.dev/"
+            >Angular Movies, a real app</a
+          >
           <a [href]="repo">Source on GitHub</a>
           <a [href]="docs">The docs</a>
           <a href="https://push-based.io/">PushBased</a>

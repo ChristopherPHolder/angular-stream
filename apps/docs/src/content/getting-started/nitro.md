@@ -12,7 +12,7 @@ single host that has its own adapter, such as
 ## 1. Install
 
 ```bash
-npm install @push-based/angular-stream-core@next @push-based/angular-stream-nitro@next unstorage
+npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-nitro@next unstorage
 npm install -D nitro@3.0.261103-rc
 ```
 
@@ -31,7 +31,7 @@ template that way.
 
 ```ts title="src/server.ts"
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { defineStreamingHandler } from '@push-based/angular-stream-nitro';
+import { defineStreamingHandler } from '@push-based/angular-ssr-stream-nitro';
 import { App } from './app/app';
 import { config } from './app/app.config.server';
 
@@ -64,7 +64,7 @@ hydrates, so the handler adds it.
 ## 5. Vite
 
 ```ts title="vite.config.ts"
-import { streamingTemplate } from '@push-based/angular-stream-nitro/vite';
+import { streamingTemplate } from '@push-based/angular-ssr-stream-nitro/vite';
 import { ngp } from '@push-based/vite-plugin-ngp';
 import { nitro } from 'nitro/vite';
 import { defineConfig } from 'vite';

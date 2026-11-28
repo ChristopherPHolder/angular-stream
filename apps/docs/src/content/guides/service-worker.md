@@ -202,7 +202,7 @@ times these numbers.
 
 Of the unminified bundle, about 45% is `@angular/platform-server` (domino
 included) and a third is `@angular/core`; rxjs, `@angular/common`,
-`@angular/platform-browser` and angular-stream's core make up most of the
+`@angular/platform-browser` and angular-ssr-stream's core make up most of the
 rest. About 20 kB is `xhr2`, which platform-server only loads for
 `withXhr()` and which never runs here.
 

@@ -9,7 +9,7 @@
 # so `sam deploy` zips the handler with the `index.html` it renders into.
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: angular-stream, streamed from AWS Lambda through CloudFront.
+Description: angular-ssr-stream, streamed from AWS Lambda through CloudFront.
 
 Resources:
   RenderFunction:

@@ -15,7 +15,7 @@ to the rendering Worker.
 
 ```ts title="src/worker.ts"
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { createStreamingWorker } from '@push-based/angular-stream-cloudflare';
+import { createStreamingWorker } from '@push-based/angular-ssr-stream-cloudflare';
 import { App } from './app/app';
 import { config } from './app/app.config.server';
 

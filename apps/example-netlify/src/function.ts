@@ -1,7 +1,7 @@
 import type { Config, Context } from '@netlify/functions';
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { ExamplePage } from '@angular-stream/stream-example';
-import { createStreamingHandler } from '@push-based/angular-stream-core/server';
+import { ExamplePage } from '@angular-ssr-stream/stream-example';
+import { createStreamingHandler } from '@push-based/angular-ssr-stream-core/server';
 import template from 'virtual:template';
 import { config as appConfig } from './app/app.config.server';
 

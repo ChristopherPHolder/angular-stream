@@ -1,5 +1,5 @@
 import { ConfigurableModuleBuilder } from '@nestjs/common';
-import type { NodeHandlerOptions } from '@push-based/angular-stream-node';
+import type { NodeHandlerOptions } from '@push-based/angular-ssr-stream-node';
 
 /**
  * What `AngularStreamModule.forRoot()` takes: the Node adapter's options,

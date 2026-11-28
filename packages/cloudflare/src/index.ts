@@ -1,9 +1,9 @@
 import {
   type StreamingAppOptions,
   createStreamingHandler,
-} from '@push-based/angular-stream-core/server';
+} from '@push-based/angular-ssr-stream-core/server';
 
-export type { StreamingAppOptions } from '@push-based/angular-stream-core/server';
+export type { StreamingAppOptions } from '@push-based/angular-ssr-stream-core/server';
 
 /** The part of the Workers `ASSETS` binding the handler uses. */
 export interface AssetsBinding {

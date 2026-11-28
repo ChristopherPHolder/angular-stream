@@ -4,7 +4,7 @@
  */
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "angular-stream",
+  "name": "angular-ssr-stream-movies",
   "main": "./src/worker.ts",
   "compatibility_date": "2026-09-07",
   /**

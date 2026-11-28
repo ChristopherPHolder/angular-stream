@@ -1,6 +1,6 @@
 # docs
 
-The documentation site for angular-stream: Angular, server-rendered by ngp,
+The documentation site for angular-ssr-stream: Angular, server-rendered by ngp,
 prerendered to static HTML and published to GitHub Pages.
 
 ## Develop
@@ -29,11 +29,11 @@ absolute URLs, at the address in `SITE` (`src/app/links.ts`): change it there if
 the site moves.
 
 The site is built for `/` unless `DOCS_BASE` says otherwise; the Pages workflow
-sets it to `/angular-stream/`. To preview that locally:
+sets it to `/angular-ssr-stream/`. To preview that locally:
 
 ```bash
-DOCS_BASE=/angular-stream/ pnpm nx build docs
-pnpm nx preview docs   # http://localhost:4173/angular-stream/
+DOCS_BASE=/angular-ssr-stream/ pnpm nx build docs
+pnpm nx preview docs   # http://localhost:4173/angular-ssr-stream/
 ```
 
 `vite preview` serves each page's `.html` file the way Pages does, but answers

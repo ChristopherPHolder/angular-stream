@@ -2,11 +2,11 @@ import { readFile } from 'node:fs/promises';
 import {
   type StreamingAppOptions,
   createStreamingHandler,
-} from '@push-based/angular-stream-core/server';
+} from '@push-based/angular-ssr-stream-core/server';
 import { type StreamingLambdaHandler, awsLambdaGlobal } from './awslambda';
 import { toRequest, writeResponse } from './function-url';
 
-export type { StreamingAppOptions } from '@push-based/angular-stream-core/server';
+export type { StreamingAppOptions } from '@push-based/angular-ssr-stream-core/server';
 export type {
   AwsLambdaGlobal,
   HttpResponseMetadata,

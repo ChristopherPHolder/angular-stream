@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
-import { ExamplePage } from '@angular-stream/stream-example';
-import { createStreamingHandler } from '@push-based/angular-stream-core/server';
+import { ExamplePage } from '@angular-ssr-stream/stream-example';
+import { createStreamingHandler } from '@push-based/angular-ssr-stream-core/server';
 import { config } from './app/app.config.server';
 
 /**

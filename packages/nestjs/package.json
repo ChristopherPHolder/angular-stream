@@ -1,10 +1,22 @@
 {
-  "name": "@push-based/angular-stream-nestjs",
+  "name": "@push-based/angular-ssr-stream-nestjs",
   "version": "0.0.0",
   "description": "Streamed SSR for Angular in a NestJS app: a module that renders every page route on platform-express or platform-fastify, next to the app's controllers.",
+  "keywords": [
+    "angular",
+    "ssr",
+    "server-side-rendering",
+    "streaming",
+    "streamed-ssr",
+    "hydration",
+    "incremental-hydration",
+    "nestjs",
+    "nest"
+  ],
+  "homepage": "https://push-based.github.io/angular-ssr-stream/docs/reference/nestjs",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/push-based/angular-stream.git",
+    "url": "git+https://github.com/push-based/angular-ssr-stream.git",
     "directory": "packages/nestjs"
   },
   "type": "module",
@@ -37,8 +49,8 @@
     }
   },
   "dependencies": {
-    "@push-based/angular-stream-core": "workspace:*",
-    "@push-based/angular-stream-node": "workspace:*"
+    "@push-based/angular-ssr-stream-core": "workspace:*",
+    "@push-based/angular-ssr-stream-node": "workspace:*"
   },
   "peerDependencies": {
     "@angular/core": "~22.3.0-rc.0",
@@ -46,7 +58,7 @@
     "@nestjs/core": "^12.0.0",
     "@nestjs/platform-express": "^12.0.0",
     "@nestjs/platform-fastify": "^12.0.0",
-    "@push-based/angular-stream-fastify": "workspace:*",
+    "@push-based/angular-ssr-stream-fastify": "workspace:*",
     "vite": ">=7"
   },
   "devDependencies": {
@@ -58,7 +70,7 @@
     "@nestjs/core": "^12.6.0",
     "@nestjs/platform-express": "^12.6.0",
     "@nestjs/platform-fastify": "^12.6.0",
-    "@push-based/angular-stream-fastify": "workspace:*",
+    "@push-based/angular-ssr-stream-fastify": "workspace:*",
     "@types/node": "^20.19.43",
     "fastify": "5.12.8",
     "reflect-metadata": "^0.2.2",
@@ -80,7 +92,7 @@
     "@nestjs/platform-fastify": {
       "optional": true
     },
-    "@push-based/angular-stream-fastify": {
+    "@push-based/angular-ssr-stream-fastify": {
       "optional": true
     },
     "vite": {

@@ -5,13 +5,13 @@ import type { ReadableStream as NodeReadableStream } from 'node:stream/web';
 import { fileURLToPath } from 'node:url';
 import zlib from 'node:zlib';
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { ExamplePage } from '@angular-stream/stream-example';
-import { createStreamingHandler } from '@push-based/angular-stream-core/server';
+import { ExamplePage } from '@angular-ssr-stream/stream-example';
+import { createStreamingHandler } from '@push-based/angular-ssr-stream-core/server';
 import {
   BadRequestError,
   createTemplateLoader,
   toWebRequest,
-} from '@push-based/angular-stream-node';
+} from '@push-based/angular-ssr-stream-node';
 import Koa, { type Context } from 'koa';
 import compress from 'koa-compress';
 import serve from 'koa-static';

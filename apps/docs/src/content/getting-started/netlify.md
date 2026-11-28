@@ -25,7 +25,7 @@ function's 60-second limit
 ```ts title="src/function.ts"
 import type { Config, Context } from '@netlify/functions';
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { createStreamingHandler } from '@push-based/angular-stream-core/server';
+import { createStreamingHandler } from '@push-based/angular-ssr-stream-core/server';
 import template from 'virtual:template';
 import { App } from './app/app';
 import { config as appConfig } from './app/app.config.server';
@@ -356,7 +356,7 @@ there for an app that makes real HTTP requests hasn't been checked;
 ```ts title="src/edge-function.ts"
 import type { Config, Context } from '@netlify/edge-functions';
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { createStreamingHandler } from '@push-based/angular-stream-core/server';
+import { createStreamingHandler } from '@push-based/angular-ssr-stream-core/server';
 import publicPaths from 'virtual:public-paths';
 import template from 'virtual:template';
 import { App } from './app/app';

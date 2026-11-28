@@ -1,4 +1,4 @@
-export type { StreamingAppOptions } from '@push-based/angular-stream-core/server';
+export type { StreamingAppOptions } from '@push-based/angular-ssr-stream-core/server';
 export { type NodeHandler, type NodeHandlerOptions, createNodeHandler } from './handler';
 export {
   BadRequestError,

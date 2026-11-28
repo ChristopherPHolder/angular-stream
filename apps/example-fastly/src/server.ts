@@ -1,8 +1,8 @@
 /// <reference types="@fastly/js-compute" />
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { ExamplePage } from '@angular-stream/stream-example';
+import { ExamplePage } from '@angular-ssr-stream/stream-example';
 import { PublisherServer } from '@fastly/compute-js-static-publish';
-import { createStreamingHandler } from '@push-based/angular-stream-core/server';
+import { createStreamingHandler } from '@push-based/angular-ssr-stream-core/server';
 import rc from '../static-publish.rc.js';
 import { config } from './app/app.config.server';
 

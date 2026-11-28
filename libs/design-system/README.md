@@ -1,14 +1,14 @@
 # PushBased
 
 > **In this repo:** a copy of the PushBased design system, shared by
-> `apps/cloudflare-demo` and `apps/docs` as `@angular-stream/design-system`
+> `apps/cloudflare-demo` and `apps/docs` as `@angular-ssr-stream/design-system`
 > (private, never published). Only `tokens.css`, `components/components.css`,
 > the logo and the component READMEs are kept; the React components,
 > `tokens.json` and `preview.html` are left out. The Google Fonts `@import` is
 > removed from `components.css`: each app's `index.html` loads Geist itself.
-> Import the CSS as `@angular-stream/design-system/tokens.css` and
-> `@angular-stream/design-system/components.css`; import the logo as
-> `@angular-stream/design-system/pushbased-logo.svg?no-inline`, which Vite
+> Import the CSS as `@angular-ssr-stream/design-system/tokens.css` and
+> `@angular-ssr-stream/design-system/components.css`; import the logo as
+> `@angular-ssr-stream/design-system/pushbased-logo.svg?no-inline`, which Vite
 > turns into an asset URL (without `?no-inline` it inlines it as a `data:` URI,
 > which `NgOptimizedImage` rejects).
 

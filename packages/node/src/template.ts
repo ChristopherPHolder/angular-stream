@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import type { IncomingMessage } from 'node:http';
 
 /**
- * Where the Vite plugin (`@push-based/angular-stream-node/vite`) leaves the dev
+ * Where the Vite plugin (`@push-based/angular-ssr-stream-node/vite`) leaves the dev
  * server's template on the Node request. `Symbol.for`, because the plugin and
  * the handler are different copies of this module in dev: Vite's config loader
  * loads one, the server environment's module runner the other.
@@ -10,7 +10,7 @@ import type { IncomingMessage } from 'node:http';
  * It holds the template, or, for a request forwarded for the plugin's
  * `routes`, a function that reads it.
  */
-export const DEV_TEMPLATE = Symbol.for('@push-based/angular-stream-node:template');
+export const DEV_TEMPLATE = Symbol.for('@push-based/angular-ssr-stream-node:template');
 
 /**
  * Loads a template for the core's `loadTemplate`: `(request, req)`, with `req`
@@ -23,7 +23,7 @@ export type TemplateLoader = (request: Request, req?: IncomingMessage) => Promis
  * keeps it in memory from then on. The result fits the core's `loadTemplate`;
  * pass it the Node request as the second argument.
  *
- * In `vite dev`, the plugin from `@push-based/angular-stream-node/vite` leaves
+ * In `vite dev`, the plugin from `@push-based/angular-ssr-stream-node/vite` leaves
  * the dev server's template on the Node request, and that is used instead: the
  * built file doesn't exist there.
  *

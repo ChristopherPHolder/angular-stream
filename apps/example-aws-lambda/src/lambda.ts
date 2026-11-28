@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { ExamplePage } from '@angular-stream/stream-example';
-import { createStreamingLambda } from '@push-based/angular-stream-aws-lambda';
+import { ExamplePage } from '@angular-ssr-stream/stream-example';
+import { createStreamingLambda } from '@push-based/angular-ssr-stream-aws-lambda';
 import { config } from './app/app.config.server';
 
 /**

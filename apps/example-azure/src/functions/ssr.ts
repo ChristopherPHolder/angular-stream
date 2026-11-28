@@ -1,8 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { ExamplePage } from '@angular-stream/stream-example';
+import { ExamplePage } from '@angular-ssr-stream/stream-example';
 import { HttpResponse, app } from '@azure/functions';
-import { createStreamingHandler } from '@push-based/angular-stream-core/server';
+import { createStreamingHandler } from '@push-based/angular-ssr-stream-core/server';
 import { config } from '../app/app.config.server';
 
 // Without this, the Functions host reads the whole body before it sends a byte.

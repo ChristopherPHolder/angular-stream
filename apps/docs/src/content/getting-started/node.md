@@ -17,7 +17,7 @@ middleware, so the same steps hold for a server built on those.
 ```ts title="src/server.ts"
 import { createServer } from 'node:http';
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { createNodeHandler } from '@push-based/angular-stream-node';
+import { createNodeHandler } from '@push-based/angular-ssr-stream-node';
 import { App } from './app/app';
 import { config } from './app/app.config.server';
 
@@ -72,7 +72,7 @@ The whole Express setup, with `express.static()`, API routes and
 ## 4. Vite
 
 ```ts title="vite.config.ts"
-import { angularStreamNode } from '@push-based/angular-stream-node/vite';
+import { angularStreamNode } from '@push-based/angular-ssr-stream-node/vite';
 import { ngp } from '@push-based/vite-plugin-ngp';
 import { defineConfig } from 'vite';
 

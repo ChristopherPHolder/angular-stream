@@ -16,7 +16,7 @@ its Vite plugin.
 ## 3. The server
 
 ```bash
-npm install @push-based/angular-stream-core@next @push-based/angular-stream-node@next @push-based/angular-stream-fastify@next
+npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-node@next @push-based/angular-ssr-stream-fastify@next
 npm install fastify @fastify/static @fastify/compress
 ```
 
@@ -26,7 +26,7 @@ import { fileURLToPath } from 'node:url';
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
 import fastifyCompress from '@fastify/compress';
 import fastifyStatic from '@fastify/static';
-import { angularStream } from '@push-based/angular-stream-fastify';
+import { angularStream } from '@push-based/angular-ssr-stream-fastify';
 import Fastify from 'fastify';
 import { App } from './app/app';
 import { config } from './app/app.config.server';
@@ -127,7 +127,7 @@ warning when that happens.
 ## 4. Vite
 
 ```ts title="vite.config.ts"
-import { angularStreamNode } from '@push-based/angular-stream-node/vite';
+import { angularStreamNode } from '@push-based/angular-ssr-stream-node/vite';
 import { ngp } from '@push-based/vite-plugin-ngp';
 import { defineConfig } from 'vite';
 

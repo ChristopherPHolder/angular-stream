@@ -1,5 +1,5 @@
 {
-  "name": "angular-stream",
+  "name": "angular-ssr-stream",
   "version": "0.0.0",
   "private": true,
   "type": "module",

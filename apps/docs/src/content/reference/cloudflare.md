@@ -1,9 +1,9 @@
 ```bash
-npm install @push-based/angular-stream-cloudflare@next
+npm install @push-based/angular-ssr-stream-cloudflare@next
 ```
 
 The Cloudflare Workers adapter. It depends on
-[`@push-based/angular-stream-core`](core.md), whose browser providers the app
+[`@push-based/angular-ssr-stream-core`](core.md), whose browser providers the app
 still needs. For the whole setup, see
 [Cloudflare Workers](../getting-started/cloudflare-workers.md).
 

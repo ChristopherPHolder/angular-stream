@@ -1,9 +1,9 @@
 ```bash
-npm install @push-based/angular-stream-core@next
+npm install @push-based/angular-ssr-stream-core@next
 ```
 
-Two entry points: `@push-based/angular-stream-core` for the browser config,
-and `@push-based/angular-stream-core/server` for the server. Neither imports
+Two entry points: `@push-based/angular-ssr-stream-core` for the browser config,
+and `@push-based/angular-ssr-stream-core/server` for the server. Neither imports
 anything runtime-specific; the server half speaks web `Request`, `Response`
 and `ReadableStream` only.
 

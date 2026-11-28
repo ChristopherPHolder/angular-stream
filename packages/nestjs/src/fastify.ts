@@ -1,5 +1,5 @@
-import { createFastifyHandler } from '@push-based/angular-stream-fastify';
-import { createStaticHandler } from '@push-based/angular-stream-node';
+import { createFastifyHandler } from '@push-based/angular-ssr-stream-fastify';
+import { createStaticHandler } from '@push-based/angular-ssr-stream-node';
 // Types only: the Fastify instance is the app's, from @nestjs/platform-fastify.
 import type { FastifyInstance } from 'fastify';
 import { toNestError } from './errors';
@@ -57,7 +57,7 @@ export function addFastifyRenderer(
 
   Object.assign(plugin, {
     [Symbol.for('skip-override')]: true,
-    [Symbol.for('fastify.display-name')]: '@push-based/angular-stream-nestjs',
+    [Symbol.for('fastify.display-name')]: '@push-based/angular-ssr-stream-nestjs',
   });
   void fastify.register(plugin);
 }

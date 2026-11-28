@@ -13,7 +13,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 // `?no-inline`: Vite would inline an asset this small as a data: URI, which NgOptimizedImage rejects.
-import logo from '@angular-stream/press-kit/symbol/angular-stream-symbol.svg?no-inline';
+import logo from '@angular-ssr-stream/press-kit/symbol/angular-ssr-stream-symbol.svg?no-inline';
 import { ALL_PAGES, DOCS, type DocSection } from './docs/nav';
 import { DEMO, MOVIES, REPO } from './links';
 import { trackPageHead } from './page-head';
@@ -29,7 +29,7 @@ import { DocsSearch } from './search/search';
         <a class="brand text-card-title" routerLink="/">
           <!-- Decorative: the name is the text next to it. -->
           <img [ngSrc]="logo" alt="" width="32" height="32" priority />
-          angular-stream <span>docs</span>
+          angular-ssr-stream <span>docs</span>
         </a>
         <docs-search />
         <nav class="top-nav text-link-mono" aria-label="Site">

@@ -3,8 +3,8 @@
  * tokens, its .pb-* components, Geist (loaded in index.html). Use those tokens
  * here and in component styles; don't hard-code colours, spacing or radii.
  */
-@import '@angular-stream/design-system/tokens.css';
-@import '@angular-stream/design-system/components.css';
+@import '@angular-ssr-stream/design-system/tokens.css';
+@import '@angular-ssr-stream/design-system/components.css';
 
 /*
  * The demo's own colours mean something: each one marks where a piece of the

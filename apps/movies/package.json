@@ -11,7 +11,7 @@
     "cf-typegen": "wrangler types"
   },
   "dependencies": {
-    "@angular-stream/press-kit": "workspace:*",
+    "@angular-ssr-stream/press-kit": "workspace:*",
     "@angular/common": "22.3.0-rc.0",
     "@angular/compiler": "22.3.0-rc.0",
     "@angular/core": "22.3.0-rc.0",
@@ -19,8 +19,8 @@
     "@angular/platform-browser": "22.3.0-rc.0",
     "@angular/platform-server": "22.3.0-rc.0",
     "@angular/router": "22.3.0-rc.0",
-    "@push-based/angular-stream-cloudflare": "workspace:*",
-    "@push-based/angular-stream-core": "workspace:*",
+    "@push-based/angular-ssr-stream-cloudflare": "workspace:*",
+    "@push-based/angular-ssr-stream-core": "workspace:*",
     "@push-based/ngx-fast-svg": "^22.0.0",
     "@rx-angular/cdk": "^22.0.0",
     "@rx-angular/state": "^22.0.0",

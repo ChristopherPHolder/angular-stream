@@ -18,7 +18,7 @@ export interface DocPageEntry {
 /** What a runtime's setup is made of, besides the core. */
 export interface RuntimeFacts {
   /**
-   * `<adapter>` in `@push-based/angular-stream-<adapter>`, which is also the
+   * `<adapter>` in `@push-based/angular-ssr-stream-<adapter>`, which is also the
    * slug of its API page. Left out for a runtime that speaks `Request` and
    * `Response` itself, where the core is the whole server.
    */
@@ -341,57 +341,57 @@ export const DOCS: DocSection[] = [
           {
             dir: 'reference',
             slug: 'core',
-            title: 'angular-stream-core',
+            title: 'angular-ssr-stream-core',
             description:
-              'The API of @push-based/angular-stream-core: the client providers and the runtime-agnostic server handler.',
+              'The API of @push-based/angular-ssr-stream-core: the client providers and the runtime-agnostic server handler.',
             load: () => import('../../content/reference/core.md'),
           },
           {
             dir: 'reference',
             slug: 'node',
-            title: 'angular-stream-node',
+            title: 'angular-ssr-stream-node',
             description:
-              'The API of @push-based/angular-stream-node: a Node request handler, the pieces it is made of, and a Vite plugin for dev.',
+              'The API of @push-based/angular-ssr-stream-node: a Node request handler, the pieces it is made of, and a Vite plugin for dev.',
             load: () => import('../../content/reference/node.md'),
           },
           {
             dir: 'reference',
             slug: 'fastify',
-            title: 'angular-stream-fastify',
+            title: 'angular-ssr-stream-fastify',
             description:
-              'The API of @push-based/angular-stream-fastify: a Fastify plugin that streams every page route.',
+              'The API of @push-based/angular-ssr-stream-fastify: a Fastify plugin that streams every page route.',
             load: () => import('../../content/reference/fastify.md'),
           },
           {
             dir: 'reference',
             slug: 'nestjs',
-            title: 'angular-stream-nestjs',
+            title: 'angular-ssr-stream-nestjs',
             description:
-              'The API of @push-based/angular-stream-nestjs: a Nest module that renders every page route, and a Vite plugin for dev.',
+              'The API of @push-based/angular-ssr-stream-nestjs: a Nest module that renders every page route, and a Vite plugin for dev.',
             load: () => import('../../content/reference/nestjs.md'),
           },
           {
             dir: 'reference',
             slug: 'cloudflare',
-            title: 'angular-stream-cloudflare',
+            title: 'angular-ssr-stream-cloudflare',
             description:
-              'The API of @push-based/angular-stream-cloudflare: a Worker fetch handler over the ASSETS binding.',
+              'The API of @push-based/angular-ssr-stream-cloudflare: a Worker fetch handler over the ASSETS binding.',
             load: () => import('../../content/reference/cloudflare.md'),
           },
           {
             dir: 'reference',
             slug: 'aws-lambda',
-            title: 'angular-stream-aws-lambda',
+            title: 'angular-ssr-stream-aws-lambda',
             description:
-              'The API of @push-based/angular-stream-aws-lambda: a response-streaming handler for a Lambda Function URL.',
+              'The API of @push-based/angular-ssr-stream-aws-lambda: a response-streaming handler for a Lambda Function URL.',
             load: () => import('../../content/reference/aws-lambda.md'),
           },
           {
             dir: 'reference',
             slug: 'nitro',
-            title: 'angular-stream-nitro',
+            title: 'angular-ssr-stream-nitro',
             description:
-              'The API of @push-based/angular-stream-nitro: an h3 handler, and a Vite plugin that gives it the template.',
+              'The API of @push-based/angular-ssr-stream-nitro: an h3 handler, and a Vite plugin that gives it the template.',
             load: () => import('../../content/reference/nitro.md'),
           },
         ],
@@ -409,7 +409,7 @@ export const DOCS: DocSection[] = [
             dir: 'reference',
             slug: 'press-kit',
             title: 'Press kit',
-            description: 'The angular-stream logo: the files, the colours and how to use them.',
+            description: 'The angular-ssr-stream logo: the files, the colours and how to use them.',
             load: () => import('../../content/reference/press-kit.md'),
           },
         ],

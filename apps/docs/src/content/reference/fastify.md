@@ -1,16 +1,16 @@
 ```bash
-npm install @push-based/angular-stream-fastify@next fastify
+npm install @push-based/angular-ssr-stream-fastify@next fastify
 ```
 
 The Fastify plugin. It is built on the [Node adapter](node.md), and depends on
-[`@push-based/angular-stream-core`](core.md), whose browser providers the app
+[`@push-based/angular-ssr-stream-core`](core.md), whose browser providers the app
 still needs. It needs Fastify 5. For the whole setup, see
 [Fastify](../getting-started/fastify.md).
 
 ## `angularStream`
 
 ```ts
-import { angularStream } from '@push-based/angular-stream-fastify';
+import { angularStream } from '@push-based/angular-ssr-stream-fastify';
 
 const angularStream: FastifyPluginAsync<AngularStreamOptions>;
 
@@ -138,7 +138,7 @@ the connection, so give pages one longer than the slowest block takes.
 ## `createFastifyHandler()`
 
 ```ts
-import { createFastifyHandler } from '@push-based/angular-stream-fastify';
+import { createFastifyHandler } from '@push-based/angular-ssr-stream-fastify';
 
 function createFastifyHandler(options: FastifyHandlerOptions): FastifyHandler;
 
@@ -254,7 +254,7 @@ answers the rest.
 ## `BadRequestError`
 
 ```ts
-import { BadRequestError } from '@push-based/angular-stream-fastify';
+import { BadRequestError } from '@push-based/angular-ssr-stream-fastify';
 ```
 
 The Node adapter's [`BadRequestError`](node.md#badrequesterror), exported

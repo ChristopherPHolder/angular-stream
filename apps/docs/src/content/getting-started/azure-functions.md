@@ -31,7 +31,7 @@ npm install @azure/functions
 import { readFile } from 'node:fs/promises';
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
 import { HttpResponse, app } from '@azure/functions';
-import { createStreamingHandler } from '@push-based/angular-stream-core/server';
+import { createStreamingHandler } from '@push-based/angular-ssr-stream-core/server';
 import { App } from '../app/app';
 import { config } from '../app/app.config.server';
 

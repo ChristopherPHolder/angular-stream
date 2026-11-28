@@ -1,7 +1,7 @@
 Add the interceptor and the stream's providers next to Angular's hydration:
 
 ```ts title="src/app/app.config.ts"
-import { provideStreamHydration, streamHttpInterceptor } from '@push-based/angular-stream-core';
+import { provideStreamHydration, streamHttpInterceptor } from '@push-based/angular-ssr-stream-core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import type { ApplicationConfig } from '@angular/core';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';

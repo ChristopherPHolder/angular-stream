@@ -1,6 +1,6 @@
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { ExamplePage } from '@angular-stream/stream-example';
-import { createStreamingHandler } from '@push-based/angular-stream-core/server';
+import { ExamplePage } from '@angular-ssr-stream/stream-example';
+import { createStreamingHandler } from '@push-based/angular-ssr-stream-core/server';
 import { files, version } from 'virtual:precache';
 import { config } from './app/app.config.server';
 
@@ -28,7 +28,7 @@ interface ServiceWorkerScope {
 const worker = self as unknown as ServiceWorkerScope;
 
 /** One cache per build: the template, the client's scripts and the icons. */
-const CACHE_PREFIX = 'angular-stream-';
+const CACHE_PREFIX = 'angular-ssr-stream-';
 const CACHE = `${CACHE_PREFIX}${version}`;
 
 /** Milliseconds from the worker's start to this script having run, for `Server-Timing`. */

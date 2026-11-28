@@ -1,12 +1,12 @@
 import {
   type StreamingAppOptions,
   createStreamingHandler,
-} from '@push-based/angular-stream-core/server';
+} from '@push-based/angular-ssr-stream-core/server';
 import { type H3Event, defineHandler } from 'nitro';
 import { useKV } from 'nitro/kv';
 import { TEMPLATE_ASSETS, TEMPLATE_KEY } from './template';
 
-export type { StreamingAppOptions } from '@push-based/angular-stream-core/server';
+export type { StreamingAppOptions } from '@push-based/angular-ssr-stream-core/server';
 
 /**
  * A Nitro event handler that streams the application. Make it the server
@@ -14,7 +14,7 @@ export type { StreamingAppOptions } from '@push-based/angular-stream-core/server
  * doesn't answer with a static file or a route of its own is rendered.
  *
  * The template is the built `index.html`, read from the server assets that
- * `streamingTemplate()` from `@push-based/angular-stream-nitro/vite` fills:
+ * `streamingTemplate()` from `@push-based/angular-ssr-stream-nitro/vite` fills:
  * it is bundled into the server, so it works on every preset, including those
  * with no filesystem. In `vite dev` it is the `index.html` Vite serves, with
  * its dev transforms.

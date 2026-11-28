@@ -1,13 +1,13 @@
 Express middleware has the shape of a Node request handler, `(req, res, next)`,
 so Express needs no adapter of its own: the handler from
-[`@push-based/angular-stream-node`](../reference/node.md) is mounted as the
+[`@push-based/angular-ssr-stream-node`](../reference/node.md) is mounted as the
 app's catch-all, after the browser build and the API routes, with
 `compression` in front of all of them. This is the setup
 [`apps/example-express`](../../../../../apps/example-express/src/server.ts) in
 the repository uses, on Express 5.
 
 ```bash
-npm install @push-based/angular-stream-core@next @push-based/angular-stream-node@next express compression
+npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-node@next express compression
 npm install -D @types/express @types/compression
 ```
 
@@ -24,7 +24,7 @@ npm install -D @types/express @types/compression
 ```ts title="src/server.ts"
 import { fileURLToPath } from 'node:url';
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { createNodeHandler } from '@push-based/angular-stream-node';
+import { createNodeHandler } from '@push-based/angular-ssr-stream-node';
 import compression from 'compression';
 import express from 'express';
 import { App } from './app/app';
@@ -160,7 +160,7 @@ connection, and the error doesn't reach `next()`.
 ## 4. Vite
 
 ```ts title="vite.config.ts"
-import { angularStreamNode } from '@push-based/angular-stream-node/vite';
+import { angularStreamNode } from '@push-based/angular-ssr-stream-node/vite';
 import { ngp } from '@push-based/vite-plugin-ngp';
 import { defineConfig } from 'vite';
 

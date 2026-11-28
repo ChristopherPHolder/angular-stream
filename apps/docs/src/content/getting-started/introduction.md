@@ -1,5 +1,5 @@
 Angular renders a page on the server and sends it whole, so the page is as slow
-as its slowest request. angular-stream sends it in pieces instead, over one
+as its slowest request. angular-ssr-stream sends it in pieces instead, over one
 response:
 
 1. **Shell.** The server bootstraps, waits for the route and its `@defer` blocks
@@ -20,24 +20,24 @@ its own data is there, in whatever order that happens.
 
 ## See it
 
-- **[The demo](https://angular-stream-demo.chris-holder.workers.dev/)** shows
+- **[The demo](https://angular-ssr-stream-demo.chris-holder.workers.dev/)** shows
   the same page sent three ways on one clock, one response stepped through
   piece by piece, a single streamed widget with the code for it, and every
   flush of a real response as it arrives.
-- **[Angular Movies](https://angular-stream.chris-holder.workers.dev/)** is the
+- **[Angular Movies](https://angular-ssr-stream-movies.chris-holder.workers.dev/)** is the
   same technique on a real app, backed by the TMDB API.
 
 ## The packages
 
-| Package                                                               | What it is                                                                                                |
-| --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| [`@push-based/angular-stream-core`](../reference/core.md)             | The renderer, its inline runtime and the client. Runtime-agnostic: web `Request`, `Response` and streams. |
-| [`@push-based/angular-stream-node`](../reference/node.md)             | `createNodeHandler()`: a Node request handler for `node:http`, Express, Connect and Koa.                  |
-| [`@push-based/angular-stream-fastify`](../reference/fastify.md)       | `angularStream`: a Fastify plugin that streams every page route.                                          |
-| [`@push-based/angular-stream-nestjs`](../reference/nestjs.md)         | `AngularStreamModule`: a Nest module, on Express or on Fastify.                                           |
-| [`@push-based/angular-stream-cloudflare`](../reference/cloudflare.md) | `createStreamingWorker()`: a Cloudflare Worker `fetch` handler over the `ASSETS` binding.                 |
-| [`@push-based/angular-stream-aws-lambda`](../reference/aws-lambda.md) | `createStreamingLambda()`: a response-streaming handler for a Lambda Function URL.                        |
-| [`@push-based/angular-stream-nitro`](../reference/nitro.md)           | `defineStreamingHandler()`: an h3 handler for a Nitro server.                                             |
+| Package                                                                   | What it is                                                                                                |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| [`@push-based/angular-ssr-stream-core`](../reference/core.md)             | The renderer, its inline runtime and the client. Runtime-agnostic: web `Request`, `Response` and streams. |
+| [`@push-based/angular-ssr-stream-node`](../reference/node.md)             | `createNodeHandler()`: a Node request handler for `node:http`, Express, Connect and Koa.                  |
+| [`@push-based/angular-ssr-stream-fastify`](../reference/fastify.md)       | `angularStream`: a Fastify plugin that streams every page route.                                          |
+| [`@push-based/angular-ssr-stream-nestjs`](../reference/nestjs.md)         | `AngularStreamModule`: a Nest module, on Express or on Fastify.                                           |
+| [`@push-based/angular-ssr-stream-cloudflare`](../reference/cloudflare.md) | `createStreamingWorker()`: a Cloudflare Worker `fetch` handler over the `ASSETS` binding.                 |
+| [`@push-based/angular-ssr-stream-aws-lambda`](../reference/aws-lambda.md) | `createStreamingLambda()`: a response-streaming handler for a Lambda Function URL.                        |
+| [`@push-based/angular-ssr-stream-nitro`](../reference/nitro.md)           | `defineStreamingHandler()`: an h3 handler for a Nitro server.                                             |
 
 An app uses both halves of the core: providers in its browser config, and a
 server entry that streams. The server entry is where runtimes differ. A runtime

@@ -6,7 +6,7 @@
   [When something goes wrong](../concepts/internals.md#when-something-goes-wrong).
 - Check hydration in dev mode. Angular only checks node matches there.
 - To see the steps one at a time, open
-  [the demo](https://angular-stream-demo.chris-holder.workers.dev/), or run it
+  [the demo](https://angular-ssr-stream-demo.chris-holder.workers.dev/), or run it
   locally with `pnpm dev:demo`. `/example` streams one widget and shows the
   code for it; `/walkthrough` and `/inspect` show each flush and each hydration
   as it happens.

@@ -1,7 +1,7 @@
 <h1 align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="press-kit/logo/angular-stream-logo-on-dark.svg" />
-    <img src="press-kit/logo/angular-stream-logo.svg" alt="angular-stream" width="420" />
+    <source media="(prefers-color-scheme: dark)" srcset="press-kit/logo/angular-ssr-stream-logo-on-dark.svg" />
+    <img src="press-kit/logo/angular-ssr-stream-logo.svg" alt="angular-ssr-stream" width="500" />
   </picture>
 </h1>
 
@@ -10,13 +10,13 @@ page while the response is still arriving. The repo holds the packages, their
 docs, and two apps that use them: a demo that shows each step of streamed
 hydration as it happens, and a real TMDB-backed movie browser.
 
-- **[The docs](https://push-based.github.io/angular-stream/)** explain
+- **[The docs](https://push-based.github.io/angular-ssr-stream/)** explain
   how to use it and how it works: getting started, guides, a real response
   taken apart flush by flush, and the API.
-- **[The demo](https://angular-stream-demo.chris-holder.workers.dev/)** shows
+- **[The demo](https://angular-ssr-stream-demo.chris-holder.workers.dev/)** shows
   it: why a page should not wait for its slowest part, how one response
   delivers it in pieces, and a live example with the code for it.
-- **[The movie browser](https://angular-stream.chris-holder.workers.dev/)** is
+- **[The movie browser](https://angular-ssr-stream-movies.chris-holder.workers.dev/)** is
   the same technique on a real app.
 
 Most Angular SSR guides target a Node server and the Angular CLI. This repo
@@ -53,24 +53,24 @@ An Nx workspace over pnpm workspaces. Apps are private; `movies` and
 `cloudflare-demo` deploy as Workers. Everything under `packages/` is published
 to npm under `@push-based/`:
 
-| Path                   | What                                                                                                   |
-| ---------------------- | ------------------------------------------------------------------------------------------------------ |
-| `apps/movies`          | The TMDB movie browser. Deployed as the `angular-stream` Worker.                                       |
-| `apps/cloudflare-demo` | Streamed hydration, step by step, with no external API. The `angular-stream-demo` Worker.              |
-| `apps/docs`            | The documentation site: Angular, prerendered by ngp, published to GitHub Pages.                        |
-| `packages/core`        | `@push-based/angular-stream-core`: the streaming renderer, its inline runtime and the client.          |
-| `packages/cloudflare`  | `@push-based/angular-stream-cloudflare`: `createStreamingWorker()`, over the Workers `ASSETS` binding. |
-| `packages/node`        | `@push-based/angular-stream-node`: `node:http`, Connect and Express, with a Vite plugin for dev.       |
-| `packages/fastify`     | `@push-based/angular-stream-fastify`: a Fastify plugin, and the route handler it is built on.          |
-| `packages/nestjs`      | `@push-based/angular-stream-nestjs`: a Nest module, on `platform-express` or `platform-fastify`.       |
-| `packages/aws-lambda`  | `@push-based/angular-stream-aws-lambda`: a response-streaming handler for a Lambda Function URL.       |
-| `packages/nitro`       | `@push-based/angular-stream-nitro`: an h3 handler and a Vite plugin, for every Nitro preset.           |
-| `apps/example-*`       | One small app per runtime, all rendering `libs/stream-example`. Built in CI, not deployed.             |
-| `libs/stream-example`  | `@angular-stream/stream-example`: the page every example renders, a shell and one slow widget.         |
-| `libs/design-system`   | `@angular-stream/design-system`: the PushBased design system the demo and the docs share. Private.     |
-| `press-kit`            | The logo in every form: symbol, lockups, favicons and the social preview, with how to use them.        |
-| `nx.json`              | Task defaults, cache inputs and outputs, and the release group.                                        |
-| `vite.config.ts`       | Workspace-wide lint (module boundaries included) and format settings.                                  |
+| Path                   | What                                                                                                       |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `apps/movies`          | The TMDB movie browser. Deployed as the `angular-ssr-stream` Worker.                                       |
+| `apps/cloudflare-demo` | Streamed hydration, step by step, with no external API. The `angular-ssr-stream-demo` Worker.              |
+| `apps/docs`            | The documentation site: Angular, prerendered by ngp, published to GitHub Pages.                            |
+| `packages/core`        | `@push-based/angular-ssr-stream-core`: the streaming renderer, its inline runtime and the client.          |
+| `packages/cloudflare`  | `@push-based/angular-ssr-stream-cloudflare`: `createStreamingWorker()`, over the Workers `ASSETS` binding. |
+| `packages/node`        | `@push-based/angular-ssr-stream-node`: `node:http`, Connect and Express, with a Vite plugin for dev.       |
+| `packages/fastify`     | `@push-based/angular-ssr-stream-fastify`: a Fastify plugin, and the route handler it is built on.          |
+| `packages/nestjs`      | `@push-based/angular-ssr-stream-nestjs`: a Nest module, on `platform-express` or `platform-fastify`.       |
+| `packages/aws-lambda`  | `@push-based/angular-ssr-stream-aws-lambda`: a response-streaming handler for a Lambda Function URL.       |
+| `packages/nitro`       | `@push-based/angular-ssr-stream-nitro`: an h3 handler and a Vite plugin, for every Nitro preset.           |
+| `apps/example-*`       | One small app per runtime, all rendering `libs/stream-example`. Built in CI, not deployed.                 |
+| `libs/stream-example`  | `@angular-ssr-stream/stream-example`: the page every example renders, a shell and one slow widget.         |
+| `libs/design-system`   | `@angular-ssr-stream/design-system`: the PushBased design system the demo and the docs share. Private.     |
+| `press-kit`            | The logo in every form: symbol, lockups, favicons and the social preview, with how to use them.            |
+| `nx.json`              | Task defaults, cache inputs and outputs, and the release group.                                            |
+| `vite.config.ts`       | Workspace-wide lint (module boundaries included) and format settings.                                      |
 
 The core is runtime-agnostic: it speaks web `Request`, `Response` and streams,
 and nothing else. A runtime adapter only says how to fetch `index.html` and what
@@ -80,13 +80,13 @@ a web `Request` (Hono, Deno, Bun, Fastly, Vercel, Netlify, Azure Functions)
 needs no adapter at all: its docs page is a recipe around the core. The
 packages are for the ones that don't (Node and its frameworks, AWS Lambda) and
 for Nitro. Each runtime's docs page is listed under
-[Installation](https://push-based.github.io/angular-stream/docs/getting-started/installation).
+[Installation](https://push-based.github.io/angular-ssr-stream/docs/getting-started/installation).
 
 An app needs two things:
 
 ```ts
 // src/app/app.config.ts
-import { provideStreamHydration, streamHttpInterceptor } from '@push-based/angular-stream-core';
+import { provideStreamHydration, streamHttpInterceptor } from '@push-based/angular-ssr-stream-core';
 
 providers: [
   provideHttpClient(withInterceptors([streamHttpInterceptor /* , ... */])),
@@ -96,7 +96,7 @@ providers: [
 
 // src/worker.ts
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { createStreamingWorker } from '@push-based/angular-stream-cloudflare';
+import { createStreamingWorker } from '@push-based/angular-ssr-stream-cloudflare';
 
 export default createStreamingWorker({
   rootComponent: App,
@@ -215,7 +215,7 @@ reached through the app's `.wrangler/deploy/config.json`) rather than the app's
 
 ### The docs
 
-`.github/workflows/docs.yml` builds the docs with `DOCS_BASE=/angular-stream/`,
+`.github/workflows/docs.yml` builds the docs with `DOCS_BASE=/angular-ssr-stream/`,
 prerenders them and publishes `apps/docs/dist/client` to GitHub Pages on every
 push to `main` that touches them. The repository's Pages source must be set to
 "GitHub Actions". Pull requests build them through `nx affected` like any other
@@ -248,7 +248,7 @@ paths. `/assets/*` and `/favicon.ico` are served directly; every navigation
 falls through to the Worker.
 
 **`src/worker.ts`** is `createStreamingWorker()` from
-`@push-based/angular-stream-cloudflare`, a thin layer over the core's
+`@push-based/angular-ssr-stream-cloudflare`, a thin layer over the core's
 `createStreamingHandler()`. It applies Angular's host guard
 (`allowedHosts` must list every hostname the Worker answers for), fetches
 `/index.html` through the `ASSETS` binding and streams the route into it. In dev
@@ -290,9 +290,9 @@ structure exists, then a chunk per `@defer` block as its data arrives. The
 browser hydrates each piece as it lands, and nothing is fetched twice.
 
 The docs cover it for users:
-[the introduction](https://push-based.github.io/angular-stream/docs/getting-started/introduction),
-[how to make something stream](https://push-based.github.io/angular-stream/docs/guides/making-something-stream),
-[debugging and verifying](https://push-based.github.io/angular-stream/docs/guides/debugging),
+[the introduction](https://push-based.github.io/angular-ssr-stream/docs/getting-started/introduction),
+[how to make something stream](https://push-based.github.io/angular-ssr-stream/docs/guides/making-something-stream),
+[debugging and verifying](https://push-based.github.io/angular-ssr-stream/docs/guides/debugging),
 and, under "How it works", why it streams out of order, a real response taken
 apart flush by flush, and the wire format. Their source is Markdown under
 [`apps/docs/src/content/`](apps/docs/src/content/).
@@ -315,7 +315,7 @@ is `packages/cloudflare/src/index.ts`: the handler, with the template read from
 
 ### Caveats and limitations
 
-See [Caveats and limitations](https://push-based.github.io/angular-stream/docs/reference/limitations)
+See [Caveats and limitations](https://push-based.github.io/angular-ssr-stream/docs/reference/limitations)
 in the docs.
 
 ## Analytics

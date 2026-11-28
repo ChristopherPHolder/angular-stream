@@ -1,10 +1,24 @@
 {
-  "name": "@push-based/angular-stream-node",
+  "name": "@push-based/angular-ssr-stream-node",
   "version": "0.0.0",
   "description": "Streamed SSR for Angular on Node: a request handler for node:http, Express, Connect and every framework built on them.",
+  "keywords": [
+    "angular",
+    "ssr",
+    "server-side-rendering",
+    "streaming",
+    "streamed-ssr",
+    "hydration",
+    "incremental-hydration",
+    "node",
+    "express",
+    "connect",
+    "vite-plugin"
+  ],
+  "homepage": "https://push-based.github.io/angular-ssr-stream/docs/reference/node",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/push-based/angular-stream.git",
+    "url": "git+https://github.com/push-based/angular-ssr-stream.git",
     "directory": "packages/node"
   },
   "type": "module",
@@ -37,7 +51,7 @@
     }
   },
   "dependencies": {
-    "@push-based/angular-stream-core": "workspace:*"
+    "@push-based/angular-ssr-stream-core": "workspace:*"
   },
   "peerDependencies": {
     "@angular/core": "~22.3.0-rc.0",
