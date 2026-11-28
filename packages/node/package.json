@@ -7,15 +7,20 @@
     "ssr",
     "server-side-rendering",
     "streaming",
+    "streaming-ssr",
     "streamed-ssr",
     "hydration",
     "incremental-hydration",
     "node",
     "express",
     "connect",
+    "koa",
     "vite-plugin"
   ],
   "homepage": "https://push-based.github.io/angular-ssr-stream/docs/reference/node",
+  "bugs": {
+    "url": "https://github.com/push-based/angular-ssr-stream/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/push-based/angular-ssr-stream.git",
