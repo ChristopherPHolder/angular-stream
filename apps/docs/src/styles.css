@@ -1101,121 +1101,316 @@ pre.mermaid[data-processed] svg {
 
 .home h1 {
   margin: 0;
+  /* Three lines of about the same length, not two and a word. */
+  text-wrap: balance;
 }
 
 .home-mark {
   display: block;
-  margin: 0 0 var(--space-5) calc(-1 * var(--space-1-5));
+  margin: 0 0 var(--space-4) calc(-1 * var(--space-1));
 }
 
-.home-hero,
+/* On a phone the header's logo is a thumb above, and the room goes to the buttons. */
+@media (max-width: 560px) {
+  .home-mark {
+    display: none;
+  }
+}
+
+/*
+ * The first screen: the pitch and its two buttons, next to the animation.
+ * Under about 45rem of room the animation goes below the buttons.
+ */
+.home-hero {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr));
+  align-items: center;
+  gap: var(--space-8) var(--space-10);
+  margin-bottom: var(--space-16);
+}
+
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: var(--space-6) 0 0;
+}
+
 .home-section {
   margin-bottom: var(--space-12);
 }
 
-/* Running text keeps to a line a reader can follow; the figures use the full width. */
-.home-hero .lede,
-.home-text,
-.timeline figcaption {
-  max-width: 44rem;
-}
-
+/* Running text keeps to a line a reader can follow. */
 .home-text {
+  max-width: 44rem;
   margin: var(--space-3) 0 0;
 }
 
 /*
- * One page sent two ways, as what is on screen over time. Four columns: a
- * second each, then the page once it is complete. The axis shares them.
+ * The hero's animation (home-race.ts): one page sent whole and streamed, on
+ * one clock. A cycle is 6 s: the 3 s the page takes, a hold, and a reset. Every
+ * animation runs on that cycle, so they stay in step; the keyframes hold the
+ * times (0.1 s is 1.6%, 1 s is 16.6%, 3 s is 50%).
  */
-.timeline {
-  margin: var(--space-6) 0 0;
-}
-
-.timeline-axis,
-.timeline-track {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-1);
+.race {
   margin: 0;
-  padding: 0;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-subtle);
 }
 
-.timeline-axis {
+.race-lanes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.race-name {
+  margin: 0 0 var(--space-1-5);
+  color: var(--color-text-heading);
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+}
+
+.race-page {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-2-5);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+/* A part keeps its room whether it is there yet or not: nothing in the drawing shifts. */
+.race-part {
+  position: relative;
+  display: block;
+  height: var(--space-11);
+}
+
+.race-part--product {
+  height: var(--space-16);
+}
+
+/* A part's two faces, one over the other: its placeholder, then the part itself. */
+.race-loading,
+.race-ready {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-1-5);
+  padding-inline: var(--space-2-5);
+  border-radius: var(--radius-base);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  overflow: hidden;
+}
+
+.race-loading {
+  border: 1px dashed var(--color-neutral-400);
+  color: var(--color-neutral-600);
+}
+
+.race-ready {
+  border: 1px solid var(--color-primary-200);
+  background: var(--color-primary-50);
+  color: var(--color-primary-800);
+  font-weight: 500;
+}
+
+/* A line of text, drawn. */
+.race-ready i {
+  display: block;
+  width: 70%;
+  height: var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--color-primary-200);
+}
+
+.race-blank {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--color-neutral-600);
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+}
+
+.race-clock {
+  margin-top: var(--space-4);
+}
+
+.race-track {
+  display: block;
+  height: var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--color-neutral-200);
+  overflow: hidden;
+}
+
+.race-elapsed {
+  display: block;
+  height: 100%;
+  background: var(--color-primary-600);
+  transform-origin: left;
+}
+
+.race-ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-1);
   color: var(--color-neutral-600);
   font-family: var(--font-mono);
   font-size: 0.75rem;
   line-height: 1rem;
 }
 
-/* Each time sits over the left edge of its column, where that second starts. */
-.timeline-axis span {
-  padding-left: var(--space-1);
-  border-left: 1px solid var(--color-neutral-300);
-}
-
-.timeline-name {
-  margin: var(--space-4) 0 var(--space-1-5);
-  color: var(--color-text-heading);
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  font-weight: 500;
-}
-
-.timeline-track {
-  list-style: none;
-}
-
-.timeline-track li {
+.race figcaption {
   display: flex;
   align-items: center;
-  min-height: var(--space-11);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  font-weight: 500;
-}
-
-.timeline-span-2 {
-  grid-column: span 2;
-}
-
-.timeline-span-3 {
-  grid-column: span 3;
-}
-
-.timeline-track .timeline-blank {
-  border: 1px dashed var(--color-neutral-400);
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
   color: var(--color-neutral-600);
-  font-weight: 400;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
 }
 
-.timeline-track .timeline-part {
-  border-color: var(--color-primary-200);
-  background: var(--color-primary-50);
-  color: var(--color-primary-800);
+/* The same width for "Pause" and "Play", so the caption does not move. */
+.race-toggle {
+  flex: none;
+  justify-content: center;
+  min-width: var(--space-16);
+  padding: var(--space-1) var(--space-3);
 }
 
-.timeline-track .timeline-done {
-  background: var(--color-primary-600);
-  color: var(--color-surface);
+.race-loading,
+.race-ready,
+.race-blank,
+.race-elapsed {
+  animation-duration: 6s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
 
-/* A second is about 4rem wide on a phone: the labels get all of it they can. */
-@media (max-width: 560px) {
-  .timeline-track li {
-    padding-inline: var(--space-2);
-    font-size: 0.8125rem;
+.race-page--whole .race-blank {
+  animation-name: race-until-3;
+}
+
+.race-page--whole .race-ready,
+.race-page--streamed .race-part--recommendations .race-ready {
+  animation-name: race-at-3;
+}
+
+.race-page--streamed .race-loading,
+.race-page--streamed .race-part--product .race-ready {
+  animation-name: race-at-0;
+}
+
+.race-page--streamed .race-part--reviews .race-ready {
+  animation-name: race-at-1;
+}
+
+.race-elapsed {
+  animation-name: race-clock;
+}
+
+@keyframes race-at-0 {
+  0%,
+  1.6% {
+    opacity: 0;
+  }
+  3.5%,
+  94% {
+    opacity: 1;
+  }
+  98%,
+  100% {
+    opacity: 0;
   }
 }
 
-.timeline figcaption {
-  margin-top: var(--space-4);
-  color: var(--color-neutral-600);
-  font-size: 0.875rem;
-  line-height: 1.25rem;
+@keyframes race-at-1 {
+  0%,
+  16.6% {
+    opacity: 0;
+  }
+  18.6%,
+  94% {
+    opacity: 1;
+  }
+  98%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes race-at-3 {
+  0%,
+  50% {
+    opacity: 0;
+  }
+  52%,
+  94% {
+    opacity: 1;
+  }
+  98%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes race-until-3 {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  52%,
+  98% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes race-clock {
+  0% {
+    transform: scaleX(0);
+  }
+  50%,
+  94% {
+    transform: scaleX(1);
+  }
+  98%,
+  100% {
+    transform: scaleX(0);
+  }
+}
+
+.race--paused * {
+  animation-play-state: paused;
+}
+
+/*
+ * Reduced motion: the frame at 1.5 s, standing still. One page is blank, the
+ * other has its product and its reviews. Nothing moves, so there is nothing to pause.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .race * {
+    animation-delay: -1.5s;
+    animation-play-state: paused;
+  }
+
+  .race-toggle {
+    display: none;
+  }
 }
 
 /* The three things that happen, in order: the number is the list's own. */
