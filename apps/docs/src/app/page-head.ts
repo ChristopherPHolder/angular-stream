@@ -4,15 +4,19 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Meta } from '@angular/platform-browser';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
-import { ALL_PAGES } from './docs/nav';
+import { ALL_PAGES, headlineOf } from './docs/nav';
 import { SITE } from './links';
 
 /** The home page's description, and that of a page that has none of its own. */
 const DESCRIPTION =
-  'Streamed server-side rendering for Angular: the browser hydrates the page while the response is still arriving.';
+  'Streaming server-side rendering (SSR) for Angular: the page is sent at once, its slow parts are streamed into it, and Angular hydrates each one as it lands.';
 
-/** The home page's name in a link preview; index.html has it as `og:site_name`. */
-const SITE_NAME = 'angular-ssr-stream';
+/**
+ * The home page's title, in the browser tab and in a link preview. The name
+ * alone says nothing to someone who has not heard it; index.html has it by
+ * itself as `og:site_name`.
+ */
+export const HOME_TITLE = 'angular-ssr-stream: streaming SSR for Angular';
 
 /** Shown with a link to any page: the logo on its backdrop, 1200 by 630. */
 const PREVIEW_IMAGE = `${SITE}press-kit/social/social-preview.png`;
@@ -51,7 +55,7 @@ export function trackPageHead(): void {
       // Not `Title.getTitle()`: the router sets the title after this event.
       meta.updateTag({
         property: 'og:title',
-        content: page?.title ?? (known ? SITE_NAME : 'Page not found'),
+        content: page ? headlineOf(page) : known ? HOME_TITLE : 'Page not found',
       });
       meta.updateTag({ property: 'og:description', content: description });
 

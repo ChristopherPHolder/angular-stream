@@ -7,7 +7,15 @@ export interface DocPageEntry {
    */
   dir: string;
   slug: string;
+  /** The page's name among the others: the sidebar, previous and next, search. */
   title: string;
+  /**
+   * Its name where it stands alone: the heading on the page, the browser tab,
+   * a search result and a link preview. "Express" says enough in the sidebar
+   * and nothing in a list of results. Left out where `title` already does;
+   * read it with `headlineOf()`.
+   */
+  headline?: string;
   /** One sentence: the page's meta description and its line on the home page. */
   description: string;
   /** Set on a runtime's setup page: shown under its title, and on the home page. */
@@ -70,6 +78,7 @@ export const DOCS: DocSection[] = [
             dir: 'getting-started',
             slug: 'introduction',
             title: 'Introduction',
+            headline: 'Introduction: streaming SSR for Angular',
             description:
               'What streamed hydration is: one response, sent in pieces, hydrated while it is still arriving.',
             load: () => import('../../content/getting-started/introduction.md'),
@@ -78,6 +87,7 @@ export const DOCS: DocSection[] = [
             dir: 'getting-started',
             slug: 'installation',
             title: 'Installation',
+            headline: 'Installing streaming SSR in an Angular app',
             description: 'The packages, what they need, and how to install them.',
             load: () => import('../../content/getting-started/installation.md'),
           },
@@ -99,6 +109,7 @@ export const DOCS: DocSection[] = [
             dir: 'getting-started',
             slug: 'node',
             title: 'Node',
+            headline: 'Angular SSR on Node, with streaming',
             description:
               'Stream an Angular app from Node with node:http, Express or Connect, from the app config to running it in production.',
             runtime: { adapter: 'node', examples: ['example-node'] },
@@ -108,6 +119,7 @@ export const DOCS: DocSection[] = [
             dir: 'getting-started',
             slug: 'express',
             title: 'Express',
+            headline: 'Angular SSR on Express, with streaming',
             description:
               'Stream an Angular app from Express 5, next to your API routes and behind compression, from the app config to production.',
             runtime: { adapter: 'node', examples: ['example-express'] },
@@ -117,6 +129,7 @@ export const DOCS: DocSection[] = [
             dir: 'getting-started',
             slug: 'fastify',
             title: 'Fastify',
+            headline: 'Angular SSR on Fastify, with streaming',
             description:
               'Stream an Angular app from a Fastify plugin, next to your routes, with @fastify/static and @fastify/compress.',
             runtime: { adapter: 'fastify', examples: ['example-fastify'] },
@@ -126,6 +139,7 @@ export const DOCS: DocSection[] = [
             dir: 'getting-started',
             slug: 'nestjs',
             title: 'NestJS',
+            headline: 'Angular SSR on NestJS, with streaming',
             description:
               'Stream an Angular app from a NestJS app on platform-express or platform-fastify, next to its controllers, from the app config to running it in production.',
             runtime: { adapter: 'nestjs', examples: ['example-nestjs', 'example-nestjs-fastify'] },
@@ -135,6 +149,7 @@ export const DOCS: DocSection[] = [
             dir: 'getting-started',
             slug: 'koa',
             title: 'Koa',
+            headline: 'Angular SSR on Koa, with streaming',
             description:
               'Stream an Angular app from Koa, with koa-static, koa-compress and your API routes, from the app config to running it in production.',
             runtime: { adapter: 'node', examples: ['example-koa'] },
@@ -149,6 +164,7 @@ export const DOCS: DocSection[] = [
             dir: 'getting-started',
             slug: 'cloudflare-workers',
             title: 'Cloudflare Workers',
+            headline: 'Angular SSR on Cloudflare Workers, with streaming',
             description:
               'Stream an Angular app from a Cloudflare Worker, from the app config to the deploy.',
             runtime: { adapter: 'cloudflare', examples: ['example-cloudflare'] },
@@ -158,6 +174,7 @@ export const DOCS: DocSection[] = [
             dir: 'getting-started',
             slug: 'hono',
             title: 'Hono',
+            headline: 'Angular SSR on Hono, with streaming',
             description:
               'Stream an Angular app from Hono on Node, Bun, Deno or Cloudflare Workers, next to your API routes.',
             runtime: { examples: ['example-hono', 'example-hono-workers'] },
@@ -167,6 +184,7 @@ export const DOCS: DocSection[] = [
             dir: 'getting-started',
             slug: 'deno',
             title: 'Deno',
+            headline: 'Angular SSR on Deno, with streaming',
             description:
               'Stream an Angular app from Deno with Deno.serve, deploy it to Deno Deploy, and what Supabase Edge Functions allow.',
             runtime: { examples: ['example-deno'] },
@@ -176,6 +194,7 @@ export const DOCS: DocSection[] = [
             dir: 'getting-started',
             slug: 'bun',
             title: 'Bun',
+            headline: 'Angular SSR on Bun, with streaming',
             description:
               'Stream an Angular app from Bun.serve(), or from Elysia, from the app config to production.',
             runtime: { examples: ['example-bun'] },
@@ -185,6 +204,7 @@ export const DOCS: DocSection[] = [
             dir: 'getting-started',
             slug: 'fastly-compute',
             title: 'Fastly Compute',
+            headline: 'Angular SSR on Fastly Compute, with streaming',
             description:
               'Stream an Angular app from Fastly Compute, with its files in a KV Store, from the app config to the deploy.',
             runtime: { examples: ['example-fastly'] },
@@ -199,6 +219,7 @@ export const DOCS: DocSection[] = [
             dir: 'getting-started',
             slug: 'vercel',
             title: 'Vercel',
+            headline: 'Angular SSR on Vercel, with streaming',
             description:
               'Stream an Angular app from a Vercel Function, from the app config to the Build Output Vercel deploys.',
             runtime: { examples: ['example-vercel'] },
@@ -208,6 +229,7 @@ export const DOCS: DocSection[] = [
             dir: 'getting-started',
             slug: 'netlify',
             title: 'Netlify',
+            headline: 'Angular SSR on Netlify, with streaming',
             description:
               'Stream an Angular app from a Netlify Function or an Edge Function, from the app config to the deploy.',
             runtime: { examples: ['example-netlify'] },
@@ -217,6 +239,7 @@ export const DOCS: DocSection[] = [
             dir: 'getting-started',
             slug: 'aws-lambda',
             title: 'AWS Lambda',
+            headline: 'Angular SSR on AWS Lambda, with streaming',
             description:
               'Stream an Angular app from AWS Lambda through a streaming Function URL and CloudFront.',
             runtime: { adapter: 'aws-lambda', examples: ['example-aws-lambda'] },
@@ -226,6 +249,7 @@ export const DOCS: DocSection[] = [
             dir: 'getting-started',
             slug: 'azure-functions',
             title: 'Azure Functions',
+            headline: 'Angular SSR on Azure Functions, with streaming',
             description:
               'Stream an Angular app from Azure Functions, from the app config to the deploy.',
             runtime: { examples: ['example-azure'] },
@@ -235,6 +259,7 @@ export const DOCS: DocSection[] = [
             dir: 'getting-started',
             slug: 'nitro',
             title: 'Nitro',
+            headline: 'Angular SSR on Nitro, with streaming',
             description:
               'Stream an Angular app from a Nitro server, deployed with any of its presets: Node, Vercel, Netlify and more.',
             runtime: { adapter: 'nitro', examples: ['example-nitro'] },
@@ -255,6 +280,7 @@ export const DOCS: DocSection[] = [
             dir: 'guides',
             slug: 'making-something-stream',
             title: 'Making something stream',
+            headline: 'Making a @defer block stream from the server',
             description:
               'Which parts of a template stream, which hydrate trigger to pick, and what to expect from them.',
             load: () => import('../../content/guides/making-something-stream.md'),
@@ -263,6 +289,7 @@ export const DOCS: DocSection[] = [
             dir: 'guides',
             slug: 'debugging',
             title: 'Debugging and verifying',
+            headline: 'Debugging and verifying streamed Angular SSR',
             description:
               'How to tell that a page really streams and hydrates, and what to do when it does not.',
             load: () => import('../../content/guides/debugging.md'),
@@ -271,6 +298,7 @@ export const DOCS: DocSection[] = [
             dir: 'guides',
             slug: 'streaming-through-proxies',
             title: 'Streaming through proxies',
+            headline: 'Streaming SSR through proxies, CDNs and compression',
             description:
               'Compression, Nginx, CDNs and timeouts: what holds a streamed response back, and how to check that it does not.',
             load: () => import('../../content/guides/streaming-through-proxies.md'),
@@ -279,6 +307,7 @@ export const DOCS: DocSection[] = [
             dir: 'guides',
             slug: 'service-worker',
             title: 'Service Worker (experimental)',
+            headline: 'Angular SSR in a Service Worker (experimental)',
             description:
               'Render and stream every navigation from a Service Worker in the browser, offline included, and what that costs.',
             runtime: { examples: ['example-service-worker'] },
@@ -299,6 +328,7 @@ export const DOCS: DocSection[] = [
             dir: 'concepts',
             slug: 'why-stream-out-of-order',
             title: 'Why stream out of order',
+            headline: 'Why stream server-rendered HTML out of order',
             description:
               'What streaming out of order buys a page, and how other frameworks came to it.',
             load: () => import('../../content/concepts/why-stream-out-of-order.md'),
@@ -307,6 +337,7 @@ export const DOCS: DocSection[] = [
             dir: 'concepts',
             slug: 'walkthrough',
             title: 'One response, flush by flush',
+            headline: 'One streamed Angular response, flush by flush',
             description:
               'A real response taken apart: the HTML each flush carries, and when each part hydrates.',
             load: () => import('../../content/concepts/walkthrough.md'),
@@ -315,6 +346,7 @@ export const DOCS: DocSection[] = [
             dir: 'concepts',
             slug: 'internals',
             title: 'Wire format and internals',
+            headline: 'Wire format and internals of streamed Angular SSR',
             description:
               'The chunk format, what the server does on each flush, and what the browser does with it.',
             load: () => import('../../content/concepts/internals.md'),
@@ -323,6 +355,7 @@ export const DOCS: DocSection[] = [
             dir: 'reference',
             slug: 'limitations',
             title: 'Caveats and limitations',
+            headline: 'Caveats and limitations of streaming Angular SSR',
             description: 'What does not work yet, and why.',
             load: () => import('../../content/reference/limitations.md'),
           },
@@ -342,6 +375,7 @@ export const DOCS: DocSection[] = [
             dir: 'reference',
             slug: 'core',
             title: 'angular-ssr-stream-core',
+            headline: '@push-based/angular-ssr-stream-core API',
             description:
               'The API of @push-based/angular-ssr-stream-core: the client providers and the runtime-agnostic server handler.',
             load: () => import('../../content/reference/core.md'),
@@ -350,6 +384,7 @@ export const DOCS: DocSection[] = [
             dir: 'reference',
             slug: 'node',
             title: 'angular-ssr-stream-node',
+            headline: '@push-based/angular-ssr-stream-node API',
             description:
               'The API of @push-based/angular-ssr-stream-node: a Node request handler, the pieces it is made of, and a Vite plugin for dev.',
             load: () => import('../../content/reference/node.md'),
@@ -358,6 +393,7 @@ export const DOCS: DocSection[] = [
             dir: 'reference',
             slug: 'fastify',
             title: 'angular-ssr-stream-fastify',
+            headline: '@push-based/angular-ssr-stream-fastify API',
             description:
               'The API of @push-based/angular-ssr-stream-fastify: a Fastify plugin that streams every page route.',
             load: () => import('../../content/reference/fastify.md'),
@@ -366,6 +402,7 @@ export const DOCS: DocSection[] = [
             dir: 'reference',
             slug: 'nestjs',
             title: 'angular-ssr-stream-nestjs',
+            headline: '@push-based/angular-ssr-stream-nestjs API',
             description:
               'The API of @push-based/angular-ssr-stream-nestjs: a Nest module that renders every page route, and a Vite plugin for dev.',
             load: () => import('../../content/reference/nestjs.md'),
@@ -374,6 +411,7 @@ export const DOCS: DocSection[] = [
             dir: 'reference',
             slug: 'cloudflare',
             title: 'angular-ssr-stream-cloudflare',
+            headline: '@push-based/angular-ssr-stream-cloudflare API',
             description:
               'The API of @push-based/angular-ssr-stream-cloudflare: a Worker fetch handler over the ASSETS binding.',
             load: () => import('../../content/reference/cloudflare.md'),
@@ -382,6 +420,7 @@ export const DOCS: DocSection[] = [
             dir: 'reference',
             slug: 'aws-lambda',
             title: 'angular-ssr-stream-aws-lambda',
+            headline: '@push-based/angular-ssr-stream-aws-lambda API',
             description:
               'The API of @push-based/angular-ssr-stream-aws-lambda: a response-streaming handler for a Lambda Function URL.',
             load: () => import('../../content/reference/aws-lambda.md'),
@@ -390,6 +429,7 @@ export const DOCS: DocSection[] = [
             dir: 'reference',
             slug: 'nitro',
             title: 'angular-ssr-stream-nitro',
+            headline: '@push-based/angular-ssr-stream-nitro API',
             description:
               'The API of @push-based/angular-ssr-stream-nitro: an h3 handler, and a Vite plugin that gives it the template.',
             load: () => import('../../content/reference/nitro.md'),
@@ -436,6 +476,11 @@ export const ALL_PAGES: FlatDocPage[] = DOCS.flatMap((section) =>
 
 export function findPage(dir: string, slug: string): FlatDocPage | undefined {
   return ALL_PAGES.find((page) => page.dir === dir && page.slug === slug);
+}
+
+/** What a page is called where it stands alone: see `DocPageEntry.headline`. */
+export function headlineOf(page: DocPageEntry): string {
+  return page.headline ?? page.title;
 }
 
 /** The API page of a runtime's adapter; the core's, for a runtime that needs none. */

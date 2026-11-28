@@ -15,7 +15,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { REPO } from '../links';
 import type { ResolvedDoc } from './doc.resolver';
-import { referenceOf, setupsOf } from './nav';
+import { headlineOf, referenceOf, setupsOf } from './nav';
 
 @Component({
   selector: 'docs-page',
@@ -32,6 +32,9 @@ export class DocPage {
 
   /** Rendered at build time from Markdown in this repository, so it is trusted. */
   protected readonly html = computed(() => this.sanitizer.bypassSecurityTrustHtml(this.doc().html));
+
+  /** The heading: the page's name with nothing next to it to explain it. */
+  protected readonly headline = computed(() => headlineOf(this.doc().page));
 
   protected readonly editUrl = computed(
     () =>

@@ -19,7 +19,7 @@ import { DEMO } from './links';
     <header class="home-hero">
       <div class="home-pitch">
         <img class="home-mark" [ngSrc]="symbol" alt="" width="64" height="64" priority />
-        <p class="text-subtitle eyebrow">Streamed hydration for Angular</p>
+        <p class="text-subtitle eyebrow">Streaming SSR for Angular</p>
         <h1 class="text-hero-title">Don't make the whole page wait for its slowest part</h1>
         <p class="text-lead lede">
           angular-ssr-stream sends a server-rendered Angular page straight away and streams the slow

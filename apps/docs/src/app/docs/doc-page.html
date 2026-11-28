@@ -19,7 +19,7 @@
   <article class="doc-article">
     <header class="doc-header">
       <p class="text-subtitle eyebrow">{{ doc().page.section.title }}</p>
-      <h1 class="text-section-title">{{ doc().page.title }}</h1>
+      <h1 class="text-section-title">{{ headline() }}</h1>
       <p class="text-lead lede">{{ doc().page.description }}</p>
       <!-- A setup page and its API page point at each other, and at the app that is the setup. -->
       @if (doc().page.runtime; as runtime) {

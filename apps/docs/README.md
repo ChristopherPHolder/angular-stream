@@ -47,6 +47,13 @@ a title, a description and a place in the contents; the sidebar, the home page,
 previous/next links and prerendering all read that list. The page's title comes
 from there, so the Markdown starts with its first paragraph, not a `#` heading.
 
+A page has two names. `title` is the short one, for where the other pages are
+next to it: the sidebar, previous/next, search. `headline` is the one that
+stands alone: the page's heading, the browser tab, a search result, a link
+preview. "Express" is a title; "Angular SSR on Express, with streaming" is its
+headline. Leave `headline` out only when the title already says what the page
+is about to someone who has not seen the site.
+
 Where a page sits in the contents is its place in `DOCS`, not its folder: the
 runtimes' setup pages are in `content/getting-started/` and listed under
 "Runtimes", so moving a page in the contents never changes its URL. A section
