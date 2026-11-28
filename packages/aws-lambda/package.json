@@ -7,6 +7,7 @@
     "ssr",
     "server-side-rendering",
     "streaming",
+    "streaming-ssr",
     "streamed-ssr",
     "hydration",
     "incremental-hydration",
@@ -16,6 +17,9 @@
     "response-streaming"
   ],
   "homepage": "https://push-based.github.io/angular-ssr-stream/docs/reference/aws-lambda",
+  "bugs": {
+    "url": "https://github.com/push-based/angular-ssr-stream/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/push-based/angular-ssr-stream.git",

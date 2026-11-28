@@ -7,6 +7,7 @@
     "ssr",
     "server-side-rendering",
     "streaming",
+    "streaming-ssr",
     "streamed-ssr",
     "hydration",
     "incremental-hydration",
@@ -15,6 +16,9 @@
     "vite-plugin"
   ],
   "homepage": "https://push-based.github.io/angular-ssr-stream/docs/reference/nitro",
+  "bugs": {
+    "url": "https://github.com/push-based/angular-ssr-stream/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/push-based/angular-ssr-stream.git",
