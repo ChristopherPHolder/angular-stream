@@ -11,8 +11,11 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, type SafeHtml } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
+import { FIGURES, type FigureName } from '../figures/names';
+import { Race } from '../figures/race';
+import { ResponsePlayer } from '../figures/response-player';
 import { REPO } from '../links';
 import type { ResolvedDoc } from './doc.resolver';
 import { headlineOf, referenceOf, setupsOf } from './nav';
@@ -20,7 +23,7 @@ import { headlineOf, referenceOf, setupsOf } from './nav';
 @Component({
   selector: 'docs-page',
   templateUrl: './doc-page.html',
-  imports: [NgTemplateOutlet, RouterLink],
+  imports: [NgTemplateOutlet, Race, ResponsePlayer, RouterLink],
 })
 export class DocPage {
   readonly doc = input.required<ResolvedDoc>();
@@ -30,8 +33,21 @@ export class DocPage {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly sanitizer = inject(DomSanitizer);
 
-  /** Rendered at build time from Markdown in this repository, so it is trusted. */
-  protected readonly html = computed(() => this.sanitizer.bypassSecurityTrustHtml(this.doc().html));
+  /**
+   * The page, top to bottom: its rendered Markdown, cut where a figure goes.
+   * The HTML was rendered at build time from Markdown in this repository, so
+   * it is trusted.
+   */
+  protected readonly parts = computed((): Part[] =>
+    this.doc()
+      .html.split(FIGURE)
+      .map((piece, index) =>
+        // `split` with a capture group: every second piece is a figure's name.
+        index % 2 === 1
+          ? { figure: piece as FigureName }
+          : { html: this.sanitizer.bypassSecurityTrustHtml(piece) },
+      ),
+  );
 
   /** The heading: the page's name with nothing next to it to explain it. */
   protected readonly headline = computed(() => headlineOf(this.doc().page));
@@ -192,6 +208,12 @@ export class DocPage {
     void this.router.navigateByUrl(path + url.hash);
   }
 }
+
+/** A stretch of the page's HTML, or the figure that stands between two of them. */
+type Part = { figure: FigureName; html?: undefined } | { figure?: undefined; html: SafeHtml };
+
+/** The line a page places a figure with, as the Markdown renderer passes it on. */
+const FIGURE = new RegExp(`<!-- figure (${FIGURES.join('|')}) -->\\n?`);
 
 /** How far below the sticky header a heading counts as reached, in pixels. */
 const READING_LINE = 40;

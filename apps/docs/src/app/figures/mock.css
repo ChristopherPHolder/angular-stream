@@ -1,0 +1,96 @@
+/*
+ * A drawing of a page in a browser, for the figures. Each part says in words
+ * what state it is in; the colour repeats it, from the design system's state
+ * scales, with the 700 shade so small text passes WCAG AA on the 50 fill:
+ *   --server       shell markup, not hydrated yet
+ *   --placeholder  a part's placeholder, waiting for its chunk
+ *   --hydrated     Angular has taken it over
+ */
+:host {
+  --server: var(--color-info-700);
+  --server-bg: var(--color-info-50);
+  --placeholder: var(--color-warning-700);
+  --placeholder-bg: var(--color-warning-50);
+  --hydrated: var(--color-success-700);
+  --hydrated-bg: var(--color-success-50);
+}
+
+.mock {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--radius-lg);
+}
+
+.mock-part {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--radius-md);
+}
+
+.mock-part--placeholder {
+  border-style: dashed;
+  border-color: var(--placeholder);
+  background: var(--placeholder-bg);
+}
+
+.mock-part--server {
+  border-color: var(--server);
+  background: var(--server-bg);
+}
+
+.mock-part--hydrated {
+  border-color: var(--hydrated);
+  background: var(--hydrated-bg);
+}
+
+.mock-label {
+  font-weight: 500;
+  color: var(--color-text-heading);
+}
+
+.mock-state {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-neutral-600);
+}
+
+.mock-part--placeholder .mock-state {
+  color: var(--placeholder);
+}
+
+.mock-part--server .mock-state {
+  color: var(--server);
+}
+
+.mock-part--hydrated .mock-state {
+  color: var(--hydrated);
+}
+
+/* Two lines standing in for text. */
+.mock-bars {
+  flex: 0 0 100%;
+  height: var(--space-4);
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--color-neutral-200) 0 var(--space-1-5),
+    transparent var(--space-1-5) var(--space-2-5)
+  );
+}
+
+.mock-empty {
+  margin: 0;
+  padding: var(--space-8) 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-neutral-600);
+}

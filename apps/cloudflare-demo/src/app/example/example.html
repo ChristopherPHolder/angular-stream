@@ -1,5 +1,5 @@
 <header class="intro">
-  <p class="text-subtitle eyebrow">Live example</p>
+  <p class="text-subtitle eyebrow">Streamed hydration for Angular, live</p>
   <h1 class="text-hero-title">One page, one slow widget</h1>
   <p class="text-lead">
     This page was streamed. Its shell arrived at once. The widget needs data that takes
@@ -16,7 +16,7 @@
         {{ seconds }} s
       }
     </p>
-    <a class="pb-btn pb-btn-primary" href="/example">Run it again</a>
+    <a class="pb-btn pb-btn-primary" href="/">Run it again</a>
   </div>
   <ol class="steps">
     <li class="step" [class.step--done]="shellAt() !== null">
@@ -66,96 +66,9 @@
   </p>
 </section>
 
-<section class="part" aria-labelledby="code-title">
-  <h2 id="code-title" class="text-section-title">The code</h2>
-  <p>Three steps. The first two are per part; the third is once per app.</p>
-
-  <ol class="how">
-    <li class="how-step">
-      <div class="how-text">
-        <h3 class="text-title">1 · Put the slow part in a <code>&#64;defer</code> block</h3>
-        <p>
-          The block is what the server can send later. Everything outside it is the shell, sent at
-          once. Give the block a <code>hydrate when</code> trigger that turns true when its data is
-          there.
-        </p>
-        <p>
-          The <code>&#64;else</code> branch goes out with the shell, so it is what paints first.
-        </p>
-      </div>
-      <demo-code [sample]="samples.template" />
-    </li>
-    <li class="how-step">
-      <div class="how-text">
-        <h3 class="text-title">2 · Load its data with <code>HttpClient</code></h3>
-        <p>
-          The server makes the request and streams the block when the response is in. The browser
-          asks for the same data, but its request is held back and answered from the stream. Nothing
-          is fetched twice.
-        </p>
-      </div>
-      <demo-code [sample]="samples.component" />
-    </li>
-    <li class="how-step">
-      <div class="how-text">
-        <h3 class="text-title">3 · Switch streaming on</h3>
-        <p>
-          Two additions to the app's providers, and a Cloudflare Worker entry that renders with the
-          streaming renderer.
-        </p>
-      </div>
-      <div class="how-code">
-        <demo-code [sample]="samples.config" />
-        <demo-code [sample]="samples.worker" />
-      </div>
-    </li>
-  </ol>
-</section>
-
-<section class="part" aria-labelledby="rules-title">
-  <h2 id="rules-title" class="text-section-title">Three rules</h2>
+<section class="part" aria-labelledby="closer-title">
+  <h2 id="closer-title" class="text-section-title">Look closer</h2>
   <ul class="cards">
-    <li class="box">
-      <h3 class="text-card-title">What depends on data goes inside a block</h3>
-      <p>
-        The shell is sent once. If something outside a block changes afterwards, the browser renders
-        the change, and the server HTML never has it.
-      </p>
-    </li>
-    <li class="box">
-      <h3 class="text-card-title">A block sits directly inside an element</h3>
-      <p>
-        Not at the root of an <code>&#64;if</code>, in an <code>ng-container</code> or in projected
-        content. The server warns about such a block and leaves it to the browser.
-      </p>
-    </li>
-    <li class="box">
-      <h3 class="text-card-title">Tie hydration to the data</h3>
-      <p>
-        With <code>hydrate when</code>, a block hydrates as soon as its own chunk lands.
-        <code>hydrate on idle</code>, <code>immediate</code>, <code>timer</code> and
-        <code>viewport</code> say nothing about data, so they wait for the end of the response.
-      </p>
-    </li>
-  </ul>
-</section>
-
-<section class="part" aria-labelledby="more-title">
-  <h2 id="more-title" class="text-section-title">See more</h2>
-  <ul class="cards">
-    <li class="box">
-      <h3 class="text-card-title"><a href="/">Why, and how it works</a></h3>
-      <p>What streaming out of order buys you, and the response followed step by step.</p>
-    </li>
-    <li class="box">
-      <h3 class="text-card-title">
-        <a href="https://angular-ssr-stream-movies.chris-holder.workers.dev/">Angular Movies</a>
-      </h3>
-      <p>
-        A real app streamed the same way: a movie browser on the TMDB API, where each list and the
-        cast arrive as their requests finish.
-      </p>
-    </li>
     <li class="box">
       <h3 class="text-card-title"><a href="/walkthrough">Walkthrough</a></h3>
       <p>
@@ -169,6 +82,39 @@
         The walkthrough's raw response, cut into the pieces the server wrote, with the size,
         contents and arrival time of each.
       </p>
+    </li>
+    <li class="box">
+      <h3 class="text-card-title"><a [href]="movies">Angular Movies</a></h3>
+      <p>
+        A real app streamed the same way: a movie browser on the TMDB API, where each list and the
+        cast arrive as their requests finish.
+      </p>
+    </li>
+  </ul>
+</section>
+
+<section class="part" aria-labelledby="docs-title">
+  <h2 id="docs-title" class="text-section-title">Read about it</h2>
+  <p>This site shows streaming as it happens. The docs explain it.</p>
+  <ul class="cards">
+    <li class="box">
+      <h3 class="text-card-title"><a [href]="docs.code">The code for a page like this</a></h3>
+      <p>
+        A <code>&#64;defer</code> block, an ordinary <code>HttpClient</code> request and two
+        providers, and the rules for writing them.
+      </p>
+    </li>
+    <li class="box">
+      <h3 class="text-card-title"><a [href]="docs.why">Why stream out of order</a></h3>
+      <p>What it buys a page, what it costs, and where the idea comes from.</p>
+    </li>
+    <li class="box">
+      <h3 class="text-card-title"><a [href]="docs.response">One response, flush by flush</a></h3>
+      <p>What each piece of a response carries, and when each part of the page hydrates.</p>
+    </li>
+    <li class="box">
+      <h3 class="text-card-title"><a [href]="docs.start">Get started</a></h3>
+      <p>What the packages need, and the setup for where your app runs.</p>
     </li>
   </ul>
 </section>

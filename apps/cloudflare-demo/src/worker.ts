@@ -30,9 +30,9 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '');
 
-    // The example's old address: moved for good, so a crawler drops the old one.
-    if (path === '/simple') {
-      return Response.redirect(`${url.origin}/example${url.search}`, 301);
+    // The example's old addresses: moved for good, so a crawler drops them.
+    if (path === '/example' || path === '/simple') {
+      return Response.redirect(`${url.origin}/${url.search}`, 301);
     }
     // For crawlers, at whatever address this is deployed to.
     if (path === '/robots.txt') {

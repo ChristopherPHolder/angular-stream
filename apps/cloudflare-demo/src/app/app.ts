@@ -4,23 +4,20 @@ import { RouterOutlet } from '@angular/router';
 // `?no-inline`: Vite would inline an asset this small as a data: URI, which NgOptimizedImage rejects.
 import logo from '@angular-ssr-stream/press-kit/symbol/angular-ssr-stream-symbol.svg?no-inline';
 import { EventLog } from './event-log';
+import { DOCS, MOVIES, REPO } from './links';
 import { setPageHead } from './page-head';
 
-const REPO = 'https://github.com/push-based/angular-ssr-stream';
-const DOCS = 'https://push-based.github.io/angular-ssr-stream/';
-
-/** The pages, in the order to read them: from the idea to the detail. */
+/** The pages: the example first, then the two that take a response apart. */
 const PAGES = [
-  { path: '/', label: 'Overview' },
-  { path: '/example', label: 'Example' },
+  { path: '/', label: 'Example' },
   { path: '/walkthrough', label: 'Walkthrough' },
   { path: '/inspect', label: 'Inspector' },
 ];
 
-/** The menu entry for a path. `/simple` is the example's old address. */
+/** The menu entry for a path. `/example` and `/simple` are the example's old addresses. */
 function currentPage(path: string): string | null {
-  if (path.startsWith('/simple')) {
-    return '/example';
+  if (/^\/(example|simple)\b/.test(path)) {
+    return '/';
   }
   const page = PAGES.find((page) =>
     page.path === '/' ? path === '/' : path.startsWith(page.path),
@@ -39,12 +36,14 @@ function currentPage(path: string): string | null {
           angular-ssr-stream <span>demo</span>
         </a>
         <!-- Plain links: every page load should be a fresh streamed response. -->
-        <nav class="top-nav text-link-mono" aria-label="Pages">
+        <nav class="top-nav text-link-mono" aria-label="Pages and docs">
           @for (page of pages; track page.path) {
             <a [href]="page.path" [attr.aria-current]="page.path === current ? 'page' : null">{{
               page.label
             }}</a>
           }
+          <!-- The demo shows; the docs explain. -->
+          <a [href]="docs">Docs</a>
         </nav>
         <a class="top-repo" [href]="repo" aria-label="angular-ssr-stream on GitHub">
           <svg viewBox="0 0 16 16" width="24" height="24" aria-hidden="true" focusable="false">
@@ -71,9 +70,7 @@ function currentPage(path: string): string | null {
       <div class="bottom-inner">
         <p>Streamed server-side rendering for Angular, on Cloudflare Workers.</p>
         <nav aria-label="Elsewhere">
-          <a href="https://angular-ssr-stream-movies.chris-holder.workers.dev/"
-            >Angular Movies, a real app</a
-          >
+          <a [href]="movies">Angular Movies, a real app</a>
           <a [href]="repo">Source on GitHub</a>
           <a [href]="docs">The docs</a>
           <a href="https://push-based.io/">PushBased</a>
@@ -86,6 +83,7 @@ function currentPage(path: string): string | null {
 export class App {
   protected readonly repo = REPO;
   protected readonly docs = DOCS;
+  protected readonly movies = MOVIES;
   protected readonly logo = logo;
   protected readonly pages = PAGES;
 
@@ -100,7 +98,7 @@ export class App {
   /** The page to mark in the menu. */
   protected readonly current = currentPage(this.path);
 
-  /** Only the walkthrough and the inspector have the log; the other pages explain themselves. */
+  /** Only the walkthrough and the inspector have the log; the example times its own three steps. */
   protected readonly showLog = /^\/(walkthrough|inspect)\b/.test(this.path);
 
   constructor() {

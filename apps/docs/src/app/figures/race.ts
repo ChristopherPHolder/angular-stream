@@ -53,14 +53,16 @@ const STRATEGIES: Strategy[] = [
 ];
 
 /**
- * The same page sent three ways, on one clock. A drawing, not a measurement:
- * the times are fixed above, and nothing here makes a request.
+ * The `race` figure: the same page sent three ways, on one clock. A drawing,
+ * not a measurement: the times are fixed above, and nothing here makes a
+ * request. The home page's hero (`home-race.ts`) plays the first and the last
+ * lane with the same times; keep the two in step.
  *
- * It starts part way through, so the picture says something before anyone
- * presses play, and with JavaScript off.
+ * It starts part way through, so the picture says something in the prerendered
+ * page, before anyone presses play and with JavaScript off.
  */
 @Component({
-  selector: 'demo-race',
+  selector: 'docs-race',
   template: `
     <div class="controls">
       <button class="pb-btn pb-btn-primary" type="button" (click)="toggle()">
@@ -85,7 +87,8 @@ const STRATEGIES: Strategy[] = [
     <ol class="lanes">
       @for (lane of lanes(); track lane.name) {
         <li class="lane">
-          <h3 class="text-card-title">{{ lane.name }}</h3>
+          <!-- Not a heading: the figure can sit anywhere in a page's outline. -->
+          <p class="lane-name text-card-title">{{ lane.name }}</p>
           <p class="how">{{ lane.how }}</p>
           <div class="mock">
             @if (lane.header) {
@@ -109,7 +112,7 @@ const STRATEGIES: Strategy[] = [
               <p class="mock-empty">Blank page</p>
             }
           </div>
-          <dl class="facts">
+          <dl class="lane-facts">
             <div [class.reached]="t() >= lane.firstAt">
               <dt>First content</dt>
               <dd>{{ seconds(lane.firstAt) }}</dd>
@@ -122,6 +125,7 @@ const STRATEGIES: Strategy[] = [
         </li>
       }
     </ol>
+    <p class="note">A drawing, not a measurement: the times are made up.</p>
   `,
   styleUrl: './race.css',
 })

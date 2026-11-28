@@ -3,6 +3,7 @@ import { Component, type Signal, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { DemoBackend, STEP_DELAYS, type Step, type StepData } from '../demo-backend';
+import { DOCS_PAGES } from '../links';
 import { HydrationStatus } from './hydration-status';
 
 /** The four steps this page shows; the example page has its own. */
@@ -23,6 +24,7 @@ export function readScale(value: string | null): number {
 export class Walkthrough {
   private readonly http = inject(HttpClient);
   protected readonly backend = inject(DemoBackend);
+  protected readonly docs = DOCS_PAGES;
   protected readonly scale = readScale(inject(ActivatedRoute).snapshot.queryParamMap.get('scale'));
 
   /** Each step's delay at the current speed, in milliseconds. */

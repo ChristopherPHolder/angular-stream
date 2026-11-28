@@ -1,12 +1,30 @@
-Put it in a `@defer` block with a `hydrate` trigger, directly inside an element:
+A part of a page streams when it is a `@defer` block with a `hydrate` trigger,
+directly inside an element, and its data comes through `HttpClient`. Everything
+else on the page is the shell, which the server sends at once.
 
-```html
-<article>
-  @defer (on immediate; hydrate when listReady()) {
-  <ui-movie-list [movies]="movies$" />
+## The least code
+
+Three steps. The first two are per part; the third is once per app.
+
+### 1. Put the slow part in a `@defer` block
+
+```html title="page.html"
+<section>
+  @defer (on immediate; hydrate when widget()) {
+  <div>
+    @if (widget(); as data) {
+    <app-widget [data]="data" />
+    } @else {
+    <p>Loading…</p>
+    }
+  </div>
   }
-</article>
+</section>
 ```
+
+The block is what the server can send later. Give it a `hydrate when` trigger
+that turns true when its data is there. The `@else` branch goes out with the
+shell, so it is what paints first.
 
 Angular leaves such a block's markup alone until the trigger fires, which is
 what lets the server replace it underneath a running application. Everything
@@ -14,6 +32,47 @@ outside a block is the shell, and the shell is sent once: if it changes after
 that, the client renders the change itself from the streamed data, and the
 change never appears in the server HTML. Text that depends on data belongs
 inside a block.
+
+### 2. Load its data with `HttpClient`
+
+```ts title="page.ts"
+export class Page {
+  // An ordinary request. Nothing here knows about streaming.
+  readonly widget = toSignal(inject(HttpClient).get<WidgetData>('/api/widget'));
+}
+```
+
+The server makes the request and streams the block when the response is in. The
+browser asks for the same data, but its request is held back and answered from
+the stream. Nothing is fetched twice.
+
+### 3. Switch streaming on
+
+This is the setup, and your runtime's page has all of it: pick it from
+[the table in Installation](../getting-started/installation.md#install). It
+comes to two additions to the app's providers and a server entry that renders
+with the streaming renderer.
+
+<!-- include ../_shared/browser-config.md -->
+
+The server entry is where runtimes differ. On Cloudflare Workers it is this:
+
+```ts title="src/worker.ts"
+import { createStreamingWorker } from '@push-based/angular-ssr-stream-cloudflare';
+import { App } from './app/app';
+import { config } from './app/app.config.server';
+
+// config is appConfig plus provideServerRendering().
+export default createStreamingWorker({
+  rootComponent: App,
+  config,
+  allowedHosts: ['localhost'],
+});
+```
+
+[The demo](https://angular-ssr-stream-demo.chris-holder.workers.dev/) is a page
+built this way: one widget whose data takes five seconds, timed as its HTML
+arrives and as it hydrates.
 
 ## Rules
 
@@ -64,7 +123,6 @@ A few consequences that are easy to miss:
 - **Everything in transfer state ships.** A chunk carries the full response of
   each request that finished, whether the page uses all of it or not.
 
-The demo's `/example` page streams one widget with the least code that does
-it, and shows that code. If you know streaming from React or Next.js,
+If you know streaming from React or Next.js,
 [React Suspense streaming, in Angular](coming-from-react-suspense.md) maps a
 `<Suspense>` boundary onto all of this.

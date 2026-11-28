@@ -1,3 +1,5 @@
+@import './mock.css';
+
 :host {
   display: grid;
   gap: var(--space-5);
@@ -59,12 +61,18 @@
   gap: var(--space-2);
 }
 
-.lane h3,
-.how {
+.lane-name,
+.how,
+.note {
   margin: 0;
 }
 
-.how {
+.lane-name {
+  color: var(--color-text-heading);
+}
+
+.how,
+.note {
   font-size: 0.875rem;
   line-height: 1.25rem;
   color: var(--color-neutral-600);
@@ -74,7 +82,7 @@
   min-height: 13.5rem;
 }
 
-.facts {
+.lane-facts {
   display: grid;
   gap: var(--space-1);
   margin: 0;
@@ -83,19 +91,19 @@
   color: var(--color-neutral-600);
 }
 
-.facts div {
+.lane-facts div {
   display: flex;
   justify-content: space-between;
   gap: var(--space-3);
 }
 
-.facts dd {
+.lane-facts dd {
   margin: 0;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 
-.facts .reached {
+.lane-facts .reached {
   color: var(--hydrated);
   font-weight: 600;
 }

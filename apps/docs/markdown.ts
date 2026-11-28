@@ -12,6 +12,7 @@ import xml from 'highlight.js/lib/languages/xml';
 import yaml from 'highlight.js/lib/languages/yaml';
 import { Marked, type Tokens } from 'marked';
 import type { Plugin } from 'vite-plus';
+import { FIGURES } from './src/app/figures/names';
 
 for (const [name, language] of Object.entries({
   bash,
@@ -148,6 +149,20 @@ export function withIncludes(
   return { source: whole, included };
 }
 
+/** A line that places a figure: `DocPage` renders the component there. */
+const FIGURE_LINE = /^<!-- figure (\S*) -->$/gm;
+
+/** Fails the build on a figure that does not exist, like a broken link. */
+function checkFigures(source: string, file: string, options: MarkdownOptions): void {
+  for (const [, name] of source.matchAll(FIGURE_LINE)) {
+    if (!(FIGURES as readonly string[]).includes(name)) {
+      throw new Error(
+        `${path.relative(options.repoRoot, file)}: no figure called "${name}" (there is ${FIGURES.join(', ')})`,
+      );
+    }
+  }
+}
+
 /**
  * Every page: the `.md` files one folder down from `contentDir`, in a stable
  * order. A folder that starts with `_` holds included files, not pages.
@@ -258,6 +273,7 @@ const CALLOUTS: Record<string, string> = {
 };
 
 export function renderPage(source: string, file: string, options: MarkdownOptions): RenderedPage {
+  checkFigures(source, file, options);
   const route = routeOf(file, options.contentDir);
   const toc: TocEntry[] = [];
   const seen = new Map<string, number>();

@@ -9,9 +9,19 @@ seconds. There are two ways to stream instead:
   placeholder for each part that is not. Each part follows when its data
   arrives, in whatever order that is, and a script puts it in place.
 
-All of them finish at the same moment; streaming does not make a slow request
-faster. What changes is that the rest of the page, and the browser's work on
-styles, fonts and scripts, no longer waits for it.
+Here is that product page sent all three ways, on one clock. Its recommendations
+sit above its reviews, and the part that needs no data is ready after a tenth
+of a second:
+
+<!-- figure race -->
+
+All three finish at the same moment: streaming does not make a slow request
+faster. What changes is everything else. Sent out of order, the product is on
+screen after 0.1 seconds and the reviews after 1, where the other two leave the
+reader with a blank or half-empty page for 3. In order, the reviews are ready
+after one second and still wait two more, behind the recommendations above
+them. The browser also gets to start on the styles, fonts and scripts that much
+sooner.
 
 The idea is about fifteen years old, and each framework that has it gives the
 same reason:
@@ -25,6 +35,10 @@ same reason:
 |      | [SvelteKit][5]         | Promises returned from a server `load` are streamed          | "This is useful if you have slow, non-essential data"                                                      |
 |      | [Qwik][6]              | Experimental, inside `<Pending>`                             | "Out-of-order streaming helps when one section of the page is slow, but the rest of the page is ready."    |
 | 2026 | [The browser][7]       | `<template for>` fills a `<?marker>`, with no script         | "primitives that have been part of userland libraries for about a decade"                                  |
+
+Facebook measured the result: "BigPipe reduces user perceived latency by half
+in most browsers." React named the problem: "You have to fetch everything
+before you can show anything".
 
 The native version is new: Chrome's intent to ship targets version 150, and
 [Chrome's guide][8] describes it as "shipped in only a single browser engine".
@@ -44,7 +58,8 @@ The costs are the same everywhere, and apply here:
   turn the response into an error page or a redirect.
 - **Placeholders get replaced,** so content can shift unless each placeholder
   holds the room its content will need.
-- **A late part needs JavaScript** to be put in place.
+- **A late part needs JavaScript** to be put in place. With scripts off, the
+  reader keeps the placeholder.
 - **Streamed responses are not cached** as they stand; see
   [When something goes wrong](internals.md#when-something-goes-wrong).
 

@@ -133,10 +133,10 @@ The idea is, and so is what it costs:
 
 ## Where to go next
 
-- [Making something stream](making-something-stream.md): the rules for a
-  block, and what follows from them.
-- The demo's [live example](https://angular-ssr-stream-demo.chris-holder.workers.dev/example)
-  streams one widget, next to the code for it.
+- [Making something stream](making-something-stream.md): the least code that
+  streams a part of a page, the rules for a block, and what follows from them.
+- [The demo](https://angular-ssr-stream-demo.chris-holder.workers.dev/) streams
+  one widget, and times it as it arrives and as it hydrates.
 - [Why stream out of order](../concepts/why-stream-out-of-order.md): React's
   place among the frameworks that did this first.
 - [Caveats and limitations](../reference/limitations.md): what does not work
