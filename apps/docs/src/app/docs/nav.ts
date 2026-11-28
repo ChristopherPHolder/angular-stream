@@ -499,10 +499,28 @@ export const DOCS: DocSection[] = [
   {
     id: 'about',
     title: 'About',
-    description: 'The project itself.',
+    description: 'Questions, releases and the logo.',
     groups: [
       {
         pages: [
+          {
+            dir: 'reference',
+            slug: 'faq',
+            title: 'FAQ',
+            headline: 'Streaming SSR for Angular: frequently asked questions',
+            description:
+              'Short answers on Angular support, SEO, caching, the Angular CLI, failures and readiness, each linking the page with the long one.',
+            load: () => import('../../content/reference/faq.md'),
+          },
+          {
+            dir: 'reference',
+            slug: 'releases',
+            title: 'Releases and upgrading',
+            headline: 'angular-ssr-stream releases, and upgrading Angular and the packages',
+            description:
+              'How the packages are versioned and tagged, where the release notes are, and how to upgrade Angular and the packages.',
+            load: () => import('../../content/reference/releases.md'),
+          },
           {
             dir: 'reference',
             slug: 'press-kit',

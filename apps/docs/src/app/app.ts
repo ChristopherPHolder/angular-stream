@@ -164,6 +164,8 @@ import { DocsSearch } from './search/search';
             <ul aria-labelledby="footer-project">
               <li><a [href]="repo">Source on GitHub</a></li>
               <li><a [href]="issues">Report an issue</a></li>
+              <li><a routerLink="/docs/reference/faq">FAQ</a></li>
+              <li><a routerLink="/docs/reference/releases">Releases and upgrading</a></li>
               <li><a routerLink="/docs/reference/press-kit">Press kit</a></li>
               <!-- The contents for a language model; the build writes it (scripts/prerender.ts). -->
               <li><a href="llms.txt">llms.txt</a></li>

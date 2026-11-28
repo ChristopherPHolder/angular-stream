@@ -105,7 +105,8 @@ few lines around it.
 | A Service Worker, in the browser (experimental) | none                                         | [Service Worker](../guides/service-worker.md) |
 
 Every package is released together, with one version: install the same
-version of each.
+version of each. [Releases and upgrading](../reference/releases.md) has how
+versions work and how to upgrade.
 
 The packages ship ESM and type declarations, and carry no Angular decorators,
 so they need no Angular compilation of their own.
