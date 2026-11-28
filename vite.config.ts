@@ -90,7 +90,14 @@ export default defineConfig({
       ],
     },
     options: { typeAware: true, typeCheck: true },
-    ignorePatterns: ['**/worker-configuration.d.ts', '**/.angular/**'],
+    ignorePatterns: [
+      '**/worker-configuration.d.ts',
+      '**/.angular/**',
+      // Installed and type-checked per Angular version by compat/run.mjs, not
+      // against the workspace's packages.
+      'compat/fixture/**',
+      'compat/.work/**',
+    ],
   },
   fmt: {
     printWidth: 100,
@@ -107,6 +114,8 @@ export default defineConfig({
       '**/worker-configuration.d.ts',
       // The Angular CLI's build cache.
       '**/.angular/**',
+      // The compatibility runs' installs and builds.
+      'compat/.work/**',
       // Captured server responses, kept byte for byte.
       'docs/out-of-order-streaming/baseline/*.html',
     ],

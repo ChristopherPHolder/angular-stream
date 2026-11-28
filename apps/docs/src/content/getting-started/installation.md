@@ -1,11 +1,8 @@
 ## Requirements
 
-- **Angular `~22.3.0-rc.0`**, standalone, with incremental hydration.
-  Zoneless or with Zone.js: on the server, the requests the renderer follows
-  run outside the Angular zone, so Zone.js doesn't hold the shell back for
-  them. The packages use private Angular APIs (the `ɵ`-prefixed ones), so
-  their supported range is narrow: each Angular minor needs a check and a
-  release.
+- **Angular 19.2, 20.3, 21.2 or 22**, from the patch each row of
+  [the compatibility table](#compatibility) names, standalone, with
+  incremental hydration. Zoneless or with Zone.js.
 - **A server that speaks web `Request` and `Response`**, directly or through
   one of the adapters below.
 - **A build that compiles Angular for the server**, one of two:
@@ -20,10 +17,49 @@
     `AngularAppEngine`, server routes and render modes are not available; see
     [Caveats and limitations](../reference/limitations.md).
 
+## Compatibility
+
+The packages use private Angular APIs (the `ɵ`-prefixed ones), which can
+change in any release. So the supported versions are the ones a check proves,
+not a guess: every row below is built and run in CI, zoneless and with
+Zone.js, as an app made by the Angular CLI. The server has to send the shell
+before the data and the widget in a chunk after it, with `@angular/ssr`'s
+statuses, headers and redirects intact. In Chrome, the widget has to hydrate
+from the server's HTML, with Angular's hydration checks on, and answer a
+click.
+
+| Angular | From    | Zoneless | Zone.js | What the app needs                                                               |
+| ------- | ------- | -------- | ------- | -------------------------------------------------------------------------------- |
+| 22      | 22.0.0  | Yes      | Yes     | Nothing extra: incremental hydration is on by default                            |
+| 21.2    | 21.2.13 | Yes      | Yes     | `withIncrementalHydration()` in `provideClientHydration()`                       |
+| 20.3    | 20.3.21 | Yes      | Yes     | `withIncrementalHydration()` in `provideClientHydration()`                       |
+| 19.2    | 19.2.22 | Yes      | Yes     | `withIncrementalHydration()`, and `provideExperimentalZonelessChangeDetection()` |
+
+Not supported:
+
+- **Angular 18 and older**, which have no incremental hydration.
+- **19.0, 19.1, 20.0 to 20.2, 21.0 and 21.1, and the patches below each row's
+  "From".** They lack two security fixes Angular backported only to the last
+  minor of each major: the server's host check (`ɵisHostAllowed`), and passing
+  the server platform to `bootstrapApplication()`, which the renderer
+  bootstraps through.
+
+With incremental hydration off, the server renders no `@defer` block with a
+`hydrate` trigger, so nothing streams. In development the server says so in a
+warning.
+
+The ngp setups are the exception: ngp builds exactly `22.3.0-rc.0`, and no
+other version.
+
+The matrix is in `.github/workflows/compat.yml` and runs
+[`compat/run.mjs`](https://github.com/push-based/angular-ssr-stream/blob/main/compat/run.mjs)
+for each row, on every pull request that touches the packages, and every week
+against Angular's `next` too. A new Angular minor gets a row there first, and
+joins the peer ranges once it passes.
+
 ## Install
 
-Releases go to npm's `next` dist-tag while the supported Angular is a release
-candidate:
+Releases go to npm's `next` dist-tag for now:
 
 ```bash
 npm install @push-based/angular-ssr-stream-core@next

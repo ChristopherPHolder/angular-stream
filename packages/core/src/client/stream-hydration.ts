@@ -12,6 +12,7 @@ import {
   ɵDEFER_BLOCK_CONFIG,
   ɵDEHYDRATED_BLOCK_REGISTRY,
   ɵDeferBlockBehavior,
+  ɵIS_INCREMENTAL_HYDRATION_ENABLED,
   ɵwithIncrementalHydration,
 } from '@angular/core';
 import { Observable, finalize, switchMap } from 'rxjs';
@@ -441,7 +442,13 @@ function findRegistryFactory(): (() => unknown) | null {
     } else if (
       (candidate as { provide?: unknown } | null)?.provide === ɵDEHYDRATED_BLOCK_REGISTRY
     ) {
-      return (candidate as { useFactory: () => unknown }).useFactory;
+      // A factory from Angular 22, a class before; both run in an injection context here.
+      const provider = candidate as { useFactory?: () => unknown; useClass?: new () => unknown };
+      if (provider.useFactory !== undefined) {
+        return provider.useFactory;
+      }
+      const RegistryClass = provider.useClass;
+      return RegistryClass === undefined ? null : () => new RegistryClass();
     }
   }
 
@@ -472,6 +479,31 @@ const STREAMED_RENDER_PROVIDERS: Provider[] = [
   },
 ];
 
+let warnedAboutIncrementalHydration = false;
+
+/**
+ * Without incremental hydration, the server renders no `@defer` block with a
+ * `hydrate` trigger, so nothing streams, and nothing says so. Angular 22 turns
+ * it on by default; 19 to 21 need `withIncrementalHydration()`. Checked during
+ * a streamed render only: the buffered fallback turns it off on purpose.
+ */
+function warnIfIncrementalHydrationIsOff(): void {
+  if (
+    warnedAboutIncrementalHydration ||
+    inject(SERVER_REQUEST_TRACKER, { optional: true }) === null ||
+    inject(ɵIS_INCREMENTAL_HYDRATION_ENABLED, { optional: true }) === true
+  ) {
+    return;
+  }
+
+  warnedAboutIncrementalHydration = true;
+  console.warn(
+    '[ssr] Incremental hydration is off, so no @defer block is streamed. Add ' +
+      'withIncrementalHydration() to provideClientHydration(): Angular 19 to 21 need it, ' +
+      '22 turns it on by default.',
+  );
+}
+
 /**
  * Lets `@defer` blocks with a `hydrate` trigger receive server-rendered
  * content after the shell. Must come after `provideClientHydration()`, whose
@@ -483,7 +515,10 @@ const STREAMED_RENDER_PROVIDERS: Provider[] = [
  */
 export function provideStreamHydration(): EnvironmentProviders {
   const providers: Array<Provider | EnvironmentProviders> = [
-    provideEnvironmentInitializer(() => inject(STREAM_HYDRATION_CLIENT).attach()),
+    provideEnvironmentInitializer(() => {
+      warnIfIncrementalHydrationIsOff();
+      inject(STREAM_HYDRATION_CLIENT).attach();
+    }),
     ...STREAMED_RENDER_PROVIDERS,
   ];
 

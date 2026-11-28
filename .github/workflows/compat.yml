@@ -1,0 +1,99 @@
+name: Angular compatibility
+
+# Builds an Angular CLI app (compat/fixture) against every Angular version the
+# packages claim to support, zoneless and with Zone.js, and checks that it
+# streams and hydrates: compat/run.mjs. The peer ranges in packages/*/package.json
+# list exactly what this matrix checks.
+
+on:
+  pull_request:
+    paths:
+      - 'packages/**'
+      - 'compat/**'
+      - '.github/workflows/compat.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/**'
+      - 'compat/**'
+      - '.github/workflows/compat.yml'
+  # Every Monday, so a new Angular patch or `next` shows up before users do.
+  schedule:
+    - cron: '0 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: compat-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      # The workspace needs Node 26.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # The two packages an Angular CLI app installs, packed as npm would get them.
+      - run: |
+          mkdir -p packs
+          for name in core angular-ssr; do
+            (cd packages/$name && pnpm run build && pnpm pack --pack-destination ../../packs)
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packs
+          path: packs/*.tgz
+
+  check:
+    needs: pack
+    runs-on: ubuntu-latest
+    # `next` is Angular's upcoming release: a failure there is a warning about
+    # what is coming, not a broken build.
+    continue-on-error: ${{ matrix.angular == 'next' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # The newest patch of each supported minor, the lowest supported patch
+        # of each older major, and what Angular releases next.
+        angular:
+          [
+            '19.2',
+            '19.2.22',
+            '20.3',
+            '20.3.21',
+            '21.2',
+            '21.2.13',
+            '22.0',
+            '22.1',
+            '22.2',
+            '22.3',
+            'next',
+          ]
+        mode: [zoneless, zone]
+    name: Angular ${{ matrix.angular }}, ${{ matrix.mode }}
+    steps:
+      - uses: actions/checkout@v4
+      # Node 22 is supported by every Angular version in the matrix.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          name: packs
+          path: packs
+      # ubuntu-latest has Chrome at /usr/bin/google-chrome.
+      - run: node compat/run.mjs --angular '${{ matrix.angular }}' --mode ${{ matrix.mode }} --packs packs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: result-${{ matrix.angular }}-${{ matrix.mode }}
+          path: compat/.work/*/result.json
+          if-no-files-found: ignore

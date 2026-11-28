@@ -30,8 +30,10 @@ providers: [
 ];
 ```
 
-It needs Angular `~22.3.0-rc.0`, standalone, with incremental hydration,
-zoneless or with Zone.js.
+It needs Angular 19.2.22+, 20.3.21+, 21.2.13+ or 22, standalone, with
+incremental hydration, zoneless or with Zone.js. Angular 19 to 21 need
+`withIncrementalHydration()`; see
+[Compatibility](https://push-based.github.io/angular-ssr-stream/docs/getting-started/installation#compatibility).
 
 - [The docs](https://push-based.github.io/angular-ssr-stream/): getting started,
   guides, how it works, and [this package's API](https://push-based.github.io/angular-ssr-stream/docs/reference/core).

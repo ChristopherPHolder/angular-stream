@@ -164,6 +164,23 @@ piece:
 Streamed responses carry `Cache-Control: no-store`, whatever the route's
 headers say: a cached copy of a partial response would be worse than none.
 
+## Angular 19 to 21
+
+The steps above are for Angular 22, which `ng new` gives you today. On 19.2,
+20.3 or 21.2, check the patch against the
+[compatibility table](installation.md#compatibility), then:
+
+- **Turn on incremental hydration.** Angular 22 does it by default; before
+  that, add `withIncrementalHydration()` from `@angular/platform-browser` to
+  `provideClientHydration()`. Without it nothing streams, and the server warns.
+- **Check `main.server.ts`.** Its `bootstrap` has to take the
+  `BootstrapContext` it is called with and pass it to
+  `bootstrapApplication()`, as in step 4. `ng new` writes it that way in every
+  supported version, but an app made before Angular's security fix that added
+  it may still have a `bootstrap` that takes no argument: add it.
+- **On 19**, zoneless is `provideExperimentalZonelessChangeDetection()`. Zone.js
+  works as well.
+
 ## 8. Behind a proxy
 
 A proxy, a CDN or compression middleware can hold the response back until it

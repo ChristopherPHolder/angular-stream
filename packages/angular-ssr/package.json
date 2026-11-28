@@ -52,10 +52,10 @@
     "@push-based/angular-ssr-stream-core": "workspace:*"
   },
   "peerDependencies": {
-    "@angular/common": "~22.3.0-rc.0",
-    "@angular/core": "~22.3.0-rc.0",
-    "@angular/router": "~22.3.0-rc.0",
-    "@angular/ssr": "~22.3.0-rc.0"
+    "@angular/common": "^19.2.22 || ^20.3.21 || ^21.2.13 || ^22.0.0 || ~22.3.0-rc.0",
+    "@angular/core": "^19.2.22 || ^20.3.21 || ^21.2.13 || ^22.0.0 || ~22.3.0-rc.0",
+    "@angular/router": "^19.2.22 || ^20.3.21 || ^21.2.13 || ^22.0.0 || ~22.3.0-rc.0",
+    "@angular/ssr": "^19.2.22 || ^20.3.21 || ^21.2.13 || ^22.0.0 || ~22.3.0-rc.0"
   },
   "devDependencies": {
     "@angular/common": "22.3.0-rc.0",
