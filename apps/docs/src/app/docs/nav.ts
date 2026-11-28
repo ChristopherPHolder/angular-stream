@@ -309,6 +309,15 @@ export const DOCS: DocSection[] = [
           },
           {
             dir: 'guides',
+            slug: 'analog-streaming-ssr',
+            title: "Analog's streaming SSR, compared",
+            headline: "Analog's streaming SSR and angular-ssr-stream, compared",
+            description:
+              'One page sent through both: what each sends first, what a @defer block waits for, when the page hydrates, and how each reaches into Angular.',
+            load: () => import('../../content/guides/analog-streaming-ssr.md'),
+          },
+          {
+            dir: 'guides',
             slug: 'debugging',
             title: 'Debugging and verifying',
             headline: 'Debugging and verifying streamed Angular SSR',
