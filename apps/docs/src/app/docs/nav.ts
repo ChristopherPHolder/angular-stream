@@ -291,10 +291,19 @@ export const DOCS: DocSection[] = [
   {
     id: 'concepts',
     title: 'How it works',
-    description: 'Why stream out of order, what goes over the wire, and what does not work yet.',
+    description:
+      'What Angular has and what it lacks, why stream out of order, what goes over the wire, and what does not work yet.',
     groups: [
       {
         pages: [
+          {
+            dir: 'concepts',
+            slug: 'angular-streaming-ssr',
+            title: 'Does Angular support streaming SSR?',
+            description:
+              'No: Angular sends a server-rendered page whole. Why it can look as if it streamed, what it has instead, and how to add streaming to it.',
+            load: () => import('../../content/concepts/angular-streaming-ssr.md'),
+          },
           {
             dir: 'concepts',
             slug: 'why-stream-out-of-order',
