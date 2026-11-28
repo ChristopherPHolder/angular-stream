@@ -150,6 +150,11 @@ together; the short version:
   `apps/docs/README.md` for the Markdown extras and how links work. The docs
   are static: `vp build` plus `scripts/prerender.ts`, no Worker, so nothing
   there may depend on a request.
+  The docs' home page is the exception to "the docs explain": its first screen
+  is the hook, a headline, the two ways on (get started, the live demo) and one
+  drawing, `src/app/home-race.ts`, which is the demo's race in two lanes with
+  the same made-up times. Keep the two in step, and the buttons on the first
+  screen.
 - **Styles (demo and docs)**: both use the PushBased design system in
   `libs/design-system/` (read its `README.md`). Use its tokens and the
   `.pb-*` component classes and `.text-*` type styles; never hard-code colours,
