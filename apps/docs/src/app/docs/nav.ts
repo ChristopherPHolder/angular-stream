@@ -314,7 +314,7 @@ export const DOCS: DocSection[] = [
             title: "Analog's streaming SSR, compared",
             headline: "Analog's streaming SSR and angular-ssr-stream, compared",
             description:
-              'One page sent through both: what each sends first, what a @defer block waits for, when the page hydrates, and how each reaches into Angular.',
+              'One page sent through both, step by step: when each part can be read and clicked, what is better here, and what Analog does that this library does not.',
             load: () => import('../../content/guides/analog-streaming-ssr.md'),
           },
           {

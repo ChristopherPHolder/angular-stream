@@ -13,6 +13,8 @@ import {
 } from '@angular/core';
 import { DomSanitizer, type SafeHtml } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
+import { AnalogSteps } from '../figures/analog-steps';
+import { AnalogTimeline } from '../figures/analog-timeline';
 import { FIGURES, type FigureName } from '../figures/names';
 import { Race } from '../figures/race';
 import { ResponsePlayer } from '../figures/response-player';
@@ -23,7 +25,7 @@ import { headlineOf, referenceOf, setupsOf } from './nav';
 @Component({
   selector: 'docs-page',
   templateUrl: './doc-page.html',
-  imports: [NgTemplateOutlet, Race, ResponsePlayer, RouterLink],
+  imports: [AnalogSteps, AnalogTimeline, NgTemplateOutlet, Race, ResponsePlayer, RouterLink],
 })
 export class DocPage {
   readonly doc = input.required<ResolvedDoc>();

@@ -1,0 +1,194 @@
+@import './mock.css';
+
+:host {
+  /* The lanes sit side by side when the figure itself is wide enough, whatever the window is. */
+  container-type: inline-size;
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-6);
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.bar,
+.step-list,
+.arrows {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.bar {
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.step-list,
+.pieces {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The step being shown, in its row of ghost buttons. */
+.pb-btn-ghost[aria-current='step'] {
+  --btn-border: 1px solid var(--color-primary-600);
+  --btn-color: var(--color-primary-700);
+  --btn-color-hover: var(--color-primary-800);
+}
+
+.moment,
+.lane-name,
+.lane-text,
+.group-title,
+.clicks,
+.note,
+.preview-name,
+.mock-missing {
+  margin: 0;
+}
+
+.moment {
+  color: var(--color-text-heading);
+}
+
+.at {
+  margin-right: var(--space-2);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary-700);
+}
+
+.lanes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.lane {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-lg);
+}
+
+.lane-name {
+  color: var(--color-text-heading);
+}
+
+.lane-text,
+.clicks,
+.note {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.note {
+  color: var(--color-neutral-600);
+}
+
+.group {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.group-title {
+  font-size: 0.75rem;
+  color: var(--color-neutral-600);
+}
+
+.pieces {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.piece {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  border-left: 3px solid var(--color-neutral-300);
+  background: var(--color-surface-subtle);
+}
+
+/* What this step added, marked as in the `response` figure. */
+.piece--new {
+  border-left-color: var(--color-primary-600);
+  background: var(--color-primary-50);
+}
+
+.piece--none {
+  color: var(--color-neutral-600);
+}
+
+.size {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-neutral-600);
+}
+
+.mock {
+  background: var(--color-surface-subtle);
+}
+
+.mock-missing {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  color: var(--color-neutral-600);
+}
+
+/* Analog's region at the top of the body: the blocks, appended in the order they rendered. */
+.preview {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 1px dashed var(--color-neutral-400);
+  border-radius: var(--radius-md);
+}
+
+.preview-name {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--color-neutral-600);
+}
+
+.clicks-name {
+  font-weight: 600;
+  color: var(--color-text-heading);
+}
+
+@container (min-width: 681px) {
+  /* Room for the longest step, so stepping moves nothing below the figure. */
+  .lane-text {
+    min-height: 7.5rem;
+  }
+
+  .pieces {
+    min-height: 11rem;
+    align-content: start;
+  }
+
+  .clicks {
+    min-height: 2.5rem;
+  }
+
+  .mock {
+    min-height: 15.25rem;
+  }
+}
+
+@container (max-width: 680px) {
+  .lanes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

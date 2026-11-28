@@ -233,4 +233,4 @@ If you know streaming from React or Next.js,
 `<Suspense>` boundary onto all of this.
 If you know Analog's `renderStream()`,
 [Analog's streaming SSR, compared](analog-streaming-ssr.md) sends one page
-through both.
+through both, and lists what each does that the other does not.

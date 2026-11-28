@@ -92,7 +92,10 @@ haven't been checked with a localized build.
 
 ## How is this different from Analog's streaming?
 
-Both stream `@defer` blocks with a `hydrate` trigger, and differ in what a
-flush waits for, where a block lands and what crawlers get.
+Both stream `@defer` blocks with a `hydrate` trigger. Here the first flush is
+the page itself, and each block arrives and hydrates when its own data does.
+In Analog the page, its data and hydration come together at the end. Analog in
+turn takes a block anywhere and data loaded any way, and serves crawlers a
+buffered document.
 [Analog's streaming SSR, compared](../guides/analog-streaming-ssr.md) sends one
-page through both.
+page through both and steps through the two responses.

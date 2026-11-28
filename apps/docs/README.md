@@ -110,7 +110,10 @@ placed in a page by a line of its own:
 ```
 
 `race` is one page sent three ways on one clock, `response` one response
-stepped through. To add one, write the component, list its name in
+stepped through. `analog-steps` and `analog-timeline` are one page sent through
+Analog's renderer and this library, stepped through and as a chart of when each
+part was readable and clickable; both draw the recording in
+`figures/analog-recording.ts`. To add one, write the component, list its name in
 `figures/names.ts` and give it a case in `docs/doc-page.html`; a name that is
 not listed fails the build. A figure is prerendered with the page, so it has to
 say something before any script runs, and it must not depend on a request. Its
