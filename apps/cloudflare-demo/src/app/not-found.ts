@@ -8,8 +8,8 @@ import { Component } from '@angular/core';
       <p class="text-subtitle eyebrow">404</p>
       <h1 class="text-hero-title">This page does not exist</h1>
       <p class="text-lead">
-        The demo has four pages. Start from the <a href="/">overview</a>, or go straight to the
-        <a href="/example">live example</a>.
+        The demo has three pages. Start from the <a href="/">live example</a>, or go on to the
+        <a href="/walkthrough">walkthrough</a> or the <a href="/inspect">response inspector</a>.
       </p>
     </header>
   `,

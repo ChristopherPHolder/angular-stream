@@ -102,6 +102,20 @@ every page, cut at its `##` and `###` headings, code included. A new page is
 searchable once it is listed in `nav.ts`; there is nothing else to do. The index
 is a chunk of its own that the browser downloads on the first search.
 
+A drawing that moves is a figure: an Angular component in `src/app/figures/`,
+placed in a page by a line of its own:
+
+```md
+<!-- figure race -->
+```
+
+`race` is one page sent three ways on one clock, `response` one response
+stepped through. To add one, write the component, list its name in
+`figures/names.ts` and give it a case in `docs/doc-page.html`; a name that is
+not listed fails the build. A figure is prerendered with the page, so it has to
+say something before any script runs, and it must not depend on a request. Its
+text is not in the search index.
+
 A page may also hold HTML. The repository's `press-kit/` folder is published
 under `press-kit/` (`press-kit.ts`), so `<img src="press-kit/...">` shows one of
 its files and `<a href="press-kit/..." download>` links one; these paths are not

@@ -7,8 +7,8 @@
 - Check hydration in dev mode. Angular only checks node matches there.
 - To see the steps one at a time, open
   [the demo](https://angular-ssr-stream-demo.chris-holder.workers.dev/), or run it
-  locally with `pnpm dev:demo`. `/example` streams one widget and shows the
-  code for it; `/walkthrough` and `/inspect` show each flush and each hydration
+  locally with `pnpm dev:demo`. Its first page streams one widget and times
+  each step; `/walkthrough` and `/inspect` show each flush and each hydration
   as it happens.
 - Request each page at least twice on the same server process. NG0600 from
   `hydrate when` only shows from the second request on.

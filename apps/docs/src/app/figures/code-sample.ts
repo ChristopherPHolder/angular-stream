@@ -1,6 +1,6 @@
 import { Component, computed, input } from '@angular/core';
 
-/** A piece of code shown on a page. */
+/** A piece of code shown in a figure. */
 export interface Sample {
   /** The file it would live in, or what it is, shown above the code. */
   file: string;
@@ -22,7 +22,7 @@ export interface Sample {
  * so the template can be formatted without changing what is shown.
  */
 @Component({
-  selector: 'demo-code',
+  selector: 'docs-code',
   template: `
     <figure>
       <figcaption>{{ sample().file }}</figcaption>

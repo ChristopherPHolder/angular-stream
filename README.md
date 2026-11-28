@@ -11,11 +11,12 @@ docs, and two apps that use them: a demo that shows each step of streamed
 hydration as it happens, and a real TMDB-backed movie browser.
 
 - **[The docs](https://push-based.github.io/angular-ssr-stream/)** explain
-  how to use it and how it works: getting started, guides, a real response
-  taken apart flush by flush, and the API.
+  why to stream, how to use it and how it works: getting started, guides, a
+  real response taken apart flush by flush, and the API.
 - **[The demo](https://angular-ssr-stream-demo.chris-holder.workers.dev/)** shows
-  it: why a page should not wait for its slowest part, how one response
-  delivers it in pieces, and a live example with the code for it.
+  it happening, which a static page cannot: a widget streamed into an open
+  page and timed, a walkthrough with a log of each step, and every flush of a
+  response as it arrives.
 - **[The movie browser](https://angular-ssr-stream-movies.chris-holder.workers.dev/)** is
   the same technique on a real app.
 

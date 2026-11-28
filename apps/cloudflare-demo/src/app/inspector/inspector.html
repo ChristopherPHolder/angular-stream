@@ -3,7 +3,8 @@
   <p>
     This fetches the walkthrough page again and splits the response at the boundaries the server
     writes. Each box below is one flush, shown when its last byte arrives, with the time since the
-    request started.
+    request started. What a flush is made of is in the docs, under
+    <a [href]="docs.internals">Wire format and internals</a>.
   </p>
   <div class="speeds" role="group" aria-label="Speed">
     @for (speed of speeds; track speed.scale) {

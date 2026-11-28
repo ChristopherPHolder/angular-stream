@@ -18,12 +18,24 @@ response:
 The page is usable as soon as its shell is, and each slow part fills in when
 its own data is there, in whatever order that happens.
 
+## One page load, step by step
+
+There is no second request and no fetching from the browser. The server keeps
+the response open and adds to it. Step through one page load, with a single
+slow part:
+
+<!-- figure response -->
+
+The page and its response are made up, and cut down to what does the work.
+[One response, flush by flush](../concepts/walkthrough.md) takes a real one
+apart.
+
 ## See it
 
-- **[The demo](https://angular-ssr-stream-demo.chris-holder.workers.dev/)** shows
-  the same page sent three ways on one clock, one response stepped through
-  piece by piece, a single streamed widget with the code for it, and every
-  flush of a real response as it arrives.
+- **[The demo](https://angular-ssr-stream-demo.chris-holder.workers.dev/)** is
+  streaming as it happens: a widget that arrives five seconds after its page,
+  timed as it lands and as it hydrates, four blocks with a log of each step,
+  and every flush of a real response as it arrives.
 - **[Angular Movies](https://angular-ssr-stream-movies.chris-holder.workers.dev/)** is the
   same technique on a real app, backed by the TMDB API.
 
@@ -57,3 +69,5 @@ others get a small adapter over it, which is what the rest of the packages are.
   of a template stream, and how to write them.
 - [Why stream out of order](../concepts/why-stream-out-of-order.md): what it
   buys, and how other frameworks came to it.
+- [One response, flush by flush](../concepts/walkthrough.md): a real page's
+  response, and what each piece of it carries.

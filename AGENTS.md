@@ -137,21 +137,28 @@ together; the short version:
   `packages/core/`, and verify such changes the way "Debugging and verifying"
   describes, in both Worker apps. `docs/out-of-order-streaming/` is the
   pre-implementation research, not a description of the current code.
-- **Demo**: four pages, from the idea to the detail. `/`
-  (`apps/cloudflare-demo/src/app/home/`) is the landing page: why, shown as the same page
-  sent three ways, then how, as one response stepped through, then where the
-  idea comes from. Both visuals are drawings with fixed times and made-up
-  content. `/example` is the real thing with one widget, and the least code
-  that streams it. `/walkthrough` and `/inspect` hold everything more involved.
-  Keep the first two simple. Every box in `apps/cloudflare-demo` states what is happening
-  at that step. If a change to `packages/` changes what happens, its
-  API or its wire format, update the demo's text, the hand-written code in
-  `example/samples.ts` and `home/response-player.ts`, and the docs with it.
-  Quotes on the landing page and in the docs' "Why stream out of order" are
-  verbatim from the linked sources; do not reword them.
-- **Docs vs demo**: the demo shows (interactive pages, live streams); the docs
-  explain (written pages: getting started, guides, how it works, API). Written
-  explanation goes in `apps/docs/src/content/`, not in the demo or the README.
+- **Demo**: three pages, and only what needs a live streamed response, which
+  the static docs cannot show. `/` (`apps/cloudflare-demo/src/app/example/`) is
+  the real thing with one widget, timed as its HTML arrives and as it hydrates;
+  keep it simple. `/walkthrough` and `/inspect` hold everything more involved,
+  for seeing the details and for debugging. Every box in `apps/cloudflare-demo`
+  states what is happening at that step, and no more: the why, the how, the
+  code and the rules are in the docs, which each page links to
+  (`src/app/links.ts`). If a change to `packages/` changes what happens, its
+  API or its wire format, update the demo's text and the docs with it; the
+  hand-written code is in the docs' "Making something stream" and in the
+  `response` figure (`apps/docs/src/app/figures/response-player.ts`).
+  Quotes in the docs' "Why stream out of order" are verbatim from the linked
+  sources; do not reword them.
+- **Docs vs demo**: the demo shows (live streams, and what can only be seen in
+  one); the docs explain (written pages: getting started, guides, how it works,
+  API). Written explanation goes in `apps/docs/src/content/`, not in the demo
+  or the README, and so does anything that needs no request: a code sample, a
+  comparison, or a drawing. A drawing that moves is a figure: a component in
+  `apps/docs/src/app/figures/`, listed in `names.ts` and placed in a page with
+  `<!-- figure <name> -->`. There are two, both with fixed times and made-up
+  content: `race`, the same page sent three ways, and `response`, one response
+  stepped through.
   A docs page is a Markdown file plus an entry in `src/app/docs/nav.ts`; a
   runtime's setup page is listed under "Runtimes" there, with its `runtime`
   facts (its adapter, if any, and its example app). Read
@@ -160,9 +167,9 @@ together; the short version:
   there may depend on a request.
   The docs' home page is the exception to "the docs explain": its first screen
   is the hook, a headline, the two ways on (get started, the live demo) and one
-  drawing, `src/app/home-race.ts`, which is the demo's race in two lanes with
-  the same made-up times. Keep the two in step, and the buttons on the first
-  screen.
+  drawing, `src/app/home-race.ts`: one page sent whole and streamed, which is
+  the `race` figure in two lanes with the same made-up times. Keep the two in
+  step, and the buttons on the first screen.
 - **Styles (demo and docs)**: both use the PushBased design system in
   `libs/design-system/` (read its `README.md`). Use its tokens and the
   `.pb-*` component classes and `.text-*` type styles; never hard-code colours,

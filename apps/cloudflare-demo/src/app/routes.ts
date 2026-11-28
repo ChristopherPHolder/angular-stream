@@ -13,16 +13,7 @@ export const routes: Routes = [
     title: `Streaming SSR for Angular, shown live${DEMO}`,
     data: {
       description:
-        'A live demo of streaming server-side rendering for Angular: one page sent three ways on the same clock, then one response stepped through piece by piece.',
-    },
-    loadComponent: () => import('./home/home').then((m) => m.Home),
-  },
-  {
-    path: 'example',
-    title: `Live example: one page, one slow widget${DEMO}`,
-    data: {
-      description:
-        'One Angular page with one widget that waits for slow data. The widget is streamed into the open response and hydrated when it lands, next to the code that does it.',
+        'A live demo of streaming server-side rendering for Angular: one page with one widget that waits for slow data. The widget is streamed into the open response and hydrated when it lands, with each step timed.',
     },
     loadComponent: () => import('./example/example').then((m) => m.Example),
   },
@@ -44,9 +35,10 @@ export const routes: Routes = [
     },
     loadComponent: () => import('./inspector/inspector').then((m) => m.Inspector),
   },
-  // Where the example used to live. The Worker answers it with a 301 before
+  // Where the example used to live. The Worker answers both with a 301 before
   // the app is asked; this is for a build that runs without it.
-  { path: 'simple', redirectTo: 'example' },
+  { path: 'example', redirectTo: '' },
+  { path: 'simple', redirectTo: '' },
   {
     path: '**',
     title: `Page not found${DEMO}`,

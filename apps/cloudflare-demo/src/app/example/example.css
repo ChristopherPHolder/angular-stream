@@ -111,27 +111,6 @@ ul {
   line-height: 1.25rem;
 }
 
-/* The code: what to do on the left, the code for it on the right. */
-.how {
-  display: grid;
-  gap: var(--space-8);
-}
-
-.how-step,
-.how-text,
-.how-code {
-  display: grid;
-  gap: var(--space-3);
-  align-content: start;
-}
-
-@media (min-width: 900px) {
-  .how-step {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    gap: var(--space-8);
-  }
-}
-
 @media (max-width: 640px) {
   .steps {
     grid-template-columns: minmax(0, 1fr);

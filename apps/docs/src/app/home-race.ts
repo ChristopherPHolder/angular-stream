@@ -9,8 +9,9 @@ const PARTS = [
 
 /**
  * The home page's hero: one product page sent whole and streamed, on one
- * clock. A drawing, not a measurement, like the demo's: the product renders at
- * once, the reviews take one second and the recommendations three.
+ * clock. A drawing, not a measurement: the product renders at once, the reviews
+ * take one second and the recommendations three, the times of the `race`
+ * figure (`figures/race.ts`) in "Why stream out of order".
  *
  * It is all CSS (`styles.css`, "The hero's animation"), so it plays in the
  * prerendered page before Angular is there. It loops, so it can be paused; a

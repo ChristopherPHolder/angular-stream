@@ -1,5 +1,5 @@
 import { Component, computed, signal } from '@angular/core';
-import { CodeSample, type Sample } from '../code-sample';
+import { CodeSample, type Sample } from './code-sample';
 
 /** Who owns a piece of the drawn page at a step. */
 type Owner = 'server' | 'hydrated';
@@ -20,28 +20,30 @@ interface Step {
 const PIECES = [
   `<!doctype html>
 <html>
-  <body>
-    <h1>Trail shoes</h1>
-    <section>
-      <p>Loading reviews…</p>
-      <!--ngh=d0-->
-    </section>
-    <script>/* the inline runtime: window.__ngs */</script>
-    <script type="module" src="main.js" async></script>`,
-  `    <template data-ngs="d0">
-      <app-reviews>…</app-reviews>
-    </template>
-    <script>
-      __ngs.push({
-        // Move the template in at d0, with its hydration data.
-        b: [{ id: 'd0', … }],
-        // The API's answer, for the browser's own request.
-        s: { … },
-        // Nothing else is coming.
-        done: true,
-      });
-    </script>
-  </body>
+<body>
+  <h1>Trail shoes</h1>
+  <section>
+    <p>Loading reviews…</p>
+    <!--ngh=d0-->
+  </section>
+  <script>
+    /* the inline runtime: window.__ngs */
+  </script>
+  <script type="module" src="main.js" async></script>`,
+  `  <template data-ngs="d0">
+    <app-reviews>…</app-reviews>
+  </template>
+  <script>
+    __ngs.push({
+      // The template for d0, and its hydration data.
+      b: [{ id: 'd0', … }],
+      // The API's answer, for the browser's request.
+      s: { … },
+      // Nothing else is coming.
+      done: true,
+    });
+  </script>
+</body>
 </html>`,
 ];
 
@@ -103,15 +105,18 @@ const OWNER_LABEL: Record<Owner, string> = {
 };
 
 /**
- * One page load, a step at a time: what has come down the response so far, and
- * what the browser shows for it. A drawing of the mechanism, with made-up
- * content; the example page does it for real.
+ * The `response` figure: one page load, a step at a time. What has come down
+ * the response so far, and what the browser shows for it. A drawing of the
+ * mechanism, with made-up content; the demo does it for real.
+ *
+ * The response is hand-written above: if the wire format changes, change it
+ * here too.
  */
 @Component({
-  selector: 'demo-response-player',
+  selector: 'docs-response-player',
   template: `
     <div class="bar">
-      <ol class="steps">
+      <ol class="step-list">
         @for (item of steps; track item.short; let i = $index) {
           <li>
             <button
@@ -146,15 +151,16 @@ const OWNER_LABEL: Record<Owner, string> = {
     </div>
 
     <div class="caption" aria-live="polite">
-      <h3 class="text-title">{{ step().title }}</h3>
+      <!-- Not a heading: the figure can sit anywhere in a page's outline. -->
+      <p class="caption-title text-title">{{ step().title }}</p>
       <p>{{ step().text }}</p>
     </div>
 
     <div class="panes">
       <div class="pane">
         <p class="text-subtitle pane-title">What the server has sent</p>
-        <demo-code [sample]="wire()" />
-        <p class="legend"><span class="swatch"></span> arrived in this step</p>
+        <docs-code [sample]="wire()" />
+        <p class="legend"><span class="legend-swatch"></span> arrived in this step</p>
       </div>
       <div class="pane pane--page">
         <p class="text-subtitle pane-title">What the browser shows</p>

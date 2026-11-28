@@ -79,7 +79,21 @@
       </details>
     }
     <!-- Clicks are handled on the container: the links are part of the HTML below. -->
-    <div class="prose" [innerHTML]="html()" (click)="onProseClick($event)"></div>
+    <div class="doc-body" (click)="onProseClick($event)">
+      @for (part of parts(); track $index) {
+        @switch (part.figure) {
+          @case ('race') {
+            <docs-race class="figure" />
+          }
+          @case ('response') {
+            <docs-response-player class="figure" />
+          }
+          @default {
+            <div class="prose" [innerHTML]="part.html"></div>
+          }
+        }
+      }
+    </div>
     <p class="visually-hidden" role="status">{{ status() }}</p>
     <nav class="pager" aria-label="Previous and next page">
       @if (doc().previous; as previous) {

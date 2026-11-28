@@ -105,8 +105,8 @@ import { DEMO } from './links';
       <section class="path" aria-labelledby="home-demo">
         <h2 class="text-title" id="home-demo">Watch it happen</h2>
         <p>
-          The live demo sends one page three ways on the same clock, steps through a response piece
-          by piece, and streams a real widget next to the code for it.
+          The live demo streams a real widget into an open page and times each step, then takes a
+          response apart flush by flush as it arrives.
         </p>
         <a class="pb-btn pb-btn-lg pb-btn-ghost" [href]="demo">Open the live demo</a>
       </section>

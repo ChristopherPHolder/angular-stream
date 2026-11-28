@@ -126,10 +126,11 @@ app runs:
   setup page for each server and platform.
 - [Making something stream](../guides/making-something-stream.md): which
   blocks stream, and which trigger to pick.
-- [Why stream out of order](why-stream-out-of-order.md): what it buys a page,
-  and the fifteen years of frameworks that did it first.
-- [The demo](https://angular-ssr-stream-demo.chris-holder.workers.dev/) sends the
-  same page three ways on one clock.
+- [Why stream out of order](why-stream-out-of-order.md): the same page sent
+  three ways on one clock, what streaming buys it, and the fifteen years of
+  frameworks that did it first.
+- [The demo](https://angular-ssr-stream-demo.chris-holder.workers.dev/) streams
+  a real widget into an open page, and times each step.
 
 ## What streaming does not do
 

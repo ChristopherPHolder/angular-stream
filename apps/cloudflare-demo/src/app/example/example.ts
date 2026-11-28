@@ -12,8 +12,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { STEP_DELAYS, type StepData } from '../demo-backend';
 import { DemoEvents } from '../event-log';
-import { CodeSample } from '../code-sample';
-import { COMPONENT, CONFIG, TEMPLATE, WORKER } from './samples';
+import { DOCS_PAGES, MOVIES } from '../links';
 import { Widget } from './widget';
 
 /**
@@ -24,22 +23,19 @@ import { Widget } from './widget';
 export const HYDRATION_PAUSE_MS = 2000;
 
 /**
- * The idea, live: the shell first, the widget about five seconds later, then
- * its hydration. Below it, the least code that does the same.
+ * The demo's first page, and the idea, live: the shell first, the widget about
+ * five seconds later, then its hydration. How it works and the code for it are
+ * in the docs, which this page links to.
  */
 @Component({
   selector: 'demo-example',
   templateUrl: './example.html',
   styleUrl: './example.css',
-  imports: [CodeSample, Widget],
+  imports: [Widget],
 })
 export class Example {
-  protected readonly samples = {
-    template: TEMPLATE,
-    component: COMPONENT,
-    config: CONFIG,
-    worker: WORKER,
-  };
+  protected readonly docs = DOCS_PAGES;
+  protected readonly movies = MOVIES;
 
   protected readonly delayMs = STEP_DELAYS.widget;
   protected readonly pauseMs = HYDRATION_PAUSE_MS;

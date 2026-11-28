@@ -3,7 +3,8 @@
   <p>
     This page is one HTTP response that arrives in pieces. Each box says which piece it came in,
     what it is waiting for, and whether Angular has taken it over yet. The event log records each
-    step as it happens.
+    step as it happens. The docs take a real page's response apart the same way, in
+    <a [href]="docs.response">One response, flush by flush</a>.
   </p>
   <p>
     The server's data takes {{ delay.a }} ms (A), {{ delay.d }} ms (D), {{ delay.b }} ms (B) and

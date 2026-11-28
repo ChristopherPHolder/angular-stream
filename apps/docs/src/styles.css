@@ -754,8 +754,14 @@ details[open] > summary.sidebar-title::after {
   overflow-wrap: break-word;
 }
 
-.prose > :first-child {
+/* A page is one stretch of prose, or several with a figure between them. */
+.prose:first-child > :first-child {
   margin-top: 0;
+}
+
+/* A figure (src/app/figures): a drawing that moves, in the column of the text. */
+.figure {
+  margin: var(--space-6) 0;
 }
 
 .prose h2 {

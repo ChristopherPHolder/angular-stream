@@ -1,4 +1,5 @@
 import { Component, afterNextRender, signal } from '@angular/core';
+import { DOCS_PAGES } from '../links';
 import { type Flush, readFlushes } from './read-flushes';
 
 const SPEEDS = [
@@ -15,6 +16,7 @@ const SPEEDS = [
 })
 export class Inspector {
   protected readonly speeds = SPEEDS;
+  protected readonly docs = DOCS_PAGES;
   protected readonly scale = signal<number>(1);
   protected readonly flushes = signal<Flush[]>([]);
   protected readonly running = signal(false);
