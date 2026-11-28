@@ -1,0 +1,206 @@
+:host {
+  /* The names sit beside their bars when the figure itself is wide enough. */
+  container-type: inline-size;
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+
+  /* This library is the subject, in the accent; Analog is what it is read against, in grey. */
+  --analog: var(--color-neutral-500);
+  --here: var(--color-primary-600);
+  --reference: var(--color-neutral-400);
+  /* Room kept at the end of every bar for its value. */
+  --value-room: 4.5rem;
+  /* How far a line reaches past its bar, towards the bar next to it. */
+  --reach: var(--space-0-5);
+}
+
+.title,
+.what,
+.note,
+.legend,
+.rows,
+.bars,
+.plot {
+  margin: 0;
+}
+
+.title {
+  color: var(--color-text-heading);
+}
+
+.legend,
+.rows {
+  padding: 0;
+  list-style: none;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-5);
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  color: var(--color-neutral-700);
+}
+
+.legend li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.swatch {
+  flex: none;
+  align-self: center;
+  width: var(--space-3);
+  height: var(--space-2-5);
+  border-radius: 0 var(--radius-base) var(--radius-base) 0;
+}
+
+.swatch--analog {
+  background: var(--analog);
+}
+
+.swatch--here {
+  background: var(--here);
+}
+
+.swatch--line {
+  width: 1px;
+  height: var(--space-4);
+  margin-inline: var(--space-1-5);
+  border-radius: 0;
+  background: var(--reference);
+}
+
+.rows {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.row {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-lg);
+}
+
+.what {
+  font-weight: 500;
+  color: var(--color-text-heading);
+}
+
+.row-note {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--color-neutral-600);
+}
+
+.bars {
+  display: grid;
+  gap: var(--space-0-5);
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: 9.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.bar dt {
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  color: var(--color-neutral-700);
+}
+
+/* One bar: from the request, at the left, to the moment. */
+.plot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 1.5rem;
+}
+
+/* When each API answered: the same two places on every bar, so they read as two lines down the chart. */
+.plot::before,
+.plot::after {
+  content: '';
+  position: absolute;
+  top: calc(-1 * var(--reach));
+  bottom: calc(-1 * var(--reach));
+  width: 1px;
+  background: var(--reference);
+}
+
+.plot::before {
+  left: calc((100% - var(--value-room)) * var(--reviews-data));
+}
+
+.plot::after {
+  left: calc((100% - var(--value-room)) * var(--recommendations-data));
+}
+
+.fill {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: calc((100% - var(--value-room)) * var(--share));
+  /* The shortest bar is still a bar. */
+  min-width: var(--space-1);
+  height: var(--space-2-5);
+  border-radius: 0 var(--radius-base) var(--radius-base) 0;
+}
+
+.bar--analog .fill {
+  background: var(--analog);
+}
+
+.bar--here .fill {
+  background: var(--here);
+}
+
+.value {
+  position: relative;
+  z-index: 1;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding-inline: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-heading);
+  /* Legible where a line passes behind it. */
+  background: var(--color-surface);
+}
+
+.note {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--color-neutral-600);
+}
+
+@container (max-width: 520px) {
+  /* The bars are apart here, with a name between them: each line stays on its bar. */
+  :host {
+    --reach: 0px;
+  }
+
+  /* The name above its bar: the bar gets the whole width. */
+  .bar {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .bars {
+    gap: var(--space-2);
+  }
+}

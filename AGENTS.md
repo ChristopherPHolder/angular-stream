@@ -156,9 +156,13 @@ together; the short version:
   or the README, and so does anything that needs no request: a code sample, a
   comparison, or a drawing. A drawing that moves is a figure: a component in
   `apps/docs/src/app/figures/`, listed in `names.ts` and placed in a page with
-  `<!-- figure <name> -->`. There are two, both with fixed times and made-up
-  content: `race`, the same page sent three ways, and `response`, one response
-  stepped through.
+  `<!-- figure <name> -->`. Two have fixed times and made-up content: `race`,
+  the same page sent three ways, and `response`, one response stepped through.
+  Two draw a recording (`figures/analog-recording.ts`) for the Analog
+  comparison: `analog-steps`, one page through Analog's renderer and this
+  library a moment at a time, and `analog-timeline`, a chart of when each part
+  was readable and clickable. Their numbers and the page's change together,
+  from a new recording.
   A docs page is a Markdown file plus an entry in `src/app/docs/nav.ts`; a
   runtime's setup page is listed under "Runtimes" there, with its `runtime`
   facts (its adapter, if any, and its example app). Read

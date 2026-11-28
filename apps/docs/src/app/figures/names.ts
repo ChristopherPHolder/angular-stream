@@ -7,6 +7,6 @@
  * A figure needs no request: the docs are static. What only a live streamed
  * response can show belongs in the demo.
  */
-export const FIGURES = ['race', 'response'] as const;
+export const FIGURES = ['race', 'response', 'analog-steps', 'analog-timeline'] as const;
 
 export type FigureName = (typeof FIGURES)[number];

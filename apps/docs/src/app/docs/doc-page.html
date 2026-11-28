@@ -88,6 +88,12 @@
           @case ('response') {
             <docs-response-player class="figure" />
           }
+          @case ('analog-steps') {
+            <docs-analog-steps class="figure" />
+          }
+          @case ('analog-timeline') {
+            <docs-analog-timeline class="figure" />
+          }
           @default {
             <div class="prose" [innerHTML]="part.html"></div>
           }
