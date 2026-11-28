@@ -30,8 +30,12 @@ The Cloudflare setup compiles Angular with ngp and renders without
 `@angular/ssr`, which brings its own limits:
 
 - **No HTTP status codes.** The Worker answers every page with `200`, so a
-  not-found page is served with `200` too. Per-route render modes and
-  `AngularAppEngine` are not available either.
+  not-found page is served with `200` too. A server that knows its routes can
+  set the status from outside, as
+  [the demo's Worker](../../../../cloudflare-demo/src/worker.ts) does: it
+  answers `404` for an address that is no page, with the body the handler
+  streamed. Per-route render modes and `AngularAppEngine` are not available
+  either.
 - **No critical CSS inlining or SRI, and no `@angular/service-worker`
   build step.** The [Service Worker guide](../guides/service-worker.md) has an
   experimental worker of its own, which renders the pages.
