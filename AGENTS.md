@@ -168,8 +168,11 @@ together; the short version:
   The docs' home page is the exception to "the docs explain": its first screen
   is the hook, a headline, the two ways on (get started, the live demo) and one
   drawing, `src/app/home-race.ts`: one page sent whole and streamed, which is
-  the `race` figure in two lanes with the same made-up times. Keep the two in
-  step, and the buttons on the first screen.
+  the `race` figure in two lanes with the same parts in the same order and the
+  same made-up times. It adds hydration, in the colours of the other figures
+  (`figures/mock.css`): each part is hydrated half a second after it lands, the
+  whole page at once when it is sent whole, a part at a time when it is
+  streamed. Keep the two in step, and the buttons on the first screen.
 - **Styles (demo and docs)**: both use the PushBased design system in
   `libs/design-system/` (read its `README.md`). Use its tokens and the
   `.pb-*` component classes and `.text-*` type styles; never hard-code colours,
