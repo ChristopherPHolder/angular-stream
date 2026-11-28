@@ -3,7 +3,7 @@
 // from the server's HTML.
 
 import { spawn } from 'node:child_process';
-import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -25,13 +25,11 @@ function findChrome() {
 }
 
 /**
- * @returns {Promise<{
- *   streamed: boolean, done: boolean, widgetText: string | null,
- *   hydratedAttr: string | null, debugStatus: string | null,
- *   zone: boolean, click: string, errors: string[]
- * }>}
+ * Starts headless Chrome on a free DevTools port, and resolves with that port
+ * once Chrome has written it to `DevToolsActivePort` in its profile, which is
+ * steadier than watching its log.
  */
-export async function checkInBrowser(url, { waitMs = 5000 } = {}) {
+async function launchChrome() {
   const profile = mkdtempSync(join(tmpdir(), 'compat-chrome-'));
   const chrome = spawn(
     findChrome(),
@@ -41,26 +39,54 @@ export async function checkInBrowser(url, { waitMs = 5000 } = {}) {
       '--no-first-run',
       '--no-default-browser-check',
       '--no-sandbox',
+      '--disable-gpu',
+      '--disable-dev-shm-usage',
       `--user-data-dir=${profile}`,
       'about:blank',
     ],
     { stdio: ['ignore', 'ignore', 'pipe'] },
   );
+  let output = '';
+  chrome.stderr.on('data', (data) => (output += data));
+
+  const deadline = Date.now() + 60000;
+  for (;;) {
+    try {
+      const [port] = readFileSync(join(profile, 'DevToolsActivePort'), 'utf8').split('\n');
+      if (port) {
+        return { chrome, profile, port };
+      }
+    } catch {
+      // Not written yet.
+    }
+    if (Date.now() > deadline || chrome.exitCode !== null) {
+      chrome.kill();
+      rmSync(profile, { recursive: true, force: true });
+      throw new Error(`Chrome did not start:\n${output.slice(-2000)}`);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+}
+
+/**
+ * @returns {Promise<{
+ *   streamed: boolean, done: boolean, widgetText: string | null,
+ *   hydratedAttr: string | null, debugStatus: string | null,
+ *   zone: boolean, click: string, errors: string[]
+ * }>}
+ */
+export async function checkInBrowser(url, { waitMs = 5000 } = {}) {
+  // A cold start on a CI runner can be slow, and a first launch can die;
+  // one more try is cheaper than a red cell.
+  let launched;
+  try {
+    launched = await launchChrome();
+  } catch {
+    launched = await launchChrome();
+  }
+  const { chrome, profile, port } = launched;
 
   try {
-    const browserUrl = await new Promise((resolve, reject) => {
-      let output = '';
-      const timer = setTimeout(() => reject(new Error(`Chrome did not start:\n${output}`)), 20000);
-      chrome.stderr.on('data', (data) => {
-        output += data;
-        const match = /DevTools listening on (ws:\/\/\S+)/.exec(output);
-        if (match) {
-          clearTimeout(timer);
-          resolve(match[1]);
-        }
-      });
-    });
-    const { port } = new URL(browserUrl);
     const targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
     const page = targets.find((target) => target.type === 'page');
 
