@@ -134,8 +134,8 @@ together; the short version:
   with a `hydrate` trigger, placed directly inside an element; prefer
   `hydrate when <its data is there>`. Read the docs' "How it works" and
   "Making something stream" pages (`apps/docs/src/content/`) before changing
-  `packages/core/`, and verify such changes the way "Debugging and verifying"
-  describes, in both Worker apps. `docs/out-of-order-streaming/` is the
+  `packages/core/`, and verify such changes the way the README's "Verifying a
+  change to the packages" describes, in both Worker apps. `docs/out-of-order-streaming/` is the
   pre-implementation research, not a description of the current code.
 - **Demo**: three pages, and only what needs a live streamed response, which
   the static docs cannot show. `/` (`apps/cloudflare-demo/src/app/example/`) is

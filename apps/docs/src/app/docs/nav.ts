@@ -319,10 +319,10 @@ export const DOCS: DocSection[] = [
           {
             dir: 'guides',
             slug: 'debugging',
-            title: 'Debugging and verifying',
-            headline: 'Debugging and verifying streamed Angular SSR',
+            title: 'Troubleshooting',
+            headline: 'Troubleshooting streamed Angular SSR',
             description:
-              'How to tell that a page really streams and hydrates, and what to do when it does not.',
+              'What you see when a page does not stream or hydrate, how to confirm the cause, and what to change.',
             load: () => import('../../content/guides/debugging.md'),
           },
           {
