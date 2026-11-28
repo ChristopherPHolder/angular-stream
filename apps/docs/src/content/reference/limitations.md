@@ -3,7 +3,8 @@
 - **It leans on Angular internals**: the layout of serialized hydration data,
   `ɵannotateForHydration`, the dehydrated block registry, and
   `DeferBlockFixture`'s way of rendering a block. This is why the supported
-  Angular range is narrow.
+  Angular versions are the ones CI checks, listed under
+  [Compatibility](../getting-started/installation.md#compatibility).
 - **`hydrate when` is rendered by hand on the server.** Angular renders it during
   a template update, which throws `NG0600` from the second request on if the
   component has signal queries. The buffered fallback cannot work around that, so

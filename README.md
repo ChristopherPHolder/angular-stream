@@ -70,6 +70,7 @@ to npm under `@push-based/`:
 | `packages/angular-ssr`     | `@push-based/angular-ssr-stream-angular-ssr`: `withStreaming()`, for `@angular/ssr` in Angular CLI apps.   |
 | `apps/example-*`           | One small app per runtime, all rendering `libs/stream-example`. Built in CI, not deployed.                 |
 | `apps/example-angular-cli` | An app made by `ng new --ssr`, built by `ng build`, with `@angular/ssr` streaming. Built in CI.            |
+| `compat`                   | An Angular CLI app and the script that checks the packages against one Angular version, for CI.            |
 | `libs/stream-example`      | `@angular-ssr-stream/stream-example`: the page every example renders, a shell and one slow widget.         |
 | `libs/design-system`       | `@angular-ssr-stream/design-system`: the PushBased design system the demo and the docs share. Private.     |
 | `press-kit`                | The logo in every form: symbol, lockups, favicons and the social preview, with how to use them.            |
@@ -239,8 +240,10 @@ publishes to npm on the `next` dist-tag with provenance. The first run needs
 `@push-based` scope.
 
 The packages use private Angular APIs (`ɵ`-prefixed), so their Angular peer
-range is narrow (`~22.3.0-rc.0`) and every Angular minor needs a check and a
-release.
+range is what `compat/` proves: an Angular CLI app, built and run against the
+latest patch of every supported minor and the lowest patch of each, zoneless
+and with Zone.js, by `.github/workflows/compat.yml`. A new Angular minor gets
+a row in that matrix first, and joins the peer ranges once it passes.
 
 ## How the pieces fit
 

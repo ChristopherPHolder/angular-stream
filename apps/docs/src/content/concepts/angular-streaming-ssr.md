@@ -142,7 +142,9 @@ app runs:
   shell, so a part that fails afterwards cannot turn the response into an error
   page or a redirect.
 - **It is not part of Angular.** The library leans on Angular internals, so it
-  supports a narrow range of Angular versions. With the Angular CLI it works
+  supports the versions a check in CI proves, 19.2 to 22 today; see
+  [Compatibility](../getting-started/installation.md#compatibility). With the
+  Angular CLI it works
   inside `@angular/ssr`, streaming the routes it renders on the server; every
   other setup renders without `@angular/ssr`.
   [Caveats and limitations](../reference/limitations.md) has the list.

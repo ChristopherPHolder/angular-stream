@@ -188,6 +188,14 @@ together; the short version:
 - **Angular version is pinned to exactly `22.3.0-rc.0`** in every project.
   Do not bump any `@angular/*` package on its own; ngp imports private
   `@angular/compiler-cli` APIs and only works against that exact release.
+  The packages themselves support more (19.2.22+, 20.3.21+, 21.2.13+, 22):
+  `compat/` is an Angular CLI app outside the workspace that
+  `node compat/run.mjs --angular <minor> --mode <zoneless|zone>` installs,
+  builds and checks (curl-style timing plus headless Chrome) against one
+  version, and `.github/workflows/compat.yml` runs it as a matrix. Change the
+  peer ranges only together with that matrix, and run the affected rows
+  locally after changing anything in `packages/core` or `packages/angular-ssr`
+  that touches Angular's internals.
 - **Styles**: component `styleUrl` files go through Vite's Sass pipeline. Inline
   `styles` are plain CSS only, no Sass there.
 - **Icons (movies)**: `<fast-svg name="...">`. Adding an icon means dropping the
