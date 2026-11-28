@@ -44,7 +44,9 @@ const streamHttpInterceptor: HttpInterceptorFn;
 ```
 
 On the server, reports each request to the streaming renderer, which sends a
-chunk when one finishes. In the browser, parks a request the server is already
+chunk when one finishes. It runs the request outside the Angular zone and
+hands its events back inside it, so that with Zone.js an open request doesn't
+keep the app from being stable, which would hold the shell back. In the browser, parks a request the server is already
 making until its response has arrived on the stream, then lets it through to
 the transfer cache. Register it with
 `provideHttpClient(withInterceptors([streamHttpInterceptor]))`.

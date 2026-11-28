@@ -30,8 +30,8 @@ providers: [
 ];
 ```
 
-It needs Angular `~22.3.0-rc.0`, standalone and zoneless, with incremental
-hydration.
+It needs Angular `~22.3.0-rc.0`, standalone, with incremental hydration,
+zoneless or with Zone.js.
 
 - [The docs](https://push-based.github.io/angular-ssr-stream/): getting started,
   guides, how it works, and [this package's API](https://push-based.github.io/angular-ssr-stream/docs/reference/core).

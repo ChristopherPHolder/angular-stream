@@ -1,7 +1,9 @@
 ## Requirements
 
-- **Angular `~22.3.0-rc.0`**, standalone and zoneless, with incremental
-  hydration. The packages use private Angular APIs (the `ɵ`-prefixed ones), so
+- **Angular `~22.3.0-rc.0`**, standalone, with incremental hydration.
+  Zoneless or with Zone.js: on the server, the requests the renderer follows
+  run outside the Angular zone, so Zone.js doesn't hold the shell back for
+  them. The packages use private Angular APIs (the `ɵ`-prefixed ones), so
   their supported range is narrow: each Angular minor needs a check and a
   release.
 - **A server that speaks web `Request` and `Response`**, directly or through

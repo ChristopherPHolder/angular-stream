@@ -2,6 +2,7 @@ import { HttpInterceptorFn, ɵREQUESTS_CONTRIBUTE_TO_STABILITY } from '@angular/
 import {
   EnvironmentProviders,
   InjectionToken,
+  NgZone,
   Provider,
   TransferState,
   inject,
@@ -13,7 +14,7 @@ import {
   ɵDeferBlockBehavior,
   ɵwithIncrementalHydration,
 } from '@angular/core';
-import { Observable, defer, finalize, switchMap } from 'rxjs';
+import { Observable, finalize, switchMap } from 'rxjs';
 import { SERVER_REQUEST_TRACKER } from './server-request-tracker';
 import {
   NGH,
@@ -397,15 +398,34 @@ export const streamHttpInterceptor: HttpInterceptorFn = (req, next) => {
   const key = streamRequestKey(req.method, req.urlWithParams);
   const tracker = inject(SERVER_REQUEST_TRACKER, { optional: true });
   if (tracker !== null) {
-    return defer(() => {
-      const done = tracker.track(key);
-      return next(req).pipe(finalize(done));
-    });
+    return outsideAngular(inject(NgZone), () => next(req).pipe(finalize(tracker.track(key))));
   }
 
   const released = inject(STREAM_HYDRATION_CLIENT).released(key);
   return released === null ? next(req) : released.pipe(switchMap(() => next(req)));
 };
+
+/**
+ * Subscribes outside the Angular zone, and hands every event back inside it.
+ *
+ * With Zone.js, a request in flight is a pending zone task, and the zone isn't
+ * stable until it ends, so `whenStable()` would wait for the data and the
+ * shell with it. The tracker is what follows requests during a streamed
+ * render; outside the zone they stop counting, and change detection still runs
+ * when their data arrives. Without Zone.js, `NgZone` runs both straight away.
+ */
+function outsideAngular<T>(zone: NgZone, request: () => Observable<T>): Observable<T> {
+  return new Observable<T>((subscriber) => {
+    const subscription = zone.runOutsideAngular(() =>
+      request().subscribe({
+        next: (value) => zone.run(() => subscriber.next(value)),
+        error: (error: unknown) => zone.run(() => subscriber.error(error)),
+        complete: () => zone.run(() => subscriber.complete()),
+      }),
+    );
+    return () => subscription.unsubscribe();
+  });
+}
 
 /**
  * Angular's own factory for the dehydrated block registry. The token is public
