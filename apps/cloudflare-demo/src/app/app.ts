@@ -4,6 +4,7 @@ import { RouterOutlet } from '@angular/router';
 // `?no-inline`: Vite would inline an asset this small as a data: URI, which NgOptimizedImage rejects.
 import logo from '@angular-ssr-stream/press-kit/symbol/angular-ssr-stream-symbol.svg?no-inline';
 import { EventLog } from './event-log';
+import { setPageHead } from './page-head';
 
 const REPO = 'https://github.com/push-based/angular-ssr-stream';
 const DOCS = 'https://push-based.github.io/angular-ssr-stream/';
@@ -101,4 +102,8 @@ export class App {
 
   /** Only the walkthrough and the inspector have the log; the other pages explain themselves. */
   protected readonly showLog = /^\/(walkthrough|inspect)\b/.test(this.path);
+
+  constructor() {
+    setPageHead();
+  }
 }
