@@ -30,7 +30,9 @@ The native version is new: Chrome's intent to ship targets version 150, and
 [Chrome's guide][8] describes it as "shipped in only a single browser engine".
 This project places late parts with a small inline script, as the libraries do.
 
-Angular itself has no streaming, and its [roadmap][9] lists none. What it has is
+Angular itself has no streaming, and its [roadmap][9] lists none;
+[Does Angular support streaming SSR?](angular-streaming-ssr.md) shows where that
+comes from. What it has is
 [incremental hydration][10]: a `@defer` block with a `hydrate` trigger stays as
 plain server HTML until the trigger fires. Angular is not touching that markup
 yet, which is what lets the server replace it underneath a running application,
