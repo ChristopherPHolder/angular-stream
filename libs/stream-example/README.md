@@ -1,4 +1,4 @@
-# @angular-stream/stream-example
+# @angular-ssr-stream/stream-example
 
 The smallest page that streams, `ExamplePage` (the root component, `app-root`), shared by every runtime example
 (`apps/example-*`): a heading and some text sent at once, and one widget whose
@@ -10,13 +10,13 @@ examples need no network and the delay is fixed.
 
 An example app supplies only what differs between runtimes: `index.html`,
 `src/main.ts`, its `app.config.ts` (the stream's providers come from
-`@push-based/angular-stream-core`, which a `type:lib` project can't import)
+`@push-based/angular-ssr-stream-core`, which a `type:lib` project can't import)
 and its server entry.
 
 ```ts
 // app.config.ts
 import { HttpBackend, provideHttpClient, withInterceptors } from '@angular/common/http';
-import { EXAMPLE_RUNTIME, ExampleBackend } from '@angular-stream/stream-example';
+import { EXAMPLE_RUNTIME, ExampleBackend } from '@angular-ssr-stream/stream-example';
 
 export const appConfig: ApplicationConfig = {
   providers: [

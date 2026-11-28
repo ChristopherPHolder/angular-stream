@@ -35,7 +35,7 @@ export const EXAMPLE_RUNTIME = new InjectionToken<string>('EXAMPLE_RUNTIME');
 export class ExamplePage {
   /** The page heading: which runtime served it. */
   protected readonly runtime =
-    inject(EXAMPLE_RUNTIME, { optional: true }) ?? 'angular-stream example';
+    inject(EXAMPLE_RUNTIME, { optional: true }) ?? 'angular-ssr-stream example';
 
   protected readonly widget = toSignal(
     inject(HttpClient).get<WidgetData>('/api/widget', { params: { delay: EXAMPLE_DELAY_MS } }),

@@ -2,7 +2,7 @@ import type { ServerResponse } from 'node:http';
 import {
   type StreamingAppOptions,
   createStreamingHandler,
-} from '@push-based/angular-stream-core/server';
+} from '@push-based/angular-ssr-stream-core/server';
 import { BadRequestError, type NodeRequest, toWebRequest } from './request';
 import { sendWebResponse } from './response';
 import { createStaticHandler } from './static';

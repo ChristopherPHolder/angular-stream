@@ -1,4 +1,4 @@
-import type { StreamChunk, StreamInit } from '@push-based/angular-stream-core';
+import type { StreamChunk, StreamInit } from '@push-based/angular-ssr-stream-core';
 
 /** A block a chunk replaces. */
 export interface FlushBlock {

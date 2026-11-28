@@ -1,9 +1,9 @@
 ```bash
-npm install @push-based/angular-stream-aws-lambda@next
+npm install @push-based/angular-ssr-stream-aws-lambda@next
 ```
 
 The AWS Lambda adapter. It depends on
-[`@push-based/angular-stream-core`](core.md), whose browser providers the app
+[`@push-based/angular-ssr-stream-core`](core.md), whose browser providers the app
 still needs. It needs neither the AWS SDK nor `@types/aws-lambda`. For the
 whole setup, see [AWS Lambda](../getting-started/aws-lambda.md).
 

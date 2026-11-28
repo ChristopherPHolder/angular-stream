@@ -1,4 +1,4 @@
-import { streamingTemplate } from '@push-based/angular-stream-nitro/vite';
+import { streamingTemplate } from '@push-based/angular-ssr-stream-nitro/vite';
 import { ngp } from '@push-based/vite-plugin-ngp';
 import { nitro } from 'nitro/vite';
 import { defineConfig, lazyPlugins } from 'vite-plus';

@@ -1,6 +1,6 @@
 import type { ServerResponse } from 'node:http';
 import type { INestApplication } from '@nestjs/common';
-import type { NodeHandler, NodeRequest } from '@push-based/angular-stream-node';
+import type { NodeHandler, NodeRequest } from '@push-based/angular-ssr-stream-node';
 import type { FastifyInstance } from 'fastify';
 
 type Next = (error?: unknown) => void;

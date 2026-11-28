@@ -9,7 +9,7 @@ Node adapter's Vite plugin for `vite dev`.
 repository is this setup, as written here.
 
 ```bash
-npm install @push-based/angular-stream-core@next @push-based/angular-stream-node@next koa koa-static koa-compress
+npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-node@next koa koa-static koa-compress
 npm install -D @types/koa @types/koa-static
 ```
 
@@ -33,12 +33,12 @@ import type { ReadableStream as NodeReadableStream } from 'node:stream/web';
 import { fileURLToPath } from 'node:url';
 import zlib from 'node:zlib';
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { createStreamingHandler } from '@push-based/angular-stream-core/server';
+import { createStreamingHandler } from '@push-based/angular-ssr-stream-core/server';
 import {
   BadRequestError,
   createTemplateLoader,
   toWebRequest,
-} from '@push-based/angular-stream-node';
+} from '@push-based/angular-ssr-stream-node';
 import Koa, { type Context } from 'koa';
 import compress from 'koa-compress';
 import serve from 'koa-static';
@@ -227,7 +227,7 @@ any other path that isn't a file falls through to `page` and is rendered.
 ## 4. Vite
 
 ```ts title="vite.config.ts"
-import { angularStreamNode } from '@push-based/angular-stream-node/vite';
+import { angularStreamNode } from '@push-based/angular-ssr-stream-node/vite';
 import { ngp } from '@push-based/vite-plugin-ngp';
 import { defineConfig } from 'vite';
 

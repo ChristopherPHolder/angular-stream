@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { BadRequestError } from '@push-based/angular-stream-node';
+import { BadRequestError } from '@push-based/angular-ssr-stream-node';
 
 /**
  * The error to hand Nest for one the renderer threw. Nest maps an error to its

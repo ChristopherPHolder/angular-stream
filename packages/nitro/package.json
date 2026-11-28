@@ -1,10 +1,23 @@
 {
-  "name": "@push-based/angular-stream-nitro",
+  "name": "@push-based/angular-ssr-stream-nitro",
   "version": "0.0.0",
   "description": "Streamed SSR for Angular on Nitro: an h3 handler and a Vite plugin, deployable to every host Nitro has a preset for.",
+  "keywords": [
+    "angular",
+    "ssr",
+    "server-side-rendering",
+    "streaming",
+    "streamed-ssr",
+    "hydration",
+    "incremental-hydration",
+    "nitro",
+    "h3",
+    "vite-plugin"
+  ],
+  "homepage": "https://push-based.github.io/angular-ssr-stream/docs/reference/nitro",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/push-based/angular-stream.git",
+    "url": "git+https://github.com/push-based/angular-ssr-stream.git",
     "directory": "packages/nitro"
   },
   "type": "module",
@@ -37,7 +50,7 @@
     }
   },
   "dependencies": {
-    "@push-based/angular-stream-core": "workspace:*"
+    "@push-based/angular-ssr-stream-core": "workspace:*"
   },
   "peerDependencies": {
     "@angular/core": "~22.3.0-rc.0",

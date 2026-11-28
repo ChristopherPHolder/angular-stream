@@ -1,16 +1,16 @@
 <h1 align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="logo/angular-stream-logo-on-dark.svg" />
-    <img src="logo/angular-stream-logo.svg" alt="angular-stream" width="420" />
+    <source media="(prefers-color-scheme: dark)" srcset="logo/angular-ssr-stream-logo-on-dark.svg" />
+    <img src="logo/angular-ssr-stream-logo.svg" alt="angular-ssr-stream" width="500" />
   </picture>
 </h1>
 
-The angular-stream logo, in every form it is used in. The mark is the Angular
+The angular-ssr-stream logo, in every form it is used in. The mark is the Angular
 shield with three streams running through it; the streams cross out of order,
 each passing over one neighbour and under the other.
 
 The same files, with previews and download links, are on the docs site's
-[press kit page](https://push-based.github.io/angular-stream/docs/reference/press-kit).
+[press kit page](https://push-based.github.io/angular-ssr-stream/docs/reference/press-kit).
 
 ## What is here
 
@@ -19,31 +19,31 @@ name and has a transparent background.
 
 ### `logo/`: the symbol with the name
 
-| File                                      | Use it                                              |
-| ----------------------------------------- | --------------------------------------------------- |
-| `angular-stream-logo.svg`                 | By default, on white and other light backgrounds.   |
-| `angular-stream-logo-on-dark.svg`         | On dark backgrounds: the name is white.             |
-| `angular-stream-logo-black.svg`           | One colour, on light backgrounds; for print.        |
-| `angular-stream-logo-white.svg`           | One colour, on dark or coloured backgrounds.        |
-| `angular-stream-logo-stacked.svg`         | Where the horizontal logo is too wide.              |
-| `angular-stream-logo-stacked-on-dark.svg` | The stacked logo on dark backgrounds.               |
-| `angular-stream-logo-stacked-black.svg`   | The stacked logo in one colour, black.              |
-| `angular-stream-logo-stacked-white.svg`   | The stacked logo in one colour, white.              |
-| `angular-stream-wordmark.svg`             | The name alone, next to a symbol placed separately. |
-| `angular-stream-wordmark-white.svg`       | The name alone, in white.                           |
-| `png/`                                    | The eight logos: 512 px high, stacked 1024 px high. |
+| File                                          | Use it                                              |
+| --------------------------------------------- | --------------------------------------------------- |
+| `angular-ssr-stream-logo.svg`                 | By default, on white and other light backgrounds.   |
+| `angular-ssr-stream-logo-on-dark.svg`         | On dark backgrounds: the name is white.             |
+| `angular-ssr-stream-logo-black.svg`           | One colour, on light backgrounds; for print.        |
+| `angular-ssr-stream-logo-white.svg`           | One colour, on dark or coloured backgrounds.        |
+| `angular-ssr-stream-logo-stacked.svg`         | Where the horizontal logo is too wide.              |
+| `angular-ssr-stream-logo-stacked-on-dark.svg` | The stacked logo on dark backgrounds.               |
+| `angular-ssr-stream-logo-stacked-black.svg`   | The stacked logo in one colour, black.              |
+| `angular-ssr-stream-logo-stacked-white.svg`   | The stacked logo in one colour, white.              |
+| `angular-ssr-stream-wordmark.svg`             | The name alone, next to a symbol placed separately. |
+| `angular-ssr-stream-wordmark-white.svg`       | The name alone, in white.                           |
+| `png/`                                        | The eight logos: 512 px high, stacked 1024 px high. |
 
 ### `symbol/`: the symbol alone
 
-| File                                    | Use it                                                          |
-| --------------------------------------- | --------------------------------------------------------------- |
-| `angular-stream-symbol.svg`             | At 32 px and above: avatars, headers, app icons.                |
-| `angular-stream-symbol-black.svg`       | One colour, on light backgrounds.                               |
-| `angular-stream-symbol-white.svg`       | One colour, on dark or coloured backgrounds.                    |
-| `angular-stream-symbol-small.svg`       | Below 32 px. Two streams and one crossing, to stay legible.     |
-| `angular-stream-symbol-small-black.svg` | The small cut in black.                                         |
-| `angular-stream-symbol-small-white.svg` | The small cut in white.                                         |
-| `png/`                                  | The symbol at 256, 512 and 1024 px; black and white at 1024 px. |
+| File                                        | Use it                                                          |
+| ------------------------------------------- | --------------------------------------------------------------- |
+| `angular-ssr-stream-symbol.svg`             | At 32 px and above: avatars, headers, app icons.                |
+| `angular-ssr-stream-symbol-black.svg`       | One colour, on light backgrounds.                               |
+| `angular-ssr-stream-symbol-white.svg`       | One colour, on dark or coloured backgrounds.                    |
+| `angular-ssr-stream-symbol-small.svg`       | Below 32 px. Two streams and one crossing, to stay legible.     |
+| `angular-ssr-stream-symbol-small-black.svg` | The small cut in black.                                         |
+| `angular-ssr-stream-symbol-small-white.svg` | The small cut in white.                                         |
+| `png/`                                      | The symbol at 256, 512 and 1024 px; black and white at 1024 px. |
 
 ### `favicon/`: what a website needs
 
@@ -84,7 +84,7 @@ canvas it runs from (14, 150) to (242, 106).
 ## Typeface
 
 The name is set in [Geist](https://vercel.com/font) (SIL Open Font License 1.1):
-`angular-` in Regular (400), `stream` in Bold (650), tracked in by 2%. In these
+`angular-` in Regular (400), `ssr-stream` in Bold (650), tracked in by 2%. In these
 files it is drawn as outlines, so nothing depends on the font being installed.
 
 ## Using it
@@ -106,13 +106,13 @@ community to adapt. Here it is drawn as its six sides, each one straight line:
 the shoulders carry on up to a point where the icon's letter comes through, and
 the lower edges run straight to the tip. The streams are cut through it, and
 the colours are its own. Angular is a trademark of Google LLC;
-angular-stream is a community project, not affiliated with or endorsed by
+angular-ssr-stream is a community project, not affiliated with or endorsed by
 Google or the Angular team.
 
 ## In this repository
 
 This folder is the one copy. It is a private workspace package,
-`@angular-stream/press-kit`, so the demo and the docs import the symbol from it,
+`@angular-ssr-stream/press-kit`, so the demo and the docs import the symbol from it,
 and the docs site publishes the whole folder under `press-kit/`. The three files
 in each app's `public/` folder (`favicon.ico`, `favicon.svg` and
 `apple-touch-icon.png`) are copies of the ones in `favicon/`; copy them again
@@ -121,5 +121,5 @@ after changing those.
 To render a PNG again after changing an SVG:
 
 ```bash
-rsvg-convert logo/angular-stream-logo.svg -h 512 -o logo/png/angular-stream-logo.png
+rsvg-convert logo/angular-ssr-stream-logo.svg -h 512 -o logo/png/angular-ssr-stream-logo.png
 ```

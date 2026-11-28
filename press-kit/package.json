@@ -1,8 +1,8 @@
 {
-  "name": "@angular-stream/press-kit",
+  "name": "@angular-ssr-stream/press-kit",
   "version": "0.0.0",
   "private": true,
-  "description": "The angular-stream logo, in every form it is used in.",
+  "description": "The angular-ssr-stream logo, in every form it is used in.",
   "type": "module",
   "exports": {
     "./*": "./*"

@@ -3,7 +3,7 @@
 
 language = "javascript"
 manifest_version = 3
-name = "angular-stream-example"
+name = "angular-ssr-stream-example"
 
 [scripts]
 build = "pnpm run build && pnpm run compile"

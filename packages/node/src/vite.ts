@@ -9,9 +9,9 @@ import type { NodeHandler } from './handler';
  * `DEV_TEMPLATE` in `./template`, restated: this module imports nothing of the
  * package at runtime, so Vite's config loader can load it from source.
  */
-const DEV_TEMPLATE = Symbol.for('@push-based/angular-stream-node:template');
+const DEV_TEMPLATE = Symbol.for('@push-based/angular-ssr-stream-node:template');
 
-const PLUGIN_NAME = 'angular-stream-node';
+const PLUGIN_NAME = 'angular-ssr-stream-node';
 /** The name of the plugin `ngp()` from `@push-based/vite-plugin-ngp` returns first. */
 const NGP_PLUGIN_NAME = 'vite-plugin-ngp';
 

@@ -32,7 +32,7 @@ and nothing in it is an npm dependency of the app, which CDK or SST would add.
 ```ts title="src/lambda.ts"
 import { join } from 'node:path';
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { createStreamingLambda } from '@push-based/angular-stream-aws-lambda';
+import { createStreamingLambda } from '@push-based/angular-ssr-stream-aws-lambda';
 import { App } from './app/app';
 import { config } from './app/app.config.server';
 

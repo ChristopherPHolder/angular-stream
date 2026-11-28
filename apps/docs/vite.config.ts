@@ -11,7 +11,7 @@ const pressKitDir = fileURLToPath(new URL('../../press-kit', import.meta.url));
 /**
  * The docs: Angular, server-rendered by ngp, then prerendered to static HTML
  * (`scripts/prerender.ts`) for GitHub Pages. `DOCS_BASE` is the path the site
- * is served under; the Pages workflow sets it to `/angular-stream/`.
+ * is served under; the Pages workflow sets it to `/angular-ssr-stream/`.
  */
 export default defineConfig({
   base: process.env['DOCS_BASE'] ?? '/',
@@ -20,7 +20,7 @@ export default defineConfig({
     markdown({
       contentDir,
       repoRoot: repoRoot.replace(/\/$/, ''),
-      repoBlobUrl: 'https://github.com/push-based/angular-stream/blob/main',
+      repoBlobUrl: 'https://github.com/push-based/angular-ssr-stream/blob/main',
     }),
     pressKit(pressKitDir),
     ngp({

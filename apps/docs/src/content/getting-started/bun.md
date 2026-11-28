@@ -11,7 +11,7 @@ with Bun 1.4.5.
 ## 1. Install
 
 ```bash
-bun add @push-based/angular-stream-core@next
+bun add @push-based/angular-ssr-stream-core@next
 ```
 
 The core is all a Bun server needs. Vite and ngp still need Node 26 for the
@@ -29,7 +29,7 @@ build; see [Installation](installation.md).
 
 ```ts title="src/server.ts"
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { createStreamingHandler } from '@push-based/angular-stream-core/server';
+import { createStreamingHandler } from '@push-based/angular-ssr-stream-core/server';
 import { App } from './app/app';
 import { config } from './app/app.config.server';
 

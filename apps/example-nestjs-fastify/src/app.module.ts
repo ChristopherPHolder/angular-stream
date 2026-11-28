@@ -1,7 +1,7 @@
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
 import { Module } from '@nestjs/common';
-import { ExamplePage } from '@angular-stream/stream-example';
-import { AngularStreamModule } from '@push-based/angular-stream-nestjs';
+import { ExamplePage } from '@angular-ssr-stream/stream-example';
+import { AngularStreamModule } from '@push-based/angular-ssr-stream-nestjs';
 import { HelloController } from './api/hello.controller';
 import { HelloService } from './api/hello.service';
 import { config } from './app/app.config.server';

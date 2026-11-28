@@ -1,6 +1,6 @@
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { ExamplePage } from '@angular-stream/stream-example';
-import { createStreamingWorker } from '@push-based/angular-stream-cloudflare';
+import { ExamplePage } from '@angular-ssr-stream/stream-example';
+import { createStreamingWorker } from '@push-based/angular-ssr-stream-cloudflare';
 import { config } from './app/app.config.server';
 
 /** Cloudflare Worker entry: every page request is rendered as a streamed response. */

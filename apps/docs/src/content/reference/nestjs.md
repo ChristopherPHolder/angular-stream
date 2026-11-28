@@ -1,19 +1,19 @@
 ```bash
-npm install @push-based/angular-stream-nestjs@next
+npm install @push-based/angular-ssr-stream-nestjs@next
 ```
 
 The NestJS module, for `@nestjs/platform-express` and
 `@nestjs/platform-fastify`. It is built on the [Node adapter](node.md), and on
 Fastify on the [Fastify adapter](fastify.md)'s route handler. It depends on
-[`@push-based/angular-stream-core`](core.md), whose browser providers the app
+[`@push-based/angular-ssr-stream-core`](core.md), whose browser providers the app
 still needs. It needs `@nestjs/common` and `@nestjs/core` 12, and one of
 `@nestjs/platform-express` and `@nestjs/platform-fastify` 12. On Fastify,
-install `@push-based/angular-stream-fastify` too: it's an optional peer, loaded
+install `@push-based/angular-ssr-stream-fastify` too: it's an optional peer, loaded
 only there, so an Express app installs nothing from Fastify. For the whole
 setup, see [NestJS](../getting-started/nestjs.md).
 
-Two entry points: `@push-based/angular-stream-nestjs` for the server, and
-`@push-based/angular-stream-nestjs/vite` for the dev server.
+Two entry points: `@push-based/angular-ssr-stream-nestjs` for the server, and
+`@push-based/angular-ssr-stream-nestjs/vite` for the dev server.
 
 ## `AngularStreamModule.forRoot()`
 
@@ -220,7 +220,7 @@ Nest to route.
 ## `angularStreamNest()`
 
 ```ts
-import { angularStreamNest } from '@push-based/angular-stream-nestjs/vite';
+import { angularStreamNest } from '@push-based/angular-ssr-stream-nestjs/vite';
 
 function angularStreamNest(options?: AngularStreamNestOptions): Plugin[];
 
@@ -295,7 +295,7 @@ On an HTTP adapter other than Express and Fastify, the module throws when the
 app initializes:
 
 ```text
-[angular-stream] AngularStreamModule renders pages on @nestjs/platform-express or @nestjs/platform-fastify; this application runs on '<type>'.
+[angular-ssr-stream] AngularStreamModule renders pages on @nestjs/platform-express or @nestjs/platform-fastify; this application runs on '<type>'.
 ```
 
 An application context (`NestFactory.createApplicationContext()`) has no HTTP

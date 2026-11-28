@@ -1,4 +1,4 @@
-import { provideStreamHydration, streamHttpInterceptor } from '@push-based/angular-stream-core';
+import { provideStreamHydration, streamHttpInterceptor } from '@push-based/angular-ssr-stream-core';
 import { HttpBackend, provideHttpClient, withInterceptors } from '@angular/common/http';
 import type { ApplicationConfig } from '@angular/core';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';

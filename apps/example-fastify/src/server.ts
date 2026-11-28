@@ -3,8 +3,8 @@ import { fileURLToPath } from 'node:url';
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
 import fastifyCompress from '@fastify/compress';
 import fastifyStatic from '@fastify/static';
-import { ExamplePage } from '@angular-stream/stream-example';
-import { angularStream } from '@push-based/angular-stream-fastify';
+import { ExamplePage } from '@angular-ssr-stream/stream-example';
+import { angularStream } from '@push-based/angular-ssr-stream-fastify';
 import Fastify from 'fastify';
 import { config } from './app/app.config.server';
 

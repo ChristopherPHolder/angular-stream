@@ -1,5 +1,5 @@
 {
-  "name": "@angular-stream/stream-example",
+  "name": "@angular-ssr-stream/stream-example",
   "version": "0.0.0",
   "private": true,
   "description": "The smallest page that streams: one slow widget. Every runtime example (apps/example-*) renders it, so they differ only in their server entry.",

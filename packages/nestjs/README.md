@@ -1,31 +1,31 @@
 <p align="center">
   <img
-    src="https://raw.githubusercontent.com/push-based/angular-stream/main/press-kit/logo/png/angular-stream-logo.png"
-    alt="angular-stream"
-    width="420"
+    src="https://raw.githubusercontent.com/push-based/angular-ssr-stream/main/press-kit/logo/png/angular-ssr-stream-logo.png"
+    alt="angular-ssr-stream"
+    width="500"
   />
 </p>
 
-# @push-based/angular-stream-nestjs
+# @push-based/angular-ssr-stream-nestjs
 
 Streamed server-side rendering for Angular in a NestJS app. The browser starts
 hydrating the page while the response is still arriving. `AngularStreamModule`
 renders every `GET` that nothing else in the app answers, on
 `@nestjs/platform-express` through the Node adapter,
-[`@push-based/angular-stream-node`](https://www.npmjs.com/package/@push-based/angular-stream-node),
+[`@push-based/angular-ssr-stream-node`](https://www.npmjs.com/package/@push-based/angular-ssr-stream-node),
 and on `@nestjs/platform-fastify` through the Fastify adapter,
-[`@push-based/angular-stream-fastify`](https://www.npmjs.com/package/@push-based/angular-stream-fastify).
+[`@push-based/angular-ssr-stream-fastify`](https://www.npmjs.com/package/@push-based/angular-ssr-stream-fastify).
 
 ```bash
-npm install @push-based/angular-stream-core@next @push-based/angular-stream-nestjs@next
+npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-nestjs@next
 # On @nestjs/platform-fastify only:
-npm install @push-based/angular-stream-fastify@next
+npm install @push-based/angular-ssr-stream-fastify@next
 ```
 
 ```ts
 // src/app.module.ts
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { AngularStreamModule } from '@push-based/angular-stream-nestjs';
+import { AngularStreamModule } from '@push-based/angular-ssr-stream-nestjs';
 
 @Module({
   imports: [
@@ -46,7 +46,7 @@ export class AppModule {}
 ```ts
 // src/server.ts
 import 'reflect-metadata';
-import { createRequestListener } from '@push-based/angular-stream-nestjs';
+import { createRequestListener } from '@push-based/angular-ssr-stream-nestjs';
 
 const app = await NestFactory.create<NestExpressApplication>(AppModule);
 // or, on Fastify: NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter())
@@ -61,14 +61,14 @@ if (import.meta.env.PROD) {
 
 ```ts
 // vite.config.ts
-import { angularStreamNest } from '@push-based/angular-stream-nestjs/vite';
+import { angularStreamNest } from '@push-based/angular-ssr-stream-nestjs/vite';
 
 plugins: [angularStreamNest({ entry: 'src/server.ts' }), ngp({ ssr: { entry: 'src/server.ts' } })];
 ```
 
-- [The docs](https://push-based.github.io/angular-stream/): start with
-  [NestJS](https://push-based.github.io/angular-stream/docs/getting-started/nestjs),
-  then [this package's API](https://push-based.github.io/angular-stream/docs/reference/nestjs)
-  and [Streaming through proxies](https://push-based.github.io/angular-stream/docs/guides/streaming-through-proxies).
-- [The repository](https://github.com/push-based/angular-stream), with an
+- [The docs](https://push-based.github.io/angular-ssr-stream/): start with
+  [NestJS](https://push-based.github.io/angular-ssr-stream/docs/getting-started/nestjs),
+  then [this package's API](https://push-based.github.io/angular-ssr-stream/docs/reference/nestjs)
+  and [Streaming through proxies](https://push-based.github.io/angular-ssr-stream/docs/guides/streaming-through-proxies).
+- [The repository](https://github.com/push-based/angular-ssr-stream), with an
   example that uses it.

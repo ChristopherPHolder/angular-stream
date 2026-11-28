@@ -11,16 +11,16 @@
     "cf-typegen": "wrangler types"
   },
   "dependencies": {
-    "@angular-stream/design-system": "workspace:*",
-    "@angular-stream/press-kit": "workspace:*",
+    "@angular-ssr-stream/design-system": "workspace:*",
+    "@angular-ssr-stream/press-kit": "workspace:*",
     "@angular/common": "22.3.0-rc.0",
     "@angular/compiler": "22.3.0-rc.0",
     "@angular/core": "22.3.0-rc.0",
     "@angular/platform-browser": "22.3.0-rc.0",
     "@angular/platform-server": "22.3.0-rc.0",
     "@angular/router": "22.3.0-rc.0",
-    "@push-based/angular-stream-cloudflare": "workspace:*",
-    "@push-based/angular-stream-core": "workspace:*",
+    "@push-based/angular-ssr-stream-cloudflare": "workspace:*",
+    "@push-based/angular-ssr-stream-core": "workspace:*",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

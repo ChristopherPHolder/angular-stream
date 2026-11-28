@@ -8,7 +8,7 @@ import { TEMPLATE_ASSETS, TEMPLATE_KEY } from './template.ts';
 
 /**
  * Puts the app's `index.html` where `defineStreamingHandler()` reads it: a
- * Nitro server-assets directory, `<buildDir>/angular-stream`.
+ * Nitro server-assets directory, `<buildDir>/angular-ssr-stream`.
  *
  * - `vite build`: the client build's `index.html` is taken out of the public
  *   output, so no preset or CDN serves it as a static page, and written to that
@@ -27,18 +27,18 @@ export function streamingTemplate(): Plugin {
 
   const write = (html: string) => {
     if (dir === undefined) {
-      throw new Error('[angular-stream] streamingTemplate() needs the nitro() Vite plugin.');
+      throw new Error('[angular-ssr-stream] streamingTemplate() needs the nitro() Vite plugin.');
     }
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, TEMPLATE_KEY), html);
   };
 
   return {
-    name: 'angular-stream:nitro-template',
+    name: 'angular-ssr-stream:nitro-template',
     enforce: 'pre',
 
     nitro: {
-      name: 'angular-stream:template',
+      name: 'angular-ssr-stream:template',
       setup(nitro) {
         dir = join(nitro.options.buildDir, TEMPLATE_ASSETS);
         if (!nitro.options.dev) {
@@ -76,7 +76,7 @@ export function streamingTemplate(): Plugin {
         if (page?.type !== 'asset') {
           // Without it every page would answer 404 in production, with nothing to say why.
           this.error(
-            `[angular-stream] streamingTemplate(): the client build has no top-level ${TEMPLATE_KEY} to render pages into.`,
+            `[angular-ssr-stream] streamingTemplate(): the client build has no top-level ${TEMPLATE_KEY} to render pages into.`,
           );
         }
         write(String(page.source));

@@ -1,10 +1,22 @@
 {
-  "name": "@push-based/angular-stream-fastify",
+  "name": "@push-based/angular-ssr-stream-fastify",
   "version": "0.0.0",
   "description": "Streamed SSR for Angular on Fastify: a plugin that renders every page route and streams it through Fastify's reply.",
+  "keywords": [
+    "angular",
+    "ssr",
+    "server-side-rendering",
+    "streaming",
+    "streamed-ssr",
+    "hydration",
+    "incremental-hydration",
+    "fastify",
+    "fastify-plugin"
+  ],
+  "homepage": "https://push-based.github.io/angular-ssr-stream/docs/reference/fastify",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/push-based/angular-stream.git",
+    "url": "git+https://github.com/push-based/angular-ssr-stream.git",
     "directory": "packages/fastify"
   },
   "type": "module",
@@ -32,8 +44,8 @@
     }
   },
   "dependencies": {
-    "@push-based/angular-stream-core": "workspace:*",
-    "@push-based/angular-stream-node": "workspace:*"
+    "@push-based/angular-ssr-stream-core": "workspace:*",
+    "@push-based/angular-ssr-stream-node": "workspace:*"
   },
   "peerDependencies": {
     "@angular/core": "~22.3.0-rc.0",

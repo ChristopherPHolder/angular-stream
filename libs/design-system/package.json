@@ -1,5 +1,5 @@
 {
-  "name": "@angular-stream/design-system",
+  "name": "@angular-ssr-stream/design-system",
   "version": "0.0.0",
   "private": true,
   "description": "The PushBased design system, shared by the demo and the docs.",

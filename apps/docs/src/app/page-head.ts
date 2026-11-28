@@ -12,7 +12,7 @@ const DESCRIPTION =
   'Streamed server-side rendering for Angular: the browser hydrates the page while the response is still arriving.';
 
 /** The home page's name in a link preview; index.html has it as `og:site_name`. */
-const SITE_NAME = 'angular-stream';
+const SITE_NAME = 'angular-ssr-stream';
 
 /** Shown with a link to any page: the logo on its backdrop, 1200 by 630. */
 const PREVIEW_IMAGE = `${SITE}press-kit/social/social-preview.png`;

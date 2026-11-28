@@ -9,8 +9,8 @@
     "preview": "vp preview"
   },
   "dependencies": {
-    "@angular-stream/design-system": "workspace:*",
-    "@angular-stream/press-kit": "workspace:*",
+    "@angular-ssr-stream/design-system": "workspace:*",
+    "@angular-ssr-stream/press-kit": "workspace:*",
     "@angular/common": "22.3.0-rc.0",
     "@angular/compiler": "22.3.0-rc.0",
     "@angular/core": "22.3.0-rc.0",

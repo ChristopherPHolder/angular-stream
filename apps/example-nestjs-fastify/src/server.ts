@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import fastifyCompress from '@fastify/compress';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
-import { createRequestListener } from '@push-based/angular-stream-nestjs';
+import { createRequestListener } from '@push-based/angular-ssr-stream-nestjs';
 import { AppModule } from './app.module';
 
 /**

@@ -1,5 +1,5 @@
-export type { StreamingAppOptions } from '@push-based/angular-stream-core/server';
-export { BadRequestError } from '@push-based/angular-stream-node';
+export type { StreamingAppOptions } from '@push-based/angular-ssr-stream-core/server';
+export { BadRequestError } from '@push-based/angular-ssr-stream-node';
 export {
   type AngularStreamOptions,
   type FastifyHandler,

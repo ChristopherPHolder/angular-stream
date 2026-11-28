@@ -4,18 +4,18 @@ import path from 'node:path';
 import {
   type AngularStreamNodeOptions,
   angularStreamNode,
-} from '@push-based/angular-stream-node/vite';
+} from '@push-based/angular-ssr-stream-node/vite';
 // Types only: an app that uses this plugin has Vite.
 import type { Plugin, RunnableDevEnvironment } from 'vite';
 
 export type AngularStreamNestOptions = AngularStreamNodeOptions;
 
 /**
- * Where `@push-based/angular-stream-node` looks for the dev template on the
+ * Where `@push-based/angular-ssr-stream-node` looks for the dev template on the
  * Node request, restated: this module imports nothing of it at runtime but its
  * Vite plugin.
  */
-const DEV_TEMPLATE = Symbol.for('@push-based/angular-stream-node:template');
+const DEV_TEMPLATE = Symbol.for('@push-based/angular-ssr-stream-node:template');
 
 type Listener = (
   req: IncomingMessage,
@@ -27,7 +27,7 @@ type Listener = (
  * Serves the Nest app in `vite dev`: pages and every other request Vite
  * doesn't answer itself, such as the API.
  *
- * It is `angularStreamNode()` from `@push-based/angular-stream-node/vite`,
+ * It is `angularStreamNode()` from `@push-based/angular-ssr-stream-node/vite`,
  * which streams each page through the server entry's default export with the
  * dev template, plus a middleware after it that hands that same export every
  * request Vite has no file or module for. Without it, `vite dev` answers
@@ -46,7 +46,7 @@ export function angularStreamNest(options: AngularStreamNestOptions = {}): Plugi
   return [
     angularStreamNode(options),
     {
-      name: 'angular-stream-nestjs',
+      name: 'angular-ssr-stream-nestjs',
       apply: 'serve',
       // After angularStreamNode()'s page middleware, before ngp's.
       enforce: 'pre',
@@ -64,13 +64,15 @@ export function angularStreamNest(options: AngularStreamNestOptions = {}): Plugi
               }
               const environment = server.environments['ssr'];
               if (environment === undefined || !('runner' in environment)) {
-                throw new Error('[angular-stream-nestjs] the ssr environment has no module runner');
+                throw new Error(
+                  '[angular-ssr-stream-nestjs] the ssr environment has no module runner',
+                );
               }
               const { runner } = environment as RunnableDevEnvironment;
               const module = (await runner.import(entry)) as { default?: unknown };
               if (typeof module.default !== 'function') {
                 throw new Error(
-                  `[angular-stream-nestjs] ${entry} must default-export a request listener, (req, res, next?), such as the one createRequestListener() returns`,
+                  `[angular-ssr-stream-nestjs] ${entry} must default-export a request listener, (req, res, next?), such as the one createRequestListener() returns`,
                 );
               }
               (module.default as Listener)(req, res, (error) => {

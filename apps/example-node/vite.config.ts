@@ -1,4 +1,4 @@
-import { angularStreamNode } from '@push-based/angular-stream-node/vite';
+import { angularStreamNode } from '@push-based/angular-ssr-stream-node/vite';
 import { ngp } from '@push-based/vite-plugin-ngp';
 import { defineConfig, lazyPlugins } from 'vite-plus';
 

@@ -9,14 +9,14 @@
     "start": "func start"
   },
   "dependencies": {
-    "@angular-stream/stream-example": "workspace:*",
+    "@angular-ssr-stream/stream-example": "workspace:*",
     "@angular/common": "22.3.0-rc.0",
     "@angular/compiler": "22.3.0-rc.0",
     "@angular/core": "22.3.0-rc.0",
     "@angular/platform-browser": "22.3.0-rc.0",
     "@angular/platform-server": "22.3.0-rc.0",
     "@azure/functions": "^4.17.1",
-    "@push-based/angular-stream-core": "workspace:*",
+    "@push-based/angular-ssr-stream-core": "workspace:*",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

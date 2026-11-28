@@ -60,27 +60,27 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 ## This project
 
 Streamed SSR for Angular 22, as an Nx workspace over pnpm, published as
-`@push-based/angular-stream-*` packages. Read `README.md` for how the pieces fit
+`@push-based/angular-ssr-stream-*` packages. Read `README.md` for how the pieces fit
 together; the short version:
 
 - **Layout**: `apps/movies` (the TMDB movie browser) and
   `apps/cloudflare-demo` (streamed hydration shown step by step, with an
   in-process fake API) are private apps, each deployed as a Cloudflare Worker.
-  `packages/core` (`@push-based/angular-stream-core`: the renderer, inline
+  `packages/core` (`@push-based/angular-ssr-stream-core`: the renderer, inline
   runtime and client, runtime-agnostic) and the adapters are published to npm:
   `packages/cloudflare` (`createStreamingWorker()`), `packages/node`
   (`node:http`, Connect, Express, and a Vite dev plugin), `packages/fastify`,
   `packages/nestjs` (on Express or Fastify), `packages/aws-lambda` and
-  `packages/nitro`, each `@push-based/angular-stream-<name>`. Runtimes that
+  `packages/nitro`, each `@push-based/angular-ssr-stream-<name>`. Runtimes that
   speak `Request`/`Response` natively (Hono, Deno, Bun, Fastly, Vercel,
   Netlify, Azure Functions, a Service Worker) have a docs recipe and an
   example, but no package. `apps/docs` is the documentation site (prerendered,
-  GitHub Pages), `libs/design-system` (`@angular-stream/design-system`,
+  GitHub Pages), `libs/design-system` (`@angular-ssr-stream/design-system`,
   private) the design system the demo and the docs share, and `press-kit`
-  (`@angular-stream/press-kit`, private) the logo.
+  (`@angular-ssr-stream/press-kit`, private) the logo.
 - **Runtime examples**: each adapter has one `apps/example-<runtime>` (private,
   not deployed) that renders the same page, `libs/stream-example`
-  (`@angular-stream/stream-example`): a shell sent at once and one widget whose
+  (`@angular-ssr-stream/stream-example`): a shell sent at once and one widget whose
   in-process fake API answers 2 s later. An example holds only `index.html`,
   `src/main.ts`, `src/app/app.config*.ts` and its server entry;
   `apps/example-cloudflare` is the reference to copy. It streams when the
@@ -106,7 +106,7 @@ together; the short version:
   by Angular when published): provide services through an `InjectionToken`
   with a factory, as `STREAM_HYDRATION_CLIENT` does.
 - **New runtime adapter**: a new `packages/<runtime>` named
-  `@push-based/angular-stream-<runtime>`, tagged `type:package` and
+  `@push-based/angular-ssr-stream-<runtime>`, tagged `type:package` and
   `runtime:<runtime>`, depending on the core with `workspace:*`, wrapping
   `createStreamingHandler()`. Add its tag to the boundary rules in
   `vite.config.ts`. Everything under `packages/` is released together. Make a
@@ -162,7 +162,7 @@ together; the short version:
   (`--server`, `--placeholder`, `--chunk`, `--hydrated`) onto its state scales.
 - **Logo**: `press-kit/` is the one copy of the logo, and its `README.md` says
   which file is for what. The demo and the docs import the symbol from it
-  (`@angular-stream/press-kit/...`), and the docs publish the folder under
+  (`@angular-ssr-stream/press-kit/...`), and the docs publish the folder under
   `press-kit/` and show it on the "Press kit" page. Each app's `public/`
   holds copies of `press-kit/favicon/`'s `favicon.ico`, `favicon.svg` and
   `apple-touch-icon.png`. Do not redraw, recolour or inline the logo; add a

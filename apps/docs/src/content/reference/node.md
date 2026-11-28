@@ -1,13 +1,13 @@
 ```bash
-npm install @push-based/angular-stream-node@next
+npm install @push-based/angular-ssr-stream-node@next
 ```
 
-The Node adapter. It depends on [`@push-based/angular-stream-core`](core.md),
+The Node adapter. It depends on [`@push-based/angular-ssr-stream-core`](core.md),
 whose browser providers the app still needs. For the whole setup, see
 [Node](../getting-started/node.md).
 
-Two entry points: `@push-based/angular-stream-node` for the server, and
-`@push-based/angular-stream-node/vite` for the dev server. Most apps need only
+Two entry points: `@push-based/angular-ssr-stream-node` for the server, and
+`@push-based/angular-ssr-stream-node/vite` for the dev server. Most apps need only
 `createNodeHandler()` and `angularStreamNode()`; the rest is what the handler
 is made of, for adapters to other Node frameworks.
 
@@ -95,7 +95,7 @@ the `Host` header and the socket.
 ## `angularStreamNode()`
 
 ```ts
-import { angularStreamNode } from '@push-based/angular-stream-node/vite';
+import { angularStreamNode } from '@push-based/angular-ssr-stream-node/vite';
 
 function angularStreamNode(options?: AngularStreamNodeOptions): Plugin;
 

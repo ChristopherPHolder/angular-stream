@@ -13,31 +13,31 @@ wherever there is room for it.
 
 <div class="logo-tiles">
   <figure class="logo-tile">
-    <img src="press-kit/logo/angular-stream-logo.svg" alt="The angular-stream logo: the symbol, then the name" width="1092" height="256" />
+    <img src="press-kit/logo/angular-ssr-stream-logo.svg" alt="The angular-ssr-stream logo: the symbol, then the name" width="1294" height="256" />
     <figcaption>
       Horizontal
-      <span><a href="press-kit/logo/angular-stream-logo.svg" download aria-label="SVG: Horizontal">SVG</a> <a href="press-kit/logo/png/angular-stream-logo.png" download aria-label="PNG: Horizontal">PNG</a></span>
+      <span><a href="press-kit/logo/angular-ssr-stream-logo.svg" download aria-label="SVG: Horizontal">SVG</a> <a href="press-kit/logo/png/angular-ssr-stream-logo.png" download aria-label="PNG: Horizontal">PNG</a></span>
     </figcaption>
   </figure>
   <figure class="logo-tile logo-tile--dark">
-    <img src="press-kit/logo/angular-stream-logo-on-dark.svg" alt="The horizontal logo with the name in white" width="1092" height="256" />
+    <img src="press-kit/logo/angular-ssr-stream-logo-on-dark.svg" alt="The horizontal logo with the name in white" width="1294" height="256" />
     <figcaption>
       Horizontal, on dark
-      <span><a href="press-kit/logo/angular-stream-logo-on-dark.svg" download aria-label="SVG: Horizontal, on dark">SVG</a> <a href="press-kit/logo/png/angular-stream-logo-on-dark.png" download aria-label="PNG: Horizontal, on dark">PNG</a></span>
+      <span><a href="press-kit/logo/angular-ssr-stream-logo-on-dark.svg" download aria-label="SVG: Horizontal, on dark">SVG</a> <a href="press-kit/logo/png/angular-ssr-stream-logo-on-dark.png" download aria-label="PNG: Horizontal, on dark">PNG</a></span>
     </figcaption>
   </figure>
   <figure class="logo-tile">
-    <img class="logo-tile-tall" src="press-kit/logo/angular-stream-logo-stacked.svg" alt="The stacked logo: the symbol above the name" width="378" height="324" />
+    <img class="logo-tile-tall" src="press-kit/logo/angular-ssr-stream-logo-stacked.svg" alt="The stacked logo: the symbol above the name" width="469" height="324" />
     <figcaption>
       Stacked
-      <span><a href="press-kit/logo/angular-stream-logo-stacked.svg" download aria-label="SVG: Stacked">SVG</a> <a href="press-kit/logo/png/angular-stream-logo-stacked.png" download aria-label="PNG: Stacked">PNG</a></span>
+      <span><a href="press-kit/logo/angular-ssr-stream-logo-stacked.svg" download aria-label="SVG: Stacked">SVG</a> <a href="press-kit/logo/png/angular-ssr-stream-logo-stacked.png" download aria-label="PNG: Stacked">PNG</a></span>
     </figcaption>
   </figure>
   <figure class="logo-tile logo-tile--dark">
-    <img class="logo-tile-tall" src="press-kit/logo/angular-stream-logo-stacked-on-dark.svg" alt="The stacked logo with the name in white" width="378" height="324" />
+    <img class="logo-tile-tall" src="press-kit/logo/angular-ssr-stream-logo-stacked-on-dark.svg" alt="The stacked logo with the name in white" width="469" height="324" />
     <figcaption>
       Stacked, on dark
-      <span><a href="press-kit/logo/angular-stream-logo-stacked-on-dark.svg" download aria-label="SVG: Stacked, on dark">SVG</a> <a href="press-kit/logo/png/angular-stream-logo-stacked-on-dark.png" download aria-label="PNG: Stacked, on dark">PNG</a></span>
+      <span><a href="press-kit/logo/angular-ssr-stream-logo-stacked-on-dark.svg" download aria-label="SVG: Stacked, on dark">SVG</a> <a href="press-kit/logo/png/angular-ssr-stream-logo-stacked-on-dark.png" download aria-label="PNG: Stacked, on dark">PNG</a></span>
     </figcaption>
   </figure>
 </div>
@@ -50,41 +50,41 @@ keeps two of the streams and one crossing.
 
 <div class="logo-tiles logo-tiles--four">
   <figure class="logo-tile">
-    <img class="logo-tile-tall" src="press-kit/symbol/angular-stream-symbol.svg" alt="The symbol in colour" width="256" height="256" />
+    <img class="logo-tile-tall" src="press-kit/symbol/angular-ssr-stream-symbol.svg" alt="The symbol in colour" width="256" height="256" />
     <figcaption>
       Colour
-      <span><a href="press-kit/symbol/angular-stream-symbol.svg" download aria-label="SVG: Colour">SVG</a> <a href="press-kit/symbol/png/angular-stream-symbol-1024.png" download aria-label="PNG: Colour">PNG</a></span>
+      <span><a href="press-kit/symbol/angular-ssr-stream-symbol.svg" download aria-label="SVG: Colour">SVG</a> <a href="press-kit/symbol/png/angular-ssr-stream-symbol-1024.png" download aria-label="PNG: Colour">PNG</a></span>
     </figcaption>
   </figure>
   <figure class="logo-tile">
-    <img class="logo-tile-tall" src="press-kit/symbol/angular-stream-symbol-black.svg" alt="The symbol in black" width="256" height="256" />
+    <img class="logo-tile-tall" src="press-kit/symbol/angular-ssr-stream-symbol-black.svg" alt="The symbol in black" width="256" height="256" />
     <figcaption>
       Black
-      <span><a href="press-kit/symbol/angular-stream-symbol-black.svg" download aria-label="SVG: Black">SVG</a> <a href="press-kit/symbol/png/angular-stream-symbol-black-1024.png" download aria-label="PNG: Black">PNG</a></span>
+      <span><a href="press-kit/symbol/angular-ssr-stream-symbol-black.svg" download aria-label="SVG: Black">SVG</a> <a href="press-kit/symbol/png/angular-ssr-stream-symbol-black-1024.png" download aria-label="PNG: Black">PNG</a></span>
     </figcaption>
   </figure>
   <figure class="logo-tile logo-tile--dark">
-    <img class="logo-tile-tall" src="press-kit/symbol/angular-stream-symbol-white.svg" alt="The symbol in white" width="256" height="256" />
+    <img class="logo-tile-tall" src="press-kit/symbol/angular-ssr-stream-symbol-white.svg" alt="The symbol in white" width="256" height="256" />
     <figcaption>
       White
-      <span><a href="press-kit/symbol/angular-stream-symbol-white.svg" download aria-label="SVG: White">SVG</a> <a href="press-kit/symbol/png/angular-stream-symbol-white-1024.png" download aria-label="PNG: White">PNG</a></span>
+      <span><a href="press-kit/symbol/angular-ssr-stream-symbol-white.svg" download aria-label="SVG: White">SVG</a> <a href="press-kit/symbol/png/angular-ssr-stream-symbol-white-1024.png" download aria-label="PNG: White">PNG</a></span>
     </figcaption>
   </figure>
   <figure class="logo-tile">
-    <img class="logo-tile-tall" src="press-kit/symbol/angular-stream-symbol-small.svg" alt="The small cut of the symbol: two streams, one crossing" width="256" height="256" />
+    <img class="logo-tile-tall" src="press-kit/symbol/angular-ssr-stream-symbol-small.svg" alt="The small cut of the symbol: two streams, one crossing" width="256" height="256" />
     <figcaption>
       Small cut
-      <span><a href="press-kit/symbol/angular-stream-symbol-small.svg" download aria-label="SVG: Small cut">SVG</a></span>
+      <span><a href="press-kit/symbol/angular-ssr-stream-symbol-small.svg" download aria-label="SVG: Small cut">SVG</a></span>
     </figcaption>
   </figure>
 </div>
 
 The logo comes in black and in white too, for one-colour printing and for
 backgrounds the gradient does not sit well on:
-[horizontal, black](../../../../../press-kit/logo/angular-stream-logo-black.svg),
-[horizontal, white](../../../../../press-kit/logo/angular-stream-logo-white.svg),
-[stacked, black](../../../../../press-kit/logo/angular-stream-logo-stacked-black.svg),
-[stacked, white](../../../../../press-kit/logo/angular-stream-logo-stacked-white.svg).
+[horizontal, black](../../../../../press-kit/logo/angular-ssr-stream-logo-black.svg),
+[horizontal, white](../../../../../press-kit/logo/angular-ssr-stream-logo-white.svg),
+[stacked, black](../../../../../press-kit/logo/angular-ssr-stream-logo-stacked-black.svg),
+[stacked, white](../../../../../press-kit/logo/angular-ssr-stream-logo-stacked-white.svg).
 
 ## Colours
 
@@ -102,7 +102,7 @@ light backgrounds and in white on dark ones.
 ## Typeface
 
 The name is set in [Geist](https://vercel.com/font): `angular-` in Regular,
-`stream` in Bold. In the files it is drawn as outlines, so nothing depends on
+`ssr-stream` in Bold. In the files it is drawn as outlines, so nothing depends on
 the font being installed.
 
 ## Using it
@@ -124,5 +124,5 @@ community to adapt. Here it is drawn as its six sides, each one straight line:
 the shoulders carry on up to a point where the icon's letter comes through, and
 the lower edges run straight to the tip. The streams are cut through it, and
 the colours are its own. Angular is a trademark of Google LLC;
-angular-stream is a community project, not affiliated with or endorsed by
+angular-ssr-stream is a community project, not affiliated with or endorsed by
 Google or the Angular team.

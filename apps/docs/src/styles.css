@@ -3,8 +3,8 @@
  * its .pb-* components and .text-* type styles, Geist (loaded in index.html).
  * Use those tokens here; don't hard-code colours, spacing or radii.
  */
-@import '@angular-stream/design-system/tokens.css';
-@import '@angular-stream/design-system/components.css';
+@import '@angular-ssr-stream/design-system/tokens.css';
+@import '@angular-ssr-stream/design-system/components.css';
 
 :root {
   /* The design system has one light theme. */
@@ -540,10 +540,19 @@ details[open] > summary.sidebar-title::after {
   }
 }
 
-/* The narrowest phones: the name without "docs" leaves room for both buttons. */
+/* The narrowest phones: the name without "docs", and tighter spacing around
+   it, leave room for both buttons. */
 @media (max-width: 360px) {
+  .brand {
+    gap: var(--space-2);
+  }
+
   .brand span {
     display: none;
+  }
+
+  .menu-toggle {
+    padding-inline: var(--space-2);
   }
 }
 

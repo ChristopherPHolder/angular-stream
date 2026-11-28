@@ -9,14 +9,14 @@
     "preview": "vp preview"
   },
   "dependencies": {
-    "@angular-stream/stream-example": "workspace:*",
+    "@angular-ssr-stream/stream-example": "workspace:*",
     "@angular/common": "22.3.0-rc.0",
     "@angular/compiler": "22.3.0-rc.0",
     "@angular/core": "22.3.0-rc.0",
     "@angular/platform-browser": "22.3.0-rc.0",
     "@angular/platform-server": "22.3.0-rc.0",
-    "@push-based/angular-stream-core": "workspace:*",
-    "@push-based/angular-stream-nitro": "workspace:*",
+    "@push-based/angular-ssr-stream-core": "workspace:*",
+    "@push-based/angular-ssr-stream-nitro": "workspace:*",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "unstorage": "2.0.0-beta.0"

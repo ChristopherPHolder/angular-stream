@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
-import { ExamplePage } from '@angular-stream/stream-example';
-import { createNodeHandler } from '@push-based/angular-stream-node';
+import { ExamplePage } from '@angular-ssr-stream/stream-example';
+import { createNodeHandler } from '@push-based/angular-ssr-stream-node';
 import { config } from './app/app.config.server';
 
 /**

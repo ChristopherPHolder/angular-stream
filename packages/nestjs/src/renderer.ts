@@ -45,7 +45,7 @@ export class AngularStreamRenderer implements OnModuleInit, OnApplicationBootstr
     const type = adapter.getType();
     if (!PLATFORMS.includes(type)) {
       throw new Error(
-        `[angular-stream] AngularStreamModule renders pages on @nestjs/platform-express or @nestjs/platform-fastify; this application runs on '${type}'.`,
+        `[angular-ssr-stream] AngularStreamModule renders pages on @nestjs/platform-express or @nestjs/platform-fastify; this application runs on '${type}'.`,
       );
     }
 
@@ -55,7 +55,7 @@ export class AngularStreamRenderer implements OnModuleInit, OnApplicationBootstr
         (module) => module.addFastifyRenderer,
         (error: unknown) => {
           throw new Error(
-            '[angular-stream] On @nestjs/platform-fastify, AngularStreamModule needs @push-based/angular-stream-fastify: npm install @push-based/angular-stream-fastify@next',
+            '[angular-ssr-stream] On @nestjs/platform-fastify, AngularStreamModule needs @push-based/angular-ssr-stream-fastify: npm install @push-based/angular-ssr-stream-fastify@next',
             { cause: error },
           );
         },

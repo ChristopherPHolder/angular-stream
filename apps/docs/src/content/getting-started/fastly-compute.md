@@ -15,7 +15,7 @@ every path without a file is rendered and streamed. This is the setup of
 ## 1. Install
 
 ```bash
-pnpm add @push-based/angular-stream-core@next @fastly/compute-js-static-publish
+pnpm add @push-based/angular-ssr-stream-core@next @fastly/compute-js-static-publish
 pnpm add -D @fastly/js-compute
 ```
 
@@ -43,7 +43,7 @@ There is no adapter package for Compute: the entry calls the core's
 /// <reference types="@fastly/js-compute" />
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
 import { PublisherServer } from '@fastly/compute-js-static-publish';
-import { createStreamingHandler } from '@push-based/angular-stream-core/server';
+import { createStreamingHandler } from '@push-based/angular-ssr-stream-core/server';
 import rc from '../static-publish.rc.js';
 import { App } from './app/app';
 import { config } from './app/app.config.server';
@@ -309,7 +309,7 @@ the served files; the routing in step 4 does the same job with 8.0.
 ```toml title="fastly.toml"
 language = "javascript"
 manifest_version = 3
-name = "angular-stream-example"
+name = "angular-ssr-stream-example"
 
 [scripts]
 build = "pnpm run build && pnpm run compile"

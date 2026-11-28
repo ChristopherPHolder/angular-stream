@@ -1,10 +1,10 @@
 ```bash
-npm install @push-based/angular-stream-nitro@next unstorage
+npm install @push-based/angular-ssr-stream-nitro@next unstorage
 npm install -D nitro@3.0.261103-rc
 ```
 
 The Nitro adapter: an h3 event handler, and a Vite plugin that gives it the
-template. It depends on [`@push-based/angular-stream-core`](core.md), whose
+template. It depends on [`@push-based/angular-ssr-stream-core`](core.md), whose
 browser providers the app still needs, and on Nitro 3 with its Vite plugin. For
 the whole setup, see [Nitro](../getting-started/nitro.md).
 
@@ -16,7 +16,7 @@ for exactly the one it was checked with, and moves with each new one.
 ## `defineStreamingHandler()`
 
 ```ts
-import { defineStreamingHandler } from '@push-based/angular-stream-nitro';
+import { defineStreamingHandler } from '@push-based/angular-ssr-stream-nitro';
 
 function defineStreamingHandler(
   options: StreamingAppOptions,
@@ -53,7 +53,7 @@ export default defineStreamingHandler({
 As the server entry it receives every request that Nitro doesn't answer with a
 static file or a route of its own, and renders each one as a page.
 
-The template is `index.html` in the server-assets mount `assets:angular-stream`,
+The template is `index.html` in the server-assets mount `assets:angular-ssr-stream`,
 read with `useKV()` from `nitro/kv`, which is why the app needs `unstorage`.
 `streamingTemplate()` puts it there. If it isn't there, every page answers
 `404`.
@@ -61,7 +61,7 @@ read with `useKV()` from `nitro/kv`, which is why the app needs `unstorage`.
 ## `streamingTemplate()`
 
 ```ts
-import { streamingTemplate } from '@push-based/angular-stream-nitro/vite';
+import { streamingTemplate } from '@push-based/angular-ssr-stream-nitro/vite';
 
 function streamingTemplate(): Plugin;
 ```
@@ -77,8 +77,8 @@ plugins: [
 ],
 ```
 
-- It registers `<buildDir>/angular-stream` (`node_modules/.nitro/angular-stream`
-  by default) as the server-assets directory `angular-stream`.
+- It registers `<buildDir>/angular-ssr-stream` (`node_modules/.nitro/angular-ssr-stream`
+  by default) as the server-assets directory `angular-ssr-stream`.
 - In `vite build` it takes the built `index.html` out of the client build, so
   that it is not in the static output for Nitro or a CDN to serve, and writes it
   to that directory. Nitro then bundles it into the server, whatever the preset.
