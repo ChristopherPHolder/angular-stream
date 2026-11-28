@@ -1,5 +1,5 @@
 ```bash
-npm install @push-based/angular-ssr-stream-nitro@next unstorage
+npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-nitro@next unstorage
 npm install -D nitro@3.0.261103-rc
 ```
 
@@ -82,6 +82,9 @@ plugins: [
 - In `vite build` it takes the built `index.html` out of the client build, so
   that it is not in the static output for Nitro or a CDN to serve, and writes it
   to that directory. Nitro then bundles it into the server, whatever the preset.
+  The build fails when the client build has no top-level `index.html`, rather
+  than answering every page with `404` later. A template left there by
+  `vite dev` is removed first, so it can't end up in a production bundle.
 - In `vite dev` it writes the `index.html` Vite serves there, with Vite's dev
   transforms, and again whenever `index.html` changes.
 - It makes `index.html` the client build's input, unless the config names one,

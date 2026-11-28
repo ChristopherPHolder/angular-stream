@@ -1,5 +1,5 @@
 ```bash
-npm install @push-based/angular-ssr-stream-node@next
+npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-node@next
 ```
 
 The Node adapter. It depends on [`@push-based/angular-ssr-stream-core`](core.md),

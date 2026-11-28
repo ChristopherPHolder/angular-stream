@@ -1,5 +1,5 @@
 ```bash
-npm install @push-based/angular-ssr-stream-aws-lambda@next
+npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-aws-lambda@next
 ```
 
 The AWS Lambda adapter. It depends on
@@ -55,7 +55,9 @@ global is missing. That happens outside Lambda, or with
 For each event, the handler:
 
 1. Builds a web `Request`. The URL is the `host` header (the Function URL's
-   hostname, also behind CloudFront), plus `rawPath` and `rawQueryString`.
+   hostname, also behind CloudFront, or `requestContext.domainName` without
+   one), plus `rawPath` and `rawQueryString`, over `X-Forwarded-Proto`, or
+   `https` without it.
    The headers are the event's, with `cookies` joined back into a `cookie`
    header. The body is decoded from base64 when `isBase64Encoded` is set.
 2. Renders it with the core handler. The template is read from `templatePath`
@@ -65,7 +67,8 @@ For each event, the handler:
    status code and headers go in the metadata prelude, and `Set-Cookie`
    headers go in its `cookies`. The prelude is sent straight away. Each body
    chunk is written as the renderer flushes it, waiting for `drain` when the
-   stream is full. The handler resolves once the stream has finished.
+   stream is full. A `HEAD` request gets the prelude only, and the body is
+   cancelled. The handler resolves once the stream has finished.
 
 If the render fails after the first chunk, the handler rejects. The runtime
 then ends the stream with error trailers, so the client gets a cut-off page.

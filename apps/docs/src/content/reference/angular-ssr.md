@@ -1,11 +1,12 @@
 ```bash
-npm install @push-based/angular-ssr-stream-angular-ssr@next
+npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-angular-ssr@next
 ```
 
 The adapter for apps built by the Angular CLI and served by `@angular/ssr`. It
 depends on [`@push-based/angular-ssr-stream-core`](core.md), whose browser
-providers the app still needs. For the whole setup, see
-[Angular CLI](../getting-started/angular-cli.md).
+providers the app still needs. Besides Angular's own packages, it needs
+`@angular/ssr` and `@angular/router`, of the same Angular version. For the
+whole setup, see [Angular CLI](../getting-started/angular-cli.md).
 
 Two entry points, because they end up in two different server bundles:
 `@push-based/angular-ssr-stream-angular-ssr` in `server.ts`'s, and
@@ -39,15 +40,21 @@ is rendered by the core's streaming renderer, with:
   `LOCALE_ID` provided on the platform, as `@angular/ssr` does;
 - the route's `status` and `headers`, read once the shell is ready, so changes
   the app made to `RESPONSE_INIT` until then count. `Cache-Control: no-store`
-  and `X-Accel-Buffering: no` are added;
-- a redirect instead of the page when the router ended up at another URL, and
-  no response at all (`null`, so the next middleware runs) when no navigation
-  succeeded;
+  and `X-Accel-Buffering: no` are added, and `Content-Language` for a
+  localized build;
+- a redirect instead of the page when the router ended up at another URL: with
+  the route's status if that is a `3xx`, `302` otherwise. No response at all
+  (`null`, so the next middleware runs) when no navigation succeeded;
 - critical CSS inlined into the shell.
 
 When the stream fails before the first byte, the error is logged and the route
 is rendered by `@angular/ssr` as it would be without streaming. When the
-request is aborted, the render stops.
+request is aborted, the render stops. An app bootstrapped from an NgModule is
+rendered by `@angular/ssr` too, unstreamed: the streaming renderer bootstraps
+standalone apps only.
+
+`withStreaming()` throws when it's given anything but one of those two engines,
+or an engine from an `@angular/ssr` version it doesn't support.
 
 It reaches into `@angular/ssr`'s internals (`getAngularServerAppForRequest()`
 on the engine, `handleRendering()` on the server app), so like the core it
@@ -57,6 +64,23 @@ supports a checked range of Angular versions only.
 
 ```ts
 function streamingRenderer(route: StreamingRouteRender): Promise<Response | null>;
+
+/** One server-rendered route, as withStreaming() hands it over. */
+interface StreamingRouteRender {
+  /** main.server.ts's default export. */
+  bootstrap: StreamingBootstrap;
+  /** index.server.html, after @angular/ssr's HTML transforms. */
+  document: string;
+  request: Request;
+  /** The URL to render: the request's, without a trailing index.html. */
+  url: URL;
+  requestContext?: unknown;
+  /** Status and headers from the server route; the app may change them. */
+  responseInit: ResponseInit & { headers: Headers };
+  locale?: string;
+  /** @angular/ssr's critical CSS inlining, applied to the shell. */
+  transformDocument?: (document: string) => string | Promise<string>;
+}
 ```
 
 Renders one server-rendered route as a stream. `withStreaming()` calls it; an

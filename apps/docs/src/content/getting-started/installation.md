@@ -1,3 +1,7 @@
+Two things decide the setup: how the app is built, the Angular CLI or Vite
+with ngp, and where it runs. Both come down to a runtime page; this one has
+what they all need.
+
 ## Requirements
 
 - **Angular 19.2, 20.3, 21.2 or 22**, from the patch each row of
@@ -16,6 +20,12 @@
     to exactly `22.3.0-rc.0`. `@angular/ssr` is not used on this path, so its
     `AngularAppEngine`, server routes and render modes are not available; see
     [Caveats and limitations](../reference/limitations.md).
+- **To run, Node 20 or later** where the server is Node: the Node, Fastify,
+  NestJS and AWS Lambda adapters use `Headers.getSetCookie()`. CI runs them on
+  Node 26. The other runtimes need what their own platform asks for.
+- **For the dev plugins, Vite 7 or later** (`angularStreamNode()`,
+  `angularStreamNest()`), and Vite 8 for Nitro's. They are optional peer
+  dependencies: a production server doesn't load them.
 
 ## Compatibility
 
@@ -59,7 +69,11 @@ joins the peer ranges once it passes.
 
 ## Install
 
-Releases go to npm's `next` dist-tag for now:
+No release is out yet: until the first one, the packages are only available as
+source in [the repository](https://github.com/push-based/angular-ssr-stream),
+where the apps use them. Releases will go to npm's `next` dist-tag while ngp
+pins Angular to a release candidate, which is why every command on these pages
+installs `@next`:
 
 ```bash
 npm install @push-based/angular-ssr-stream-core@next
@@ -95,11 +109,6 @@ version of each.
 
 The packages ship ESM and type declarations, and carry no Angular decorators,
 so they need no Angular compilation of their own.
-
-> [!NOTE]
-> Until the first release is out, the packages are only available as source in
-> [the repository](https://github.com/push-based/angular-ssr-stream), where
-> the apps use them.
 
 The hosted platforms (Vercel, Netlify, AWS Lambda, Azure Functions, Fastly
 Compute, Deno Deploy, and Nitro's presets for them) have been checked locally,

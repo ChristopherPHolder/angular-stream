@@ -1,5 +1,5 @@
 ```bash
-npm install @push-based/angular-ssr-stream-nestjs@next
+npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-nestjs@next
 ```
 
 The NestJS module, for `@nestjs/platform-express` and
@@ -20,7 +20,9 @@ Two entry points: `@push-based/angular-ssr-stream-nestjs` for the server, and
 ```ts
 class AngularStreamModule {
   static forRoot(options: AngularStreamModuleOptions): DynamicModule;
-  static forRootAsync(options: AngularStreamModuleAsyncOptions): DynamicModule;
+  static forRootAsync(
+    options: ConfigurableModuleAsyncOptions<AngularStreamModuleOptions, 'create'>,
+  ): DynamicModule;
 }
 
 /** The Node adapter's options, unchanged. */
@@ -153,19 +155,22 @@ complete one, and no filter writes into it. That holds on both platforms.
 ## `AngularStreamModule.forRootAsync()`
 
 ```ts
-interface AngularStreamModuleAsyncOptions {
+import type { ConfigurableModuleAsyncOptions } from '@nestjs/common';
+
+// What it comes to, with Options = AngularStreamModuleOptions:
+interface ConfigurableModuleAsyncOptions<Options, 'create'> {
   imports?: ModuleMetadata['imports'];
-  useFactory?: (...args: any[]) => AngularStreamModuleOptions | Promise<AngularStreamModuleOptions>;
-  inject?: InjectionToken[];
-  useClass?: Type<{ create(): AngularStreamModuleOptions | Promise<AngularStreamModuleOptions> }>;
-  useExisting?: Type<{
-    create(): AngularStreamModuleOptions | Promise<AngularStreamModuleOptions>;
-  }>;
+  useFactory?: (...args: any[]) => Options | Promise<Options>;
+  inject?: (InjectionToken | OptionalFactoryDependency)[];
+  useClass?: Type<{ create(): Options | Promise<Options> }>;
+  useExisting?: Type<{ create(): Options | Promise<Options> }>;
+  provideInjectionTokensFrom?: Provider[];
 }
 ```
 
 The same module, with the options from a provider, as Nest's
-`ConfigurableModuleBuilder` defines it:
+`ConfigurableModuleBuilder` defines it. The type is Nest's own, from
+`@nestjs/common`; this package exports no name for it.
 
 ```ts
 AngularStreamModule.forRootAsync({
@@ -185,7 +190,16 @@ The options are read once, when the module initializes.
 
 ## `ANGULAR_STREAM_OPTIONS`
 
-The injection token the module's options are provided under.
+```ts
+const ANGULAR_STREAM_OPTIONS: string | symbol;
+```
+
+The injection token the module's options are provided under, whether they came
+from `forRoot()` or `forRootAsync()`:
+
+```ts
+constructor(@Inject(ANGULAR_STREAM_OPTIONS) options: AngularStreamModuleOptions) {}
+```
 
 ## `createRequestListener()`
 
@@ -224,11 +238,14 @@ import { angularStreamNest } from '@push-based/angular-ssr-stream-nestjs/vite';
 
 function angularStreamNest(options?: AngularStreamNestOptions): Plugin[];
 
+/** angularStreamNode()'s options, unchanged. */
 interface AngularStreamNestOptions {
   /** The server entry, relative to Vite's root. Default: 'src/server.ts'. */
   entry?: string;
   /** The template, relative to Vite's root. Default: 'index.html'. */
   template?: string;
+  /** Requests for the server entry before Vite sees them: path prefixes, or a function. Default: none. */
+  routes?: readonly string[] | ((pathname: string, req: IncomingMessage) => boolean);
 }
 ```
 

@@ -10,7 +10,7 @@
 
 Streamed server-side rendering for Angular in a NestJS app. The browser starts
 hydrating the page while the response is still arriving. `AngularStreamModule`
-renders every `GET` that nothing else in the app answers, on
+renders every `GET` and `HEAD` that nothing else in the app answers, on
 `@nestjs/platform-express` through the Node adapter,
 [`@push-based/angular-ssr-stream-node`](https://www.npmjs.com/package/@push-based/angular-ssr-stream-node),
 and on `@nestjs/platform-fastify` through the Fastify adapter,

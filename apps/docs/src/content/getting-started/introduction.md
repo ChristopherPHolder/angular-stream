@@ -41,15 +41,16 @@ apart.
 
 ## The packages
 
-| Package                                                                   | What it is                                                                                                |
-| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| [`@push-based/angular-ssr-stream-core`](../reference/core.md)             | The renderer, its inline runtime and the client. Runtime-agnostic: web `Request`, `Response` and streams. |
-| [`@push-based/angular-ssr-stream-node`](../reference/node.md)             | `createNodeHandler()`: a Node request handler for `node:http`, Express, Connect and Koa.                  |
-| [`@push-based/angular-ssr-stream-fastify`](../reference/fastify.md)       | `angularStream`: a Fastify plugin that streams every page route.                                          |
-| [`@push-based/angular-ssr-stream-nestjs`](../reference/nestjs.md)         | `AngularStreamModule`: a Nest module, on Express or on Fastify.                                           |
-| [`@push-based/angular-ssr-stream-cloudflare`](../reference/cloudflare.md) | `createStreamingWorker()`: a Cloudflare Worker `fetch` handler over the `ASSETS` binding.                 |
-| [`@push-based/angular-ssr-stream-aws-lambda`](../reference/aws-lambda.md) | `createStreamingLambda()`: a response-streaming handler for a Lambda Function URL.                        |
-| [`@push-based/angular-ssr-stream-nitro`](../reference/nitro.md)           | `defineStreamingHandler()`: an h3 handler for a Nitro server.                                             |
+| Package                                                                     | What it is                                                                                                   |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| [`@push-based/angular-ssr-stream-core`](../reference/core.md)               | The renderer, its inline runtime and the client. Runtime-agnostic: web `Request`, `Response` and streams.    |
+| [`@push-based/angular-ssr-stream-angular-ssr`](../reference/angular-ssr.md) | `withStreaming()`: streams an Angular CLI app's server-rendered routes, with `@angular/ssr` still in charge. |
+| [`@push-based/angular-ssr-stream-node`](../reference/node.md)               | `createNodeHandler()`: a Node request handler for `node:http`, Express, Connect and Koa.                     |
+| [`@push-based/angular-ssr-stream-fastify`](../reference/fastify.md)         | `angularStream`: a Fastify plugin that streams every page route.                                             |
+| [`@push-based/angular-ssr-stream-nestjs`](../reference/nestjs.md)           | `AngularStreamModule`: a Nest module, on Express or on Fastify.                                              |
+| [`@push-based/angular-ssr-stream-cloudflare`](../reference/cloudflare.md)   | `createStreamingWorker()`: a Cloudflare Worker `fetch` handler over the `ASSETS` binding.                    |
+| [`@push-based/angular-ssr-stream-aws-lambda`](../reference/aws-lambda.md)   | `createStreamingLambda()`: a response-streaming handler for a Lambda Function URL.                           |
+| [`@push-based/angular-ssr-stream-nitro`](../reference/nitro.md)             | `defineStreamingHandler()`: an h3 handler for a Nitro server.                                                |
 
 An app uses both halves of the core: providers in its browser config, and a
 server entry that streams. The server entry is where runtimes differ. A runtime
@@ -57,6 +58,8 @@ that hands the server a web `Request` and takes a `Response` back (Hono, Deno,
 Bun, Fastly Compute, Vercel, Netlify, Azure Functions) needs only the core's
 [`createStreamingHandler()`](../reference/core.md#createstreaminghandler). The
 others get a small adapter over it, which is what the rest of the packages are.
+An Angular CLI app keeps `@angular/ssr` as its server and adds
+`withStreaming()` to its engine.
 
 ## Where to go next
 
