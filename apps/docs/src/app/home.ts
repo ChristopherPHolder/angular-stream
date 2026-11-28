@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 // `?no-inline`: Vite would inline an asset this small as a data: URI, which NgOptimizedImage rejects.
 import symbol from '@angular-ssr-stream/press-kit/symbol/angular-ssr-stream-symbol.svg?no-inline';
 import { DOCS } from './docs/nav';
+import { ResponsePlayer } from './figures/response-player';
 import { HomeRace } from './home-race';
 import { DEMO } from './links';
 
@@ -88,6 +89,11 @@ import { DEMO } from './links';
         </li>
       </ol>
       <p class="home-text">
+        Step through one page load. Its two slow parts arrive in the order their data does, not the
+        order of the page, and each one hydrates on its own.
+      </p>
+      <docs-response-player class="figure" />
+      <p class="home-text">
         In your app, a slow part is a <code>&#64;defer</code> block with a
         <code>hydrate</code> trigger. The rest is a few providers in the app config and a server
         entry for where the app runs.
@@ -159,7 +165,7 @@ import { DEMO } from './links';
     </div>
   `,
   host: { class: 'home' },
-  imports: [HomeRace, NgOptimizedImage, RouterLink],
+  imports: [HomeRace, NgOptimizedImage, ResponsePlayer, RouterLink],
 })
 export class Home {
   protected readonly symbol = symbol;

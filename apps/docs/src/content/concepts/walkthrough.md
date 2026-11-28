@@ -2,8 +2,8 @@ To watch these steps happen in a browser, open
 [the demo](https://angular-ssr-stream-demo.chris-holder.workers.dev/): its first
 page streams one widget and times each step, `/walkthrough` has one labelled box
 per behaviour described here and a live event log, and `/inspect` shows each
-flush of its response as it arrives. For the same thing with one slow part and
-two pieces, step through the figure in the
+flush of its response as it arrives. For the same thing cut down to two slow
+parts, step through the figure in the
 [Introduction](../getting-started/introduction.md#one-page-load-step-by-step).
 
 ## The request at a glance
