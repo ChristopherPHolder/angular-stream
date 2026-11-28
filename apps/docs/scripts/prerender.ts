@@ -17,7 +17,8 @@
  * `markdown.ts` already fails on a link to a missing file; a heading is only
  * known once the page is rendered.
  *
- * Last, it writes sitemap.xml: every page at its public address.
+ * Last, it writes sitemap.xml, every page at its public address, and llms.txt,
+ * the same pages with a line on each, for a language model (`src/app/llms.ts`).
  *
  * `DOCS_BASE` must match the one the build ran with.
  */
@@ -40,6 +41,7 @@ interface ServerEntry {
   PRERENDERED_ROUTES: string[];
   /** The public address of the site, with its trailing slash. */
   SITE: string;
+  llmsTxt: () => string;
 }
 const entry = (await import(path.join(serverDir, entryFile))) as ServerEntry;
 
@@ -91,6 +93,19 @@ await writeFile(
     '\n</urlset>\n',
 );
 console.log(`wrote sitemap.xml: ${urls.length} pages`);
+
+// The same pages for a language model. Every address in it must be one the
+// sitemap has: a page that is linked but not published is a broken link.
+const llms = entry.llmsTxt();
+const published = new Set(entry.PRERENDERED_ROUTES.map((route) => entry.SITE + route));
+const unpublished = [...llms.matchAll(/\]\((https?:[^)\s]+)\)/g)]
+  .map((match) => match[1])
+  .filter((url) => url.startsWith(entry.SITE) && !published.has(url));
+if (unpublished.length > 0) {
+  throw new Error(`llms.txt links to pages that are not published:\n  ${unpublished.join('\n  ')}`);
+}
+await writeFile(path.join(client, 'llms.txt'), llms);
+console.log('wrote llms.txt');
 
 function escapeRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

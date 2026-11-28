@@ -24,7 +24,8 @@ every route `src/app/docs/nav.ts` lists into `dist/client`, as `<route>.html`,
 plus `404.html`. `dist/client` is the whole site.
 
 Each page's description, link preview (`og:*`) and canonical URL are its own
-(`src/app/page-head.ts`), and the prerender writes `sitemap.xml`. Those are
+(`src/app/page-head.ts`), and the prerender writes `sitemap.xml` and `llms.txt` (the
+contents for a language model, from `src/app/llms.ts`). Those are
 absolute URLs, at the address in `SITE` (`src/app/links.ts`): change it there if
 the site moves.
 
