@@ -153,7 +153,7 @@ answers.
 
 None of these was checked on a real deployment, only with each platform's
 local runtime. A CDN or proxy in front of the server can still buffer; see
-[Debugging and verifying](../guides/debugging.md).
+[Troubleshooting](../guides/debugging.md).
 
 Two presets buffer as Nitro ships them, going by their runtime code (not run):
 

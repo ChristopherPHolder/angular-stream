@@ -165,7 +165,7 @@ curl -N https://your-app.example/a-slow-page
 
 Nothing and then the whole document is a page sent whole. The top of the
 document at once and the rest in pieces is a streamed one.
-[Debugging and verifying](../guides/debugging.md) goes further, and the demo's
+[Troubleshooting](../guides/debugging.md) goes further, and the demo's
 [response inspector](https://angular-ssr-stream-demo.chris-holder.workers.dev/inspect)
 shows every flush of a real response with the time it arrived.
 
