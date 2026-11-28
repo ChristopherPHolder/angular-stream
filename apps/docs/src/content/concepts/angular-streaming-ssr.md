@@ -92,6 +92,11 @@ page whose application has already started, without Angular finding a mismatch.
 A block that Angular is not looking at yet is the one place where that is
 allowed.
 
+Two projects build streaming on it from outside Angular: this one, and
+[Analog](https://analogjs.org), the meta-framework, whose renderer is
+experimental. [Analog's streaming SSR, compared](../guides/analog-streaming-ssr.md)
+sends one page through both.
+
 ## Adding the other half
 
 angular-ssr-stream does the sending. It renders with Angular's own platform, but

@@ -126,3 +126,6 @@ A few consequences that are easy to miss:
 If you know streaming from React or Next.js,
 [React Suspense streaming, in Angular](coming-from-react-suspense.md) maps a
 `<Suspense>` boundary onto all of this.
+If you know Analog's `renderStream()`,
+[Analog's streaming SSR, compared](analog-streaming-ssr.md) sends one page
+through both.
