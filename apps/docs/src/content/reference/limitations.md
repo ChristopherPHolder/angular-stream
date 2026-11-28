@@ -20,7 +20,9 @@
   a streamed `@defer` block isn't recorded, so that block loses the clicks made
   before Angular starts. When the shell has no listeners at all, Angular removes
   the contract, and nothing is recorded.
-- **No CSP nonce** on the inline scripts yet.
+- **No CSP nonce** on the inline scripts yet, so a strict Content Security
+  Policy blocks the stream; see
+  [Content Security Policy](../guides/production.md#content-security-policy).
 - **Not cacheable.** Streamed responses are sent with `Cache-Control: no-store`.
 - **If the response breaks off**, the browser keeps what it has and the client
   fetches the rest itself.
@@ -41,6 +43,11 @@ limits:
 - **No critical CSS inlining or SRI, and no `@angular/service-worker`
   build step.** The [Service Worker guide](../guides/service-worker.md) has an
   experimental worker of its own, which renders the pages.
+- **The app doesn't get the request.** `createStreamingHandler()` and the
+  adapters built on it don't provide `REQUEST`, so the app can't read the
+  incoming request's cookies or headers. Rendering with
+  `renderStreamingAngular()` and passing it in `platformProviders` works; see
+  [Request context](../guides/production.md#request-context).
 - **Inline component `styles` are plain CSS.** There is no
   `inlineStyleLanguage`; `styleUrl` files do go through Vite's Sass pipeline.
 - **ngp is a prototype.** Any Angular commit can break it, hence the exact

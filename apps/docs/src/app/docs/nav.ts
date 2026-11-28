@@ -286,7 +286,8 @@ export const DOCS: DocSection[] = [
   {
     id: 'guides',
     title: 'Guides',
-    description: 'Making a page stream, checking that it does, and getting it through a proxy.',
+    description:
+      'Making a page stream, checking that it does, getting it through a proxy, and running it in production.',
     groups: [
       {
         pages: [
@@ -333,6 +334,15 @@ export const DOCS: DocSection[] = [
             description:
               'Compression, Nginx, CDNs and timeouts: what holds a streamed response back, and how to check that it does not.',
             load: () => import('../../content/guides/streaming-through-proxies.md'),
+          },
+          {
+            dir: 'guides',
+            slug: 'production',
+            title: 'Going to production',
+            headline: 'Streamed Angular SSR in production',
+            description:
+              'Status codes, crawlers and metadata, Content Security Policy, caching, Web Vitals and request context, with a checklist.',
+            load: () => import('../../content/guides/production.md'),
           },
           {
             dir: 'guides',
