@@ -50,7 +50,11 @@ comes from. What it has is
 [incremental hydration][10]: a `@defer` block with a `hydrate` trigger stays as
 plain server HTML until the trigger fires. Angular is not touching that markup
 yet, which is what lets the server replace it underneath a running application,
-and it is the piece everything below builds on.
+and it is the piece everything below builds on. To see the two together, step
+through one load of this page in the
+[Introduction](../getting-started/introduction.md#one-page-load-step-by-step):
+the reviews arrive before the recommendations above them, and each part
+hydrates on its own.
 
 The costs are the same everywhere, and apply here:
 

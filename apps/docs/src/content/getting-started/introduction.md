@@ -21,8 +21,9 @@ its own data is there, in whatever order that happens.
 ## One page load, step by step
 
 There is no second request and no fetching from the browser. The server keeps
-the response open and adds to it. Step through one page load, with a single
-slow part:
+the response open and adds to it. Step through one page load. Its two slow
+parts arrive in the order their data does, not the order of the page, and each
+one hydrates on its own:
 
 <!-- figure response -->
 

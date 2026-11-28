@@ -4,6 +4,9 @@ import { CodeSample, type Sample } from './code-sample';
 /** Who owns a piece of the drawn page at a step. */
 type Owner = 'server' | 'hydrated';
 
+/** A slow part of the page: its placeholder until its chunk arrives. */
+type BlockState = 'placeholder' | Owner;
+
 interface Step {
   /** The label on the step's button. */
   short: string;
@@ -13,31 +16,49 @@ interface Step {
   sent: number;
   /** Null until the shell has arrived. */
   shell: Owner | null;
-  reviews: 'placeholder' | Owner;
+  recommendations: BlockState;
+  reviews: BlockState;
 }
 
-/** The response, in the two pieces the server writes. Cut down to what does the work. */
+/**
+ * The response, in the three pieces the server writes. Cut down to what does
+ * the work. The recommendations sit above the reviews, so they are met first
+ * and get `d0`; the reviews are `d1`, and arrive first.
+ */
 const PIECES = [
   `<!doctype html>
 <html>
 <body>
   <h1>Trail shoes</h1>
   <section>
-    <p>Loading reviews…</p>
+    <p>Loading recommendations…</p>
     <!--ngh=d0-->
   </section>
-  <script>
-    /* the inline runtime: window.__ngs */
-  </script>
+  <section>
+    <p>Loading reviews…</p>
+    <!--ngh=d1-->
+  </section>
+  <script>/* the inline runtime: window.__ngs */</script>
   <script type="module" src="main.js" async></script>`,
-  `  <template data-ngs="d0">
+  `  <template data-ngs="d1">
     <app-reviews>…</app-reviews>
   </template>
   <script>
     __ngs.push({
-      // The template for d0, and its hydration data.
+      // The template for d1, and its hydration data.
+      b: [{ id: 'd1', … }],
+      // The reviews API's answer, for the browser's request.
+      s: { … },
+      // Still on its way: the recommendations.
+      p: [ … ],
+    });
+  </script>`,
+  `  <template data-ngs="d0">
+    <app-recommendations>…</app-recommendations>
+  </template>
+  <script>
+    __ngs.push({
       b: [{ id: 'd0', … }],
-      // The API's answer, for the browser's request.
       s: { … },
       // Nothing else is coming.
       done: true,
@@ -51,41 +72,64 @@ const STEPS: Step[] = [
   {
     short: 'Request',
     title: 'The browser asks for the page',
-    text: 'The server starts rendering. The page shows reviews from an API, and that request takes a while. Nothing has been sent yet.',
+    text: 'The server starts rendering. The page has two parts that wait for an API: recommendations, which take 3 seconds, and below them reviews, which take 1. Nothing has been sent yet.',
     sent: 0,
     shell: null,
+    recommendations: 'placeholder',
     reviews: 'placeholder',
   },
   {
     short: 'Shell',
     title: 'The server sends what it has',
-    text: 'Everything that does not need the reviews goes out at once, with a placeholder where they will go. A comment marks the spot, a small inline script will deal with what follows, and the app’s own script comes last. The response stays open.',
+    text: 'After 0.1 seconds, everything that does not wait for data goes out, with a placeholder for each slow part. A comment marks each spot, a small inline script will deal with what follows, and the app’s own script comes last. The response stays open.',
     sent: 1,
     shell: 'server',
+    recommendations: 'placeholder',
     reviews: 'placeholder',
   },
   {
     short: 'Angular starts',
     title: 'Angular starts on what is there',
-    text: 'The app’s script has loaded. Angular hydrates the shell, so the page responds to clicks while the reviews are still loading. Nothing new has arrived.',
+    text: 'The app’s script has loaded. Angular hydrates the shell, so the page responds to clicks while both slow parts are still loading. It leaves the two placeholders alone.',
     sent: 1,
     shell: 'hydrated',
+    recommendations: 'placeholder',
     reviews: 'placeholder',
   },
   {
     short: 'Reviews arrive',
-    title: 'The reviews arrive as HTML',
-    text: 'The API answered, so the server rendered the reviews and sent them down the same response: the markup in a template, then a script that moves it in front of the comment, in place of the placeholder. The script also hands over the API’s answer, so the browser never asks for it. This works the same if Angular has not started yet. Then the response ends.',
+    title: 'The reviews arrive first, out of order',
+    text: 'After 1 second the reviews API answers. The reviews sit lower on the page, but they do not wait for the recommendations above them: the server sends them at once, as markup in a template and a script that moves it in front of d1’s comment. The script also hands over the API’s answer, and says the recommendations are still on their way.',
     sent: 2,
     shell: 'hydrated',
+    recommendations: 'placeholder',
     reviews: 'server',
   },
   {
     short: 'Reviews hydrate',
-    title: 'Angular takes the reviews over',
-    text: 'The data is what the block was waiting for. Angular hydrates the markup that is already on the page. It renders nothing again and sends no request.',
+    title: 'Angular takes the reviews over, and only them',
+    text: 'The data is what the reviews were waiting for, so Angular hydrates that block on its own, against the markup already on the page. It renders nothing again and sends no request. The recommendations stay a placeholder that Angular does not touch.',
     sent: 2,
     shell: 'hydrated',
+    recommendations: 'placeholder',
+    reviews: 'hydrated',
+  },
+  {
+    short: 'Recommendations arrive',
+    title: 'The recommendations arrive last',
+    text: 'After 3 seconds the recommendations API answers. The server sends them down the same response, and the script puts them in front of d0’s comment, above the reviews, which are already hydrated and stay as they are. Nothing else is coming, so the response ends.',
+    sent: 3,
+    shell: 'hydrated',
+    recommendations: 'server',
+    reviews: 'hydrated',
+  },
+  {
+    short: 'Recommendations hydrate',
+    title: 'Angular takes the recommendations over',
+    text: 'Their data has come with them, so the last block hydrates too. Each part became usable when its own data arrived, in the order the APIs answered, not the order of the page.',
+    sent: 3,
+    shell: 'hydrated',
+    recommendations: 'hydrated',
     reviews: 'hydrated',
   },
 ];
@@ -95,6 +139,7 @@ const TOTAL_LINES = PIECES.join('\n').split('\n').length;
 /** The heading over the response, by how many pieces have been sent. */
 const FILE_LABELS = [
   'The response: nothing sent yet',
+  'The response: still open',
   'The response: still open',
   'The response: complete',
 ];
@@ -106,8 +151,10 @@ const OWNER_LABEL: Record<Owner, string> = {
 
 /**
  * The `response` figure: one page load, a step at a time. What has come down
- * the response so far, and what the browser shows for it. A drawing of the
- * mechanism, with made-up content; the demo does it for real.
+ * the response so far, and what the browser shows for it. Two slow parts
+ * arrive in the order their data does, not the order of the page, and each
+ * hydrates on its own. A drawing of the mechanism, with made-up content; the
+ * demo does it for real.
  *
  * The response is hand-written above: if the wire format changes, change it
  * here too.
@@ -171,18 +218,19 @@ const OWNER_LABEL: Record<Owner, string> = {
               <span class="mock-state">{{ label(shell) }}</span>
               <span class="mock-bars" aria-hidden="true"></span>
             </div>
-            @let reviews = step().reviews;
-            <div class="mock-part" [class]="'mock-part mock-part--' + reviews">
-              @if (reviews === 'placeholder') {
-                <span class="mock-label">Loading reviews…</span>
-                <span class="mock-state">placeholder</span>
-              } @else {
-                <span class="mock-label">Reviews</span>
-                <span class="mock-state">{{ label(reviews) }}</span>
-                <span class="mock-bars" aria-hidden="true"></span>
-                <span class="mock-bars" aria-hidden="true"></span>
-              }
-            </div>
+            @for (block of blocks(); track block.name) {
+              <div class="mock-part" [class]="'mock-part mock-part--' + block.state">
+                @if (block.state === 'placeholder') {
+                  <span class="mock-label">Loading {{ block.name }}…</span>
+                  <span class="mock-state">placeholder · {{ block.id }}</span>
+                } @else {
+                  <span class="mock-label">{{ block.title }}</span>
+                  <span class="mock-state">{{ label(block.state) }} · {{ block.id }}</span>
+                  <span class="mock-bars" aria-hidden="true"></span>
+                  <span class="mock-bars" aria-hidden="true"></span>
+                }
+              </div>
+            }
           } @else {
             <p class="mock-empty">Blank page</p>
           }
@@ -197,6 +245,20 @@ export class ResponsePlayer {
   protected readonly steps = STEPS;
   protected readonly index = signal(0);
   protected readonly step = computed(() => STEPS[this.index()]);
+
+  /** The slow parts, top to bottom, as the page holds them at this step. */
+  protected readonly blocks = computed(() => {
+    const step = this.step();
+    return [
+      {
+        id: 'd0',
+        name: 'recommendations',
+        title: 'Recommendations',
+        state: step.recommendations,
+      },
+      { id: 'd1', name: 'reviews', title: 'Reviews', state: step.reviews },
+    ];
+  });
 
   /**
    * The response as far as it has come: only what has been sent is shown, and
