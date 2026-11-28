@@ -287,6 +287,14 @@ export const DOCS: DocSection[] = [
           },
           {
             dir: 'guides',
+            slug: 'coming-from-react-suspense',
+            title: 'React Suspense streaming, in Angular',
+            description:
+              'A Suspense boundary, its fallback and loading.js: what each maps to here, and where streaming an Angular page differs from streaming a React one.',
+            load: () => import('../../content/guides/coming-from-react-suspense.md'),
+          },
+          {
+            dir: 'guides',
             slug: 'debugging',
             title: 'Debugging and verifying',
             headline: 'Debugging and verifying streamed Angular SSR',

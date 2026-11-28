@@ -65,4 +65,6 @@ A few consequences that are easy to miss:
   each request that finished, whether the page uses all of it or not.
 
 The demo's `/example` page streams one widget with the least code that does
-it, and shows that code.
+it, and shows that code. If you know streaming from React or Next.js,
+[React Suspense streaming, in Angular](coming-from-react-suspense.md) maps a
+`<Suspense>` boundary onto all of this.
