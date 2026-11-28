@@ -6,15 +6,17 @@
   release.
 - **A server that speaks web `Request` and `Response`**, directly or through
   one of the adapters below.
-- **As set up in these docs:** Vite with
-  [`@push-based/vite-plugin-ngp`](https://github.com/push-based/vite-plugin-ngp)
-  compiling Angular, and building the server bundle for the runtime. ngp needs
-  Node 26 to build, and every `@angular/*` package pinned to exactly
-  `22.3.0-rc.0`. What runs the result is up to the runtime.
-
-`@angular/ssr` is not used. Its `AngularAppEngine`, server routes and render
-modes are not available on this path; see
-[Caveats and limitations](../reference/limitations.md).
+- **A build that compiles Angular for the server**, one of two:
+  - **The Angular CLI** (`@angular/build`), with `@angular/ssr` serving the
+    app, as `ng new --ssr` sets it up. `@angular/ssr` keeps its server routes,
+    render modes and status codes; its server-rendered routes stream. See
+    [Angular CLI](angular-cli.md).
+  - **Vite with [`@push-based/vite-plugin-ngp`](https://github.com/push-based/vite-plugin-ngp)**,
+    which every other runtime page uses, building the server bundle for that
+    runtime. ngp needs Node 26 to build, and every `@angular/*` package pinned
+    to exactly `22.3.0-rc.0`. `@angular/ssr` is not used on this path, so its
+    `AngularAppEngine`, server routes and render modes are not available; see
+    [Caveats and limitations](../reference/limitations.md).
 
 ## Install
 
@@ -30,24 +32,25 @@ server a web `Request` and takes a `Response` back needs no adapter: the
 core's `createStreamingHandler()` is the whole server, and its page shows the
 few lines around it.
 
-| Where it runs                                   | Package                                     | Setup                                         |
-| ----------------------------------------------- | ------------------------------------------- | --------------------------------------------- |
-| Node (`node:http`, Connect)                     | `@push-based/angular-ssr-stream-node`       | [Node](node.md)                               |
-| Express                                         | `@push-based/angular-ssr-stream-node`       | [Express](express.md)                         |
-| Fastify                                         | `@push-based/angular-ssr-stream-fastify`    | [Fastify](fastify.md)                         |
-| NestJS (on Express or Fastify)                  | `@push-based/angular-ssr-stream-nestjs`     | [NestJS](nestjs.md)                           |
-| Koa                                             | `@push-based/angular-ssr-stream-node`       | [Koa](koa.md)                                 |
-| Cloudflare Workers                              | `@push-based/angular-ssr-stream-cloudflare` | [Cloudflare Workers](cloudflare-workers.md)   |
-| Hono (Node, Bun, Deno, Workers)                 | none                                        | [Hono](hono.md)                               |
-| Deno, Deno Deploy                               | none                                        | [Deno](deno.md)                               |
-| Bun                                             | none                                        | [Bun](bun.md)                                 |
-| Fastly Compute                                  | none                                        | [Fastly Compute](fastly-compute.md)           |
-| Vercel                                          | none                                        | [Vercel](vercel.md)                           |
-| Netlify                                         | none                                        | [Netlify](netlify.md)                         |
-| AWS Lambda                                      | `@push-based/angular-ssr-stream-aws-lambda` | [AWS Lambda](aws-lambda.md)                   |
-| Azure Functions                                 | none                                        | [Azure Functions](azure-functions.md)         |
-| Nitro, and the hosts its presets deploy to      | `@push-based/angular-ssr-stream-nitro`      | [Nitro](nitro.md)                             |
-| A Service Worker, in the browser (experimental) | none                                        | [Service Worker](../guides/service-worker.md) |
+| Where it runs                                   | Package                                      | Setup                                         |
+| ----------------------------------------------- | -------------------------------------------- | --------------------------------------------- |
+| Angular CLI, with `@angular/ssr`                | `@push-based/angular-ssr-stream-angular-ssr` | [Angular CLI](angular-cli.md)                 |
+| Node (`node:http`, Connect)                     | `@push-based/angular-ssr-stream-node`        | [Node](node.md)                               |
+| Express                                         | `@push-based/angular-ssr-stream-node`        | [Express](express.md)                         |
+| Fastify                                         | `@push-based/angular-ssr-stream-fastify`     | [Fastify](fastify.md)                         |
+| NestJS (on Express or Fastify)                  | `@push-based/angular-ssr-stream-nestjs`      | [NestJS](nestjs.md)                           |
+| Koa                                             | `@push-based/angular-ssr-stream-node`        | [Koa](koa.md)                                 |
+| Cloudflare Workers                              | `@push-based/angular-ssr-stream-cloudflare`  | [Cloudflare Workers](cloudflare-workers.md)   |
+| Hono (Node, Bun, Deno, Workers)                 | none                                         | [Hono](hono.md)                               |
+| Deno, Deno Deploy                               | none                                         | [Deno](deno.md)                               |
+| Bun                                             | none                                         | [Bun](bun.md)                                 |
+| Fastly Compute                                  | none                                         | [Fastly Compute](fastly-compute.md)           |
+| Vercel                                          | none                                         | [Vercel](vercel.md)                           |
+| Netlify                                         | none                                         | [Netlify](netlify.md)                         |
+| AWS Lambda                                      | `@push-based/angular-ssr-stream-aws-lambda`  | [AWS Lambda](aws-lambda.md)                   |
+| Azure Functions                                 | none                                         | [Azure Functions](azure-functions.md)         |
+| Nitro, and the hosts its presets deploy to      | `@push-based/angular-ssr-stream-nitro`       | [Nitro](nitro.md)                             |
+| A Service Worker, in the browser (experimental) | none                                         | [Service Worker](../guides/service-worker.md) |
 
 Every package is released together, with one version: install the same
 version of each.

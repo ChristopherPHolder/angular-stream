@@ -2,10 +2,11 @@ import { ɵREQUESTS_CONTRIBUTE_TO_STABILITY } from '@angular/common/http';
 import {
   type ApplicationConfig,
   type ApplicationRef,
+  type StaticProvider,
   type Type,
   mergeApplicationConfig,
 } from '@angular/core';
-import { bootstrapApplication } from '@angular/platform-browser';
+import { type BootstrapContext, bootstrapApplication } from '@angular/platform-browser';
 import {
   INITIAL_CONFIG,
   PlatformState,
@@ -19,7 +20,14 @@ import { HydrationStream } from './hydration-stream';
 import { RequestTracker } from './request-tracker';
 import { frameChunk, frameRuntime } from './stream-runtime';
 
-export interface StreamingAngularRenderOptions {
+/**
+ * Bootstraps the application on the platform it is given: what an Angular CLI
+ * app's `main.server.ts` exports by default.
+ */
+export type StreamingBootstrap = (context: BootstrapContext) => Promise<ApplicationRef>;
+
+/** The application, as a root component and its server config. */
+export interface StreamingRootComponent {
   /** The application's root component. */
   rootComponent: Type<unknown>;
   /**
@@ -27,10 +35,49 @@ export interface StreamingAngularRenderOptions {
    * `provideServerRendering()` and whatever else the server needs.
    */
   config: ApplicationConfig;
+}
+
+/**
+ * The application, as a function that bootstraps it. Its config has to
+ * include `provideStreamHydration()`, which brings the providers the renderer
+ * needs; with `rootComponent`, the renderer adds them itself.
+ */
+export interface StreamingBootstrapFunction {
+  bootstrap: StreamingBootstrap;
+}
+
+interface StreamingAngularRenderBase {
   /** The `index.html` template to render into. */
   document: string;
   url: string;
+  /** More providers for the server platform: `REQUEST`, `LOCALE_ID`, … */
+  platformProviders?: StaticProvider[];
+  /**
+   * The response's status and headers. Read when the shell is ready, not
+   * before, so the application can still change them while it renders: the
+   * object handed to it as `RESPONSE_INIT`, for instance. The renderer sets
+   * `Content-Type` and `Cache-Control` itself.
+   */
+  responseInit?: ResponseInit;
+  /**
+   * Called once the application is stable, before anything is sent. A
+   * `Response` returned here is sent instead of the stream, and the render
+   * stops: a redirect, for instance. To send the stream, return nothing.
+   */
+  beforeCommit?: (
+    applicationRef: ApplicationRef,
+  ) => Response | undefined | Promise<Response | undefined>;
+  /**
+   * Rewrites the document as rendered for the shell, before it is split:
+   * critical CSS inlining, for instance. Chunks are not passed through it.
+   */
+  transformDocument?: (document: string) => string | Promise<string>;
+  /** Stops the render, before or after the shell has gone out. */
+  signal?: AbortSignal;
 }
+
+export type StreamingAngularRenderOptions = StreamingAngularRenderBase &
+  (StreamingRootComponent | StreamingBootstrapFunction);
 
 export interface OpenBodyDocument {
   shell: string;
@@ -65,16 +112,19 @@ export interface OpenBodyDocument {
  * Unlike `renderApplication`, nothing here waits for stability before the
  * first byte.
  */
-export async function renderStreamingAngular({
-  rootComponent,
-  config,
-  document,
-  url,
-}: StreamingAngularRenderOptions): Promise<Response> {
+export async function renderStreamingAngular(
+  options: StreamingAngularRenderOptions,
+): Promise<Response> {
+  const { document, url, platformProviders = [], responseInit, signal } = options;
+  signal?.throwIfAborted();
   const requestTracker = new RequestTracker();
   const platformRef = platformServer([
     { provide: INITIAL_CONFIG, useValue: { document, url } },
     { provide: ɵSERVER_CONTEXT, useValue: 'streamed-ssr' },
+    // On the platform, so that an application bootstrapped by a function of
+    // its own finds it too: `provideStreamHydration()` looks for it there.
+    { provide: SERVER_REQUEST_TRACKER, useValue: requestTracker },
+    ...platformProviders,
   ]);
 
   let destroyPromise: Promise<void> | undefined;
@@ -85,28 +135,54 @@ export async function renderStreamingAngular({
     return destroyPromise;
   };
 
+  // Set once the body exists: an abort after the shell has gone out ends the
+  // stream. Whoever aborted is gone, so it is closed rather than errored, which
+  // would only be logged by whatever is still writing it out.
+  let endStream: (() => void) | undefined;
+  const onAbort = (): void => {
+    terminated = true;
+    endStream?.();
+    void destroyOnce();
+  };
+  signal?.addEventListener('abort', onAbort, { once: true });
+
   try {
-    const applicationRef = await bootstrapApplication(
-      rootComponent,
-      mergeApplicationConfig(config, {
-        providers: [
-          // HTTP leaves `whenStable()` to the tracker; see step 1 above.
-          { provide: ɵREQUESTS_CONTRIBUTE_TO_STABILITY, useValue: false },
-          { provide: SERVER_REQUEST_TRACKER, useValue: requestTracker },
-          MANUAL_DEFER_BLOCKS,
-        ],
-      }),
-      { platformRef },
-    );
+    const bootstrap: StreamingBootstrap =
+      'bootstrap' in options
+        ? options.bootstrap
+        : (context) =>
+            bootstrapApplication(
+              options.rootComponent,
+              mergeApplicationConfig(options.config, {
+                providers: [
+                  // HTTP leaves `whenStable()` to the tracker; see step 1 above.
+                  { provide: ɵREQUESTS_CONTRIBUTE_TO_STABILITY, useValue: false },
+                  MANUAL_DEFER_BLOCKS,
+                ],
+              }),
+              context,
+            );
+    const applicationRef = await bootstrap({ platformRef });
     const deferBlocks = new ServerDeferBlocks(applicationRef);
     await applicationRef.whenStable();
     await deferBlocks.render();
+    signal?.throwIfAborted();
+
+    const early = await options.beforeCommit?.(applicationRef);
+    if (early !== undefined) {
+      terminated = true;
+      signal?.removeEventListener('abort', onAbort);
+      await destroyOnce();
+      return early;
+    }
 
     const serverDocument = platformRef.injector.get(PlatformState).getDocument() as Document;
     const entryScripts = takeEntryScripts(serverDocument);
-    const { shell, tail } = splitOpenBodyDocument(
-      await ɵrenderInternal(platformRef, applicationRef),
-    );
+    let rendered = await ɵrenderInternal(platformRef, applicationRef);
+    if (options.transformDocument !== undefined) {
+      rendered = await options.transformDocument(rendered);
+    }
+    const { shell, tail } = splitOpenBodyDocument(rendered);
     warnIfEventReplayIsLost(serverDocument);
     const stream = new HydrationStream(applicationRef, serverDocument);
     const init = stream.begin(requestTracker.pending());
@@ -126,14 +202,23 @@ export async function renderStreamingAngular({
       },
     });
 
+    endStream = () => {
+      try {
+        controller.close();
+      } catch {
+        // Already closed or cancelled.
+      }
+    };
+
+    const headers = new Headers(responseInit?.headers);
+    headers.set('Content-Type', 'text/html; charset=utf-8');
+    // The body is assembled across several flushes; a cached copy of a
+    // partial response would be worse than no cache at all.
+    headers.set('Cache-Control', 'no-store');
     const response = new Response(body, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        // The body is assembled across several flushes; a cached copy of a
-        // partial response would be worse than no cache at all.
-        'Cache-Control': 'no-store',
-      },
+      status: responseInit?.status ?? 200,
+      statusText: responseInit?.statusText,
+      headers,
     });
 
     // The runtime has to exist before the application does, and the
@@ -187,6 +272,7 @@ export async function renderStreamingAngular({
         controller.enqueue(encoder.encode(tail));
         controller.close();
         terminated = true;
+        signal?.removeEventListener('abort', onAbort);
         await destroyOnce();
       } catch (error) {
         if (terminated) {
@@ -202,6 +288,7 @@ export async function renderStreamingAngular({
     // Nothing has been committed yet, so the caller can still fall back to a
     // buffered render and a real status code.
     terminated = true;
+    signal?.removeEventListener('abort', onAbort);
     await destroyOnce();
     throw error;
   }

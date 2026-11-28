@@ -19,12 +19,13 @@ hydration as it happens, and a real TMDB-backed movie browser.
 - **[The movie browser](https://angular-ssr-stream-movies.chris-holder.workers.dev/)** is
   the same technique on a real app.
 
-Most Angular SSR guides target a Node server and the Angular CLI. This repo
-compiles Angular with [ngp][ngp] through Vite instead, and streams from any
-server that speaks web `Request` and `Response`: Cloudflare Workers, Node and
-its frameworks (Express, Fastify, NestJS, Koa), Hono, Deno, Bun, Fastly
-Compute, Vercel, Netlify, AWS Lambda, Azure Functions, and the hosts Nitro
-deploys to. The two apps run as Cloudflare Workers: the server bundle runs
+It works with the Angular CLI: an app made by `ng new --ssr` keeps
+`@angular/ssr` and its server routes, and the routes it renders on the server
+stream. Beyond that, this repo compiles Angular with [ngp][ngp] through Vite,
+and streams from any server that speaks web `Request` and `Response`:
+Cloudflare Workers, Node and its frameworks (Express, Fastify, NestJS, Koa),
+Hono, Deno, Bun, Fastly Compute, Vercel, Netlify, AWS Lambda, Azure Functions,
+and the hosts Nitro deploys to. The two apps run as Cloudflare Workers: the server bundle runs
 directly in workerd, static assets are served by Cloudflare's `ASSETS` binding,
 and every navigation falls through to the rendering Worker.
 
@@ -53,24 +54,26 @@ An Nx workspace over pnpm workspaces. Apps are private; `movies` and
 `cloudflare-demo` deploy as Workers. Everything under `packages/` is published
 to npm under `@push-based/`:
 
-| Path                   | What                                                                                                       |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `apps/movies`          | The TMDB movie browser. Deployed as the `angular-ssr-stream` Worker.                                       |
-| `apps/cloudflare-demo` | Streamed hydration, step by step, with no external API. The `angular-ssr-stream-demo` Worker.              |
-| `apps/docs`            | The documentation site: Angular, prerendered by ngp, published to GitHub Pages.                            |
-| `packages/core`        | `@push-based/angular-ssr-stream-core`: the streaming renderer, its inline runtime and the client.          |
-| `packages/cloudflare`  | `@push-based/angular-ssr-stream-cloudflare`: `createStreamingWorker()`, over the Workers `ASSETS` binding. |
-| `packages/node`        | `@push-based/angular-ssr-stream-node`: `node:http`, Connect and Express, with a Vite plugin for dev.       |
-| `packages/fastify`     | `@push-based/angular-ssr-stream-fastify`: a Fastify plugin, and the route handler it is built on.          |
-| `packages/nestjs`      | `@push-based/angular-ssr-stream-nestjs`: a Nest module, on `platform-express` or `platform-fastify`.       |
-| `packages/aws-lambda`  | `@push-based/angular-ssr-stream-aws-lambda`: a response-streaming handler for a Lambda Function URL.       |
-| `packages/nitro`       | `@push-based/angular-ssr-stream-nitro`: an h3 handler and a Vite plugin, for every Nitro preset.           |
-| `apps/example-*`       | One small app per runtime, all rendering `libs/stream-example`. Built in CI, not deployed.                 |
-| `libs/stream-example`  | `@angular-ssr-stream/stream-example`: the page every example renders, a shell and one slow widget.         |
-| `libs/design-system`   | `@angular-ssr-stream/design-system`: the PushBased design system the demo and the docs share. Private.     |
-| `press-kit`            | The logo in every form: symbol, lockups, favicons and the social preview, with how to use them.            |
-| `nx.json`              | Task defaults, cache inputs and outputs, and the release group.                                            |
-| `vite.config.ts`       | Workspace-wide lint (module boundaries included) and format settings.                                      |
+| Path                       | What                                                                                                       |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `apps/movies`              | The TMDB movie browser. Deployed as the `angular-ssr-stream` Worker.                                       |
+| `apps/cloudflare-demo`     | Streamed hydration, step by step, with no external API. The `angular-ssr-stream-demo` Worker.              |
+| `apps/docs`                | The documentation site: Angular, prerendered by ngp, published to GitHub Pages.                            |
+| `packages/core`            | `@push-based/angular-ssr-stream-core`: the streaming renderer, its inline runtime and the client.          |
+| `packages/cloudflare`      | `@push-based/angular-ssr-stream-cloudflare`: `createStreamingWorker()`, over the Workers `ASSETS` binding. |
+| `packages/node`            | `@push-based/angular-ssr-stream-node`: `node:http`, Connect and Express, with a Vite plugin for dev.       |
+| `packages/fastify`         | `@push-based/angular-ssr-stream-fastify`: a Fastify plugin, and the route handler it is built on.          |
+| `packages/nestjs`          | `@push-based/angular-ssr-stream-nestjs`: a Nest module, on `platform-express` or `platform-fastify`.       |
+| `packages/aws-lambda`      | `@push-based/angular-ssr-stream-aws-lambda`: a response-streaming handler for a Lambda Function URL.       |
+| `packages/nitro`           | `@push-based/angular-ssr-stream-nitro`: an h3 handler and a Vite plugin, for every Nitro preset.           |
+| `packages/angular-ssr`     | `@push-based/angular-ssr-stream-angular-ssr`: `withStreaming()`, for `@angular/ssr` in Angular CLI apps.   |
+| `apps/example-*`           | One small app per runtime, all rendering `libs/stream-example`. Built in CI, not deployed.                 |
+| `apps/example-angular-cli` | An app made by `ng new --ssr`, built by `ng build`, with `@angular/ssr` streaming. Built in CI.            |
+| `libs/stream-example`      | `@angular-ssr-stream/stream-example`: the page every example renders, a shell and one slow widget.         |
+| `libs/design-system`       | `@angular-ssr-stream/design-system`: the PushBased design system the demo and the docs share. Private.     |
+| `press-kit`                | The logo in every form: symbol, lockups, favicons and the social preview, with how to use them.            |
+| `nx.json`                  | Task defaults, cache inputs and outputs, and the release group.                                            |
+| `vite.config.ts`           | Workspace-wide lint (module boundaries included) and format settings.                                      |
 
 The core is runtime-agnostic: it speaks web `Request`, `Response` and streams,
 and nothing else. A runtime adapter only says how to fetch `index.html` and what

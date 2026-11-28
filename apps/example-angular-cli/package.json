@@ -1,0 +1,41 @@
+{
+  "name": "example-angular-cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "ng": "ng",
+    "dev": "ng serve",
+    "build": "ng build",
+    "start": "node dist/example-angular-cli/server/server.mjs"
+  },
+  "dependencies": {
+    "@angular-ssr-stream/stream-example": "workspace:*",
+    "@angular/common": "22.3.0-rc.0",
+    "@angular/compiler": "22.3.0-rc.0",
+    "@angular/core": "22.3.0-rc.0",
+    "@angular/platform-browser": "22.3.0-rc.0",
+    "@angular/platform-server": "22.3.0-rc.0",
+    "@angular/router": "22.3.0-rc.0",
+    "@angular/ssr": "22.3.0-rc.0",
+    "@push-based/angular-ssr-stream-angular-ssr": "workspace:*",
+    "@push-based/angular-ssr-stream-core": "workspace:*",
+    "express": "^5.1.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "22.3.0-rc.0",
+    "@angular/cli": "22.3.0-rc.0",
+    "@angular/compiler-cli": "22.3.0-rc.0",
+    "@types/express": "^5.0.1",
+    "@types/node": "^20.19.43",
+    "typescript": "~6.0.2"
+  },
+  "nx": {
+    "tags": [
+      "type:app",
+      "runtime:node"
+    ]
+  }
+}

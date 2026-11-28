@@ -1,4 +1,4 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpInterceptorFn, ɵREQUESTS_CONTRIBUTE_TO_STABILITY } from '@angular/common/http';
 import {
   EnvironmentProviders,
   InjectionToken,
@@ -8,7 +8,9 @@ import {
   makeEnvironmentProviders,
   makeStateKey,
   provideEnvironmentInitializer,
+  ɵDEFER_BLOCK_CONFIG,
   ɵDEHYDRATED_BLOCK_REGISTRY,
+  ɵDeferBlockBehavior,
   ɵwithIncrementalHydration,
 } from '@angular/core';
 import { Observable, defer, finalize, switchMap } from 'rxjs';
@@ -427,13 +429,42 @@ function findRegistryFactory(): (() => unknown) | null {
 }
 
 /**
+ * What a streamed render needs from the application's own injector. The
+ * streaming renderer provides `SERVER_REQUEST_TRACKER` on the platform, so
+ * these only change anything there; everywhere else, including a buffered
+ * render on the server, they give what would be there without them.
+ */
+const STREAMED_RENDER_PROVIDERS: Provider[] = [
+  // HTTP leaves `whenStable()` to the tracker, so the shell doesn't wait for data.
+  {
+    provide: ɵREQUESTS_CONTRIBUTE_TO_STABILITY,
+    useFactory: () =>
+      inject(SERVER_REQUEST_TRACKER, { optional: true }) === null &&
+      (inject(ɵREQUESTS_CONTRIBUTE_TO_STABILITY, { skipSelf: true, optional: true }) ?? true),
+  },
+  // `@defer` blocks are rendered by the renderer, between change detection passes.
+  {
+    provide: ɵDEFER_BLOCK_CONFIG,
+    useFactory: () =>
+      inject(SERVER_REQUEST_TRACKER, { optional: true }) === null
+        ? inject(ɵDEFER_BLOCK_CONFIG, { skipSelf: true, optional: true })
+        : { behavior: ɵDeferBlockBehavior.Manual },
+  },
+];
+
+/**
  * Lets `@defer` blocks with a `hydrate` trigger receive server-rendered
  * content after the shell. Must come after `provideClientHydration()`, whose
  * registry provider this replaces.
+ *
+ * On the server, it also brings what the streaming renderer needs from the
+ * application's injector, so an application bootstrapped by a function of its
+ * own (an Angular CLI app's `main.server.ts`) streams as well.
  */
 export function provideStreamHydration(): EnvironmentProviders {
   const providers: Array<Provider | EnvironmentProviders> = [
     provideEnvironmentInitializer(() => inject(STREAM_HYDRATION_CLIENT).attach()),
+    ...STREAMED_RENDER_PROVIDERS,
   ];
 
   const createRegistry = findRegistryFactory();

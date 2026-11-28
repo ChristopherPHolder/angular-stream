@@ -26,10 +26,11 @@
 
 ## Without `@angular/ssr`
 
-The Cloudflare setup compiles Angular with ngp and renders without
-`@angular/ssr`, which brings its own limits:
+Every setup but [Angular CLI](../getting-started/angular-cli.md) compiles
+Angular with ngp and renders without `@angular/ssr`, which brings its own
+limits:
 
-- **No HTTP status codes.** The Worker answers every page with `200`, so a
+- **No HTTP status codes.** The server answers every page with `200`, so a
   not-found page is served with `200` too. A server that knows its routes can
   set the status from outside, as
   [the demo's Worker](../../../../cloudflare-demo/src/worker.ts) does: it
@@ -44,4 +45,16 @@ The Cloudflare setup compiles Angular with ngp and renders without
 - **ngp is a prototype.** Any Angular commit can break it, hence the exact
   Angular pin.
 
-An adapter for `@angular/build` and `@angular/ssr` is planned.
+The Angular CLI setup has none of these: `@angular/ssr` serves the app, and
+only its `RenderMode.Server` routes are rendered differently.
+
+## With `@angular/ssr`
+
+- **Status and headers are settled when the shell goes out.** Changes the app
+  makes to `RESPONSE_INIT` after that, once data has arrived, can't reach the
+  response any more. Set a status from the route, or from a component that
+  exists before the data does.
+- **Streamed routes are not cached.** They carry `Cache-Control: no-store`,
+  whatever the route's `headers` say.
+- **It reaches into `@angular/ssr`'s internals** to swap the renderer, so the
+  supported `@angular/ssr` versions are as narrow as the Angular ones.

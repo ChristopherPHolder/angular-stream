@@ -32,6 +32,11 @@ hydrates, and from then on:
 Without a runtime on the page (the buffered fallback, or the server itself)
 all of it is inert.
 
+On the server, during a streamed render, it also turns off Angular's HTTP
+stability tracking and the automatic rendering of `@defer` blocks, which the
+renderer does itself. Anywhere else, a buffered or prerendered page included,
+those stay as they are.
+
 ### `streamHttpInterceptor`
 
 ```ts
@@ -64,10 +69,11 @@ interface ServerRequestTracker {
 const SERVER_REQUEST_TRACKER: InjectionToken<ServerRequestTracker>;
 ```
 
-Provided by the streaming renderer only. It turns off Angular's own HTTP
-stability tracking, so that `whenStable()` means "the route and its `@defer`
-blocks are in place" rather than "every request has answered", and waits on
-this tracker instead.
+Provided by the streaming renderer only, on the server platform. Angular's own
+HTTP stability tracking is off during a streamed render, so that
+`whenStable()` means "the route and its `@defer` blocks are in place" rather
+than "every request has answered", and the renderer waits on this tracker
+instead.
 
 ### Wire format
 
@@ -135,20 +141,47 @@ warning, once.
 ### `renderStreamingAngular()`
 
 ```ts
-function renderStreamingAngular(options: {
-  rootComponent: Type<unknown>;
-  config: ApplicationConfig;
+function renderStreamingAngular(options: StreamingAngularRenderOptions): Promise<Response>;
+
+type StreamingAngularRenderOptions = {
   /** The index.html template to render into. */
   document: string;
   url: string;
-}): Promise<Response>;
+  /** More providers for the server platform: REQUEST, LOCALE_ID, … */
+  platformProviders?: StaticProvider[];
+  /** Status and headers, read when the shell is ready. */
+  responseInit?: ResponseInit;
+  /** Called once the app is stable; a Response returned here is sent instead. */
+  beforeCommit?: (
+    applicationRef: ApplicationRef,
+  ) => Response | undefined | Promise<Response | undefined>;
+  /** Rewrites the shell's document before it is sent: critical CSS, for instance. */
+  transformDocument?: (document: string) => string | Promise<string>;
+  /** Stops the render, before or after the shell has gone out. */
+  signal?: AbortSignal;
+} & (
+  | { rootComponent: Type<unknown>; config: ApplicationConfig }
+  | { bootstrap: (context: BootstrapContext) => Promise<ApplicationRef> }
+);
 ```
 
 The streaming renderer itself: resolves once the shell is ready, with a
-`200` response whose body is the shell followed by a chunk per finished
-request. The response carries `Cache-Control: no-store`: a cached copy of a
-partial response would be worse than none. It throws if rendering fails
-before the first flush; after that, the error breaks the stream.
+response whose body is the shell followed by a chunk per finished request. The
+status is `responseInit.status`, `200` without one, and the response carries
+`Cache-Control: no-store`: a cached copy of a partial response would be worse
+than none. It throws if rendering fails before the first flush; after that, the
+error breaks the stream.
+
+The app is given as a root component and its server config, or as a function
+that bootstraps it on the platform it is handed, which is what an Angular CLI
+app's `main.server.ts` exports. A bootstrap function's config can't be added
+to, so the providers the renderer needs come from `provideStreamHydration()`
+in that config. With `rootComponent`, the renderer adds them itself.
+
+`responseInit` is read once the app is stable, so an app that is handed the
+same object, as `@angular/ssr` hands it `RESPONSE_INIT`, can still change the
+status until then. The adapter for `@angular/ssr` is built on these options;
+see [`withStreaming()`](angular-ssr.md#withstreaming).
 
 ### `createBufferedRender()`
 
