@@ -1,5 +1,5 @@
 ```bash
-npm install @push-based/angular-ssr-stream-cloudflare@next
+npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-cloudflare@next
 ```
 
 The Cloudflare Workers adapter. It depends on

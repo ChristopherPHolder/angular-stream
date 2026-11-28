@@ -80,7 +80,10 @@ instead.
 ### Wire format
 
 `StreamChunk`, `StreamBlock`, `StreamInit`, `StreamRuntime`, `NGH` and
-`streamRequestKey()` describe what travels in a chunk. See
+`streamRequestKey()` describe what travels in a chunk; `SerializedView` and
+`SerializedDeferBlock` the hydration data in it; `StreamSwap` and
+`StreamLogEntry` what the inline runtime records, and `StreamSink` the app's
+side of it, attached once Angular starts. See
 [Wire format and internals](../concepts/internals.md#the-wire-format).
 
 ## Server
@@ -92,7 +95,8 @@ function createStreamingHandler<Context = void>(
   options: StreamingHandlerOptions<Context>,
 ): StreamingHandler<Context>;
 
-interface StreamingHandlerOptions<Context = void> {
+/** What every adapter takes too, besides its own options. */
+interface StreamingAppOptions {
   /** The application's root component. */
   rootComponent: Type<unknown>;
   /** The application's server config, provideServerRendering() included. */
@@ -101,6 +105,9 @@ interface StreamingHandlerOptions<Context = void> {
   allowedHosts: readonly string[];
   /** The contents of @angular/core/event-dispatch-contract.min.js, for withEventReplay(). */
   eventDispatchContract?: string;
+}
+
+interface StreamingHandlerOptions<Context = void> extends StreamingAppOptions {
   /** Fetches the built index.html. A response that isn't ok turns into a 404. */
   loadTemplate(request: Request, context: Context): Promise<Response>;
 }
@@ -113,8 +120,10 @@ request it:
 
 1. applies Angular's host guard, answering `403` for a host not in
    `allowedHosts`;
-2. loads the template with `loadTemplate`, answering `404` if that fails, and
-   adds `eventDispatchContract` to it;
+2. loads the template with `loadTemplate`, answering `404` if its response
+   isn't `ok`, and adds `eventDispatchContract` to it. A `loadTemplate` that
+   rejects isn't caught: the error reaches the runtime, which usually answers
+   `500`;
 3. streams the route into it with `renderStreamingAngular()`;
 4. if streaming throws before its first flush, renders the page buffered
    instead, with `createBufferedRender()`.
@@ -161,16 +170,25 @@ type StreamingAngularRenderOptions = {
   transformDocument?: (document: string) => string | Promise<string>;
   /** Stops the render, before or after the shell has gone out. */
   signal?: AbortSignal;
-} & (
-  | { rootComponent: Type<unknown>; config: ApplicationConfig }
-  | { bootstrap: (context: BootstrapContext) => Promise<ApplicationRef> }
-);
+} & (StreamingRootComponent | StreamingBootstrapFunction);
+
+interface StreamingRootComponent {
+  rootComponent: Type<unknown>;
+  config: ApplicationConfig;
+}
+
+interface StreamingBootstrapFunction {
+  bootstrap: StreamingBootstrap;
+}
+
+/** What an Angular CLI app's main.server.ts exports by default. */
+type StreamingBootstrap = (context: BootstrapContext) => Promise<ApplicationRef>;
 ```
 
 The streaming renderer itself: resolves once the shell is ready, with a
 response whose body is the shell followed by a chunk per finished request. The
-status is `responseInit.status`, `200` without one, and the response carries
-`Cache-Control: no-store`: a cached copy of a partial response would be worse
+status is `responseInit.status`, `200` without one. The renderer sets
+`Content-Type` itself, and `Cache-Control: no-store`: a cached copy of a partial response would be worse
 than none. It throws if rendering fails before the first flush; after that, the
 error breaks the stream.
 

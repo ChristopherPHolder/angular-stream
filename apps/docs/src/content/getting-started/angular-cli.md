@@ -4,7 +4,8 @@ made by `ng new --ssr`, built by `ng build`, and served by `@angular/ssr`'s
 request. The only thing that changes is how a route with `RenderMode.Server` is
 rendered: as a stream, instead of all at once.
 
-Starting from a fresh `ng new my-app --ssr`, that takes changes to four files.
+Starting from a fresh `ng new my-app --ssr`, that takes changes to four files,
+and a fifth, `angular.json`, for the hosts it answers on in production.
 
 ## 1. Install
 

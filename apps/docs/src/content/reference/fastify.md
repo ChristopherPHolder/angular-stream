@@ -1,5 +1,5 @@
 ```bash
-npm install @push-based/angular-ssr-stream-fastify@next fastify
+npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-fastify@next fastify
 ```
 
 The Fastify plugin. It is built on the [Node adapter](node.md), and depends on
