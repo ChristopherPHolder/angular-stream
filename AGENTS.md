@@ -70,8 +70,10 @@ together; the short version:
   runtime and client, runtime-agnostic) and the adapters are published to npm:
   `packages/cloudflare` (`createStreamingWorker()`), `packages/node`
   (`node:http`, Connect, Express, and a Vite dev plugin), `packages/fastify`,
-  `packages/nestjs` (on Express or Fastify), `packages/aws-lambda` and
-  `packages/nitro`, each `@push-based/angular-ssr-stream-<name>`. Runtimes that
+  `packages/nestjs` (on Express or Fastify), `packages/aws-lambda`,
+  `packages/nitro` and `packages/angular-ssr` (`withStreaming()` for
+  `@angular/ssr`'s engine, for Angular CLI apps), each
+  `@push-based/angular-ssr-stream-<name>`. Runtimes that
   speak `Request`/`Response` natively (Hono, Deno, Bun, Fastly, Vercel,
   Netlify, Azure Functions, a Service Worker) have a docs recipe and an
   example, but no package. `apps/docs` is the documentation site (prerendered,
@@ -89,8 +91,10 @@ together; the short version:
 - **Toolchain**: Nx runs the tasks (`pnpm nx <target> <project>`,
   `run-many`, `affected`); targets are inferred from each `package.json`'s
   scripts, which call Vite+ (`vp`). Angular is compiled by
-  `@push-based/vite-plugin-ngp`. There is no `angular.json` and no Angular CLI;
-  `ng` commands and `@nx/angular` do not apply here. At the root: `pnpm dev` /
+  `@push-based/vite-plugin-ngp`, except in `apps/example-angular-cli`, an
+  app made by `ng new --ssr` and built by `ng build` (its `package.json`
+  scripts call `ng`). Nowhere else is there an `angular.json`; `@nx/angular`
+  does not apply here. At the root: `pnpm dev` /
   `dev:demo` / `build` / `ready`. Run `vp check` before committing; it formats
   with Oxfmt (not Prettier), lints with Oxlint and enforces module boundaries.
   Import from `vite-plus`, not `vite`. Use pnpm, never npm.
@@ -120,8 +124,12 @@ together; the short version:
 - **SSR**: streamed by `packages/core/src/server/`; the browser hydrates the
   shell while the response is still open. `createStreamingHandler()` falls back
   to a buffered `renderApplication` if streaming fails before its first byte.
-  `@angular/ssr` is **not** used, so `AngularAppEngine`, `serverRoutes`,
-  per-route render modes and SSR status codes are unavailable.
+  Outside `apps/example-angular-cli`, `@angular/ssr` is **not** used, so
+  `AngularAppEngine`, `serverRoutes`, per-route render modes and SSR status
+  codes are unavailable there. With the Angular CLI, `withStreaming()`
+  (`packages/angular-ssr`) leaves `@angular/ssr` in charge and only streams its
+  `RenderMode.Server` routes; the renderer it calls has to be exported from
+  the app's `main.server.ts`, whose bundle has its own copy of Angular.
 - **Streaming**: content that depends on HTTP data belongs in a `@defer` block
   with a `hydrate` trigger, placed directly inside an element; prefer
   `hydrate when <its data is there>`. Read the docs' "How it works" and

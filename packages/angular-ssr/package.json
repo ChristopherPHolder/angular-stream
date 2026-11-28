@@ -1,0 +1,77 @@
+{
+  "name": "@push-based/angular-ssr-stream-angular-ssr",
+  "version": "0.0.0",
+  "description": "Streamed SSR for Angular CLI apps: AngularAppEngine and AngularNodeAppEngine from @angular/ssr, with server-rendered routes streamed.",
+  "keywords": [
+    "angular",
+    "ssr",
+    "server-side-rendering",
+    "streaming",
+    "streamed-ssr",
+    "hydration",
+    "incremental-hydration",
+    "angular-cli",
+    "angular-ssr"
+  ],
+  "homepage": "https://push-based.github.io/angular-ssr-stream/docs/reference/angular-ssr",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/push-based/angular-ssr-stream.git",
+    "directory": "packages/angular-ssr"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./renderer": "./src/renderer.ts",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vp pack",
+    "typecheck": "tsc --noEmit"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "next",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./renderer": {
+        "types": "./dist/renderer.d.ts",
+        "default": "./dist/renderer.js"
+      },
+      "./package.json": "./package.json"
+    }
+  },
+  "dependencies": {
+    "@push-based/angular-ssr-stream-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@angular/common": "~22.3.0-rc.0",
+    "@angular/core": "~22.3.0-rc.0",
+    "@angular/router": "~22.3.0-rc.0",
+    "@angular/ssr": "~22.3.0-rc.0"
+  },
+  "devDependencies": {
+    "@angular/common": "22.3.0-rc.0",
+    "@angular/core": "22.3.0-rc.0",
+    "@angular/platform-browser": "22.3.0-rc.0",
+    "@angular/platform-server": "22.3.0-rc.0",
+    "@angular/router": "22.3.0-rc.0",
+    "@angular/ssr": "22.3.0-rc.0",
+    "rxjs": "~7.8.0",
+    "typescript": "~6.0.2",
+    "vite-plus": "1.8.0"
+  },
+  "nx": {
+    "tags": [
+      "type:package",
+      "runtime:agnostic"
+    ]
+  }
+}

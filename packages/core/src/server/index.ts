@@ -7,5 +7,8 @@ export {
 } from './handler';
 export {
   type StreamingAngularRenderOptions,
+  type StreamingBootstrap,
+  type StreamingBootstrapFunction,
+  type StreamingRootComponent,
   renderStreamingAngular,
 } from './streaming-angular-renderer';

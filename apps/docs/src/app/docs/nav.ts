@@ -103,6 +103,20 @@ export const DOCS: DocSection[] = [
     collapsed: true,
     groups: [
       {
+        title: 'Angular CLI',
+        pages: [
+          {
+            dir: 'getting-started',
+            slug: 'angular-cli',
+            title: 'Angular CLI',
+            description:
+              'Stream the server-rendered routes of an app made by ng new --ssr, built by ng build and served by @angular/ssr.',
+            runtime: { adapter: 'angular-ssr', examples: ['example-angular-cli'] },
+            load: () => import('../../content/getting-started/angular-cli.md'),
+          },
+        ],
+      },
+      {
         title: 'Node and its frameworks',
         pages: [
           {
@@ -396,6 +410,14 @@ export const DOCS: DocSection[] = [
             description:
               'The API of @push-based/angular-ssr-stream-core: the client providers and the runtime-agnostic server handler.',
             load: () => import('../../content/reference/core.md'),
+          },
+          {
+            dir: 'reference',
+            slug: 'angular-ssr',
+            title: 'angular-ssr-stream-angular-ssr',
+            description:
+              'The API of @push-based/angular-ssr-stream-angular-ssr: streaming for @angular/ssr, and the renderer main.server.ts exports.',
+            load: () => import('../../content/reference/angular-ssr.md'),
           },
           {
             dir: 'reference',

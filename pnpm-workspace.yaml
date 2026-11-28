@@ -25,6 +25,10 @@ allowBuilds:
   fsevents: true
   nx: true
   workerd: true
+  # The Angular CLI's cache (example-angular-cli). Both ship prebuilt binaries;
+  # their scripts only compile from source when none fits.
+  lmdb: false
+  msgpackr-extract: false
 
 minimumReleaseAgeExclude:
   - '@nx/devkit@24.1.0'
