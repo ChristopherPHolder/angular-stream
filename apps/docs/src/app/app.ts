@@ -10,7 +10,14 @@ import {
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import {
+  NavigationEnd,
+  NavigationStart,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from '@angular/router';
 import { filter } from 'rxjs';
 // `?no-inline`: Vite would inline an asset this small as a data: URI, which NgOptimizedImage rejects.
 import logo from '@angular-ssr-stream/press-kit/symbol/angular-ssr-stream-symbol.svg?no-inline';
@@ -154,13 +161,22 @@ export class App {
 
     const location = inject(Location);
     this.currentSection.set(sectionOf(location.path()));
+    // Whether the menu was open when the latest navigation started.
+    let fromMenu = false;
     inject(Router)
       .events.pipe(
-        filter((event) => event instanceof NavigationEnd),
+        filter((event) => event instanceof NavigationStart || event instanceof NavigationEnd),
         takeUntilDestroyed(),
       )
-      .subscribe(() => {
-        if (this.menuOpen()) {
+      .subscribe((event) => {
+        if (event instanceof NavigationStart) {
+          fromMenu = this.menuOpen();
+          return;
+        }
+        // Only a navigation that started from the open menu closes it. The first
+        // one starts before anyone can tap, and may end after the menu was
+        // opened while the page was still loading: that menu stays open.
+        if (fromMenu && this.menuOpen()) {
           // The link that was followed is in the menu, which is closing.
           this.menuOpen.set(false);
           this.focusNext(this.main);

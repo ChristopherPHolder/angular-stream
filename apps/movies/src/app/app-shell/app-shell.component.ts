@@ -1,5 +1,11 @@
 import { Component, inject, signal, TrackByFunction, ViewEncapsulation } from '@angular/core';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import {
+  NavigationEnd,
+  NavigationStart,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+} from '@angular/router';
 import { distinctUntilChanged, filter, map, shareReplay, switchMap } from 'rxjs';
 import { TMDBMovieGenreModel } from '../data-access/api/model/movie-genre.model';
 import { trackByProp } from '../shared/cdk/track-by';
@@ -56,12 +62,22 @@ export class AppShellComponent {
   readonly accountMenuComponent = toSignal(this.accountMenuComponent$);
 
   constructor() {
+    // Whether the drawer was open when the latest navigation started.
+    let fromDrawer = false;
     rxEffects(({ register }) => {
+      register(
+        this.router.events.pipe(filter((e) => e instanceof NavigationStart)),
+        () => (fromDrawer = this.sideDrawerOpen()),
+      );
+      // Only a navigation that started from the open drawer closes it. The first
+      // one starts before anyone can tap, and may end after the drawer was
+      // opened while the page was still streaming: that drawer stays open.
       register(
         this.router.events.pipe(
           filter((e) => e instanceof NavigationEnd),
           map((e) => (e as NavigationEnd).urlAfterRedirects),
           distinctUntilChanged(),
+          filter(() => fromDrawer),
         ),
         () => this.closeSidenav(),
       );
