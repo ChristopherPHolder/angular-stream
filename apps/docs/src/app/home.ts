@@ -45,6 +45,11 @@ import { DEMO } from './links';
         away and the reviews after one.
       </p>
       <p class="home-text">
+        Hydration follows the HTML. Sent whole, nothing on the page responds to a click until all of
+        it has arrived and Angular has hydrated all of it. Streamed, Angular hydrates each part as
+        it lands, so the product can be used while the reviews are still loading.
+      </p>
+      <p class="home-text">
         Both pages are complete at the same moment: streaming does not make a slow request faster.
         It stops the rest of the page, and the browser's work on styles, fonts and scripts, from
         waiting for it.

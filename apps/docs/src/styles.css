@@ -1166,11 +1166,18 @@ pre.mermaid[data-processed] svg {
 
 /*
  * The hero's animation (home-race.ts): one page sent whole and streamed, on
- * one clock. A cycle is 6 s: the 3 s the page takes, a hold, and a reset. Every
+ * one clock. A cycle is 8 s: the 4 s on the clock, a hold, and a reset. Every
  * animation runs on that cycle, so they stay in step; the keyframes hold the
- * times (0.1 s is 1.6%, 1 s is 16.6%, 3 s is 50%).
+ * times (0.1 s is 1.25%, 0.5 s is 6.25%, 1 s is 12.5%).
  */
 .race {
+  /* What a colour means, as in the figures (figures/mock.css). */
+  --server: var(--color-info-700);
+  --server-bg: var(--color-info-50);
+  --placeholder: var(--color-warning-700);
+  --placeholder-bg: var(--color-warning-50);
+  --hydrated: var(--color-success-700);
+  --hydrated-bg: var(--color-success-50);
   margin: 0;
   padding: var(--space-5);
   border: 1px solid var(--color-border);
@@ -1206,48 +1213,78 @@ pre.mermaid[data-processed] svg {
 .race-part {
   position: relative;
   display: block;
-  height: var(--space-11);
+  height: var(--space-12);
 }
 
 .race-part--product {
   height: var(--space-16);
 }
 
-/* A part's two faces, one over the other: its placeholder, then the part itself. */
-.race-loading,
-.race-ready {
+/*
+ * A part's faces, one over the other, each with its name and what it is: its
+ * placeholder, then its server HTML, then the same part hydrated.
+ */
+.race-face {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: var(--space-1-5);
   padding-inline: var(--space-2-5);
+  border: 1px solid;
   border-radius: var(--radius-base);
+  color: var(--color-text-heading);
   font-size: 0.75rem;
   line-height: 1rem;
+  font-weight: 500;
   overflow: hidden;
 }
 
+/* The state, in words; the colour repeats it. */
+.race-face small {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 400;
+}
+
 .race-loading {
-  border: 1px dashed var(--color-neutral-400);
-  color: var(--color-neutral-600);
+  border-style: dashed;
+  border-color: var(--placeholder);
+  background: var(--placeholder-bg);
 }
 
-.race-ready {
-  border: 1px solid var(--color-primary-200);
-  background: var(--color-primary-50);
-  color: var(--color-primary-800);
-  font-weight: 500;
+.race-loading small {
+  color: var(--placeholder);
 }
 
-/* A line of text, drawn. */
-.race-ready i {
-  display: block;
-  width: 70%;
-  height: var(--space-1);
+.race-html {
+  border-color: var(--server);
+  background: var(--server-bg);
+}
+
+.race-html small {
+  color: var(--server);
+}
+
+.race-hydrated {
+  border-color: var(--hydrated);
+  background: var(--hydrated-bg);
+}
+
+.race-hydrated small {
+  color: var(--hydrated);
+}
+
+/* Hydrated is the state the page is sent for: a dot marks it besides the colour. */
+.race-hydrated small::before {
+  content: '';
+  display: inline-block;
+  width: var(--space-1-5);
+  height: var(--space-1-5);
+  margin-right: var(--space-1);
   border-radius: var(--radius-full);
-  background: var(--color-primary-200);
+  background: var(--hydrated);
+  vertical-align: 0.0625rem;
 }
 
 .race-blank {
@@ -1308,89 +1345,177 @@ pre.mermaid[data-processed] svg {
   padding: var(--space-1) var(--space-3);
 }
 
-.race-loading,
-.race-ready,
+.race-face,
 .race-blank,
 .race-elapsed {
-  animation-duration: 6s;
+  animation-duration: 8s;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }
 
+/*
+ * When each thing happens. A part lands as HTML (race-in-*) and is hydrated
+ * half a second later (race-live-*), with a ring that fades to mark the
+ * moment: the product at 0.1 s, the reviews at 1 s and the recommendations at
+ * 3 s when streamed, all of them at 3 s when sent whole. The reviews are the
+ * last part on the page, so the streamed page fills out of order.
+ */
 .race-page--whole .race-blank {
   animation-name: race-until-3;
 }
 
-.race-page--whole .race-ready,
-.race-page--streamed .race-part--recommendations .race-ready {
-  animation-name: race-at-3;
-}
-
 .race-page--streamed .race-loading,
-.race-page--streamed .race-part--product .race-ready {
-  animation-name: race-at-0;
+.race-page--streamed .race-part--product .race-html {
+  animation-name: race-in-0;
 }
 
-.race-page--streamed .race-part--reviews .race-ready {
-  animation-name: race-at-1;
+.race-page--streamed .race-part--product .race-hydrated {
+  animation-name: race-live-0;
+}
+
+.race-page--streamed .race-part--reviews .race-html {
+  animation-name: race-in-1;
+}
+
+.race-page--streamed .race-part--reviews .race-hydrated {
+  animation-name: race-live-1;
+}
+
+.race-page--whole .race-html,
+.race-page--streamed .race-part--recommendations .race-html {
+  animation-name: race-in-3;
+}
+
+.race-page--whole .race-hydrated,
+.race-page--streamed .race-part--recommendations .race-hydrated {
+  animation-name: race-live-3;
 }
 
 .race-elapsed {
   animation-name: race-clock;
 }
 
-@keyframes race-at-0 {
+@keyframes race-in-0 {
   0%,
-  1.6% {
+  1.25% {
     opacity: 0;
   }
-  3.5%,
-  94% {
+  3%,
+  92% {
     opacity: 1;
   }
-  98%,
+  96%,
   100% {
     opacity: 0;
   }
 }
 
-@keyframes race-at-1 {
+@keyframes race-live-0 {
   0%,
-  16.6% {
+  7.5% {
     opacity: 0;
+    box-shadow: 0 0 0 0 var(--color-success-300);
   }
-  18.6%,
-  94% {
+  9.25% {
+    opacity: 1;
+    box-shadow: 0 0 0 var(--space-1) var(--color-success-200);
+  }
+  15.5% {
+    box-shadow: 0 0 0 var(--space-1) transparent;
+  }
+  92% {
     opacity: 1;
   }
-  98%,
+  96%,
+  100% {
+    opacity: 0;
+    box-shadow: 0 0 0 var(--space-1) transparent;
+  }
+}
+
+@keyframes race-in-1 {
+  0%,
+  12.5% {
+    opacity: 0;
+  }
+  14.25%,
+  92% {
+    opacity: 1;
+  }
+  96%,
   100% {
     opacity: 0;
   }
 }
 
-@keyframes race-at-3 {
+@keyframes race-live-1 {
   0%,
-  50% {
+  18.75% {
     opacity: 0;
+    box-shadow: 0 0 0 0 var(--color-success-300);
   }
-  52%,
-  94% {
+  20.5% {
+    opacity: 1;
+    box-shadow: 0 0 0 var(--space-1) var(--color-success-200);
+  }
+  26.75% {
+    box-shadow: 0 0 0 var(--space-1) transparent;
+  }
+  92% {
     opacity: 1;
   }
-  98%,
+  96%,
   100% {
     opacity: 0;
+    box-shadow: 0 0 0 var(--space-1) transparent;
+  }
+}
+
+@keyframes race-in-3 {
+  0%,
+  37.5% {
+    opacity: 0;
+  }
+  39.25%,
+  92% {
+    opacity: 1;
+  }
+  96%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes race-live-3 {
+  0%,
+  43.75% {
+    opacity: 0;
+    box-shadow: 0 0 0 0 var(--color-success-300);
+  }
+  45.5% {
+    opacity: 1;
+    box-shadow: 0 0 0 var(--space-1) var(--color-success-200);
+  }
+  51.75% {
+    box-shadow: 0 0 0 var(--space-1) transparent;
+  }
+  92% {
+    opacity: 1;
+  }
+  96%,
+  100% {
+    opacity: 0;
+    box-shadow: 0 0 0 var(--space-1) transparent;
   }
 }
 
 @keyframes race-until-3 {
   0%,
-  50% {
+  37.5% {
     opacity: 1;
   }
-  52%,
-  98% {
+  39.25%,
+  96% {
     opacity: 0;
   }
   100% {
@@ -1403,10 +1528,10 @@ pre.mermaid[data-processed] svg {
     transform: scaleX(0);
   }
   50%,
-  94% {
+  92% {
     transform: scaleX(1);
   }
-  98%,
+  96%,
   100% {
     transform: scaleX(0);
   }
@@ -1417,12 +1542,13 @@ pre.mermaid[data-processed] svg {
 }
 
 /*
- * Reduced motion: the frame at 1.5 s, standing still. One page is blank, the
- * other has its product and its reviews. Nothing moves, so there is nothing to pause.
+ * Reduced motion: the frame at 1.25 s, standing still. One page is blank; the
+ * other has its product hydrated, a placeholder for its recommendations and,
+ * below that, its reviews as HTML. Nothing moves, so there is nothing to pause.
  */
 @media (prefers-reduced-motion: reduce) {
   .race * {
-    animation-delay: -1.5s;
+    animation-delay: -1.25s;
     animation-play-state: paused;
   }
 
