@@ -202,6 +202,8 @@ ui-side-drawer {
   flex-direction: column;
   flex: 1;
   overflow: auto;
+  /* At either end of the list, a drag stops there instead of moving the page. */
+  overscroll-behavior: contain;
   font-size: var(--text-md);
   font-weight: bold;
   contain: content;

@@ -475,6 +475,9 @@ details[open] > summary.sidebar-title::after {
     z-index: 2;
     width: min(100%, 22rem);
     max-height: none;
+    /* Fills the space between the insets, so it scrolls. With the wide layout's
+       start, a fixed box is as tall as its links and runs off the screen. */
+    align-self: stretch;
     padding: var(--space-5) var(--space-5) var(--space-10);
     border-left: 1px solid var(--color-border);
     background: var(--color-surface);

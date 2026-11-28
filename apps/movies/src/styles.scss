@@ -32,6 +32,15 @@ body {
   }
 }
 
+/* While the drawer is open over the page, the page stays where it is: a drag
+   on the drawer scrolls its list, not the page behind it. From 1298px the
+   drawer is a column beside the page (side-drawer.component.scss). */
+@media screen and (max-width: 1297px) {
+  html:has(.side-drawer.opened) {
+    overflow: hidden;
+  }
+}
+
 body.dark img:not([src*='.svg']) {
   filter: var(--image-filter);
 }
