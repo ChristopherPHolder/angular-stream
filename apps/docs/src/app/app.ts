@@ -110,6 +110,8 @@ import { DocsSearch } from './search/search';
           <a [href]="movies">Angular Movies, a real app</a>
           <a [href]="repo">Source on GitHub</a>
           <a routerLink="/docs/reference/press-kit">Press kit</a>
+          <!-- The contents for a language model; the build writes it (scripts/prerender.ts). -->
+          <a href="llms.txt">llms.txt</a>
           <a href="https://push-based.io/">PushBased</a>
         </nav>
       </div>
