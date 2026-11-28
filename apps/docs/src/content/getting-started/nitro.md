@@ -9,6 +9,10 @@ It needs Nitro 3, whose Vite plugin is what builds the server here. Nitro 3 is a
 single host that has its own adapter, such as
 [Cloudflare Workers](cloudflare-workers.md), that adapter is lighter.
 
+## Before you start
+
+<!-- include ../_shared/before-you-start.md -->
+
 ## 1. Install
 
 ```bash
@@ -47,8 +51,8 @@ This file is Nitro's server entry: Nitro serves a static file when there is
 one, runs any routes of its own, and hands every other request to the handler,
 which renders the route into the template.
 
-`allowedHosts` must list every hostname the server answers for: Angular's SSR
-host guard rejects any other `host` header, and the handler answers `403`.
+<!-- include ../_shared/allowed-hosts.md -->
+
 Nitro's server ignores `X-Forwarded-Host` and `X-Forwarded-Proto` unless its
 `trustProxy` option is on, so behind a proxy the check sees the `host` header
 the proxy sends. List preview hostnames too, with a wildcard such as
@@ -57,9 +61,7 @@ the proxy sends. List preview hostnames too, with a wildcard such as
 A missing file under `/assets/` answers `404`; any other path that isn't a
 file, `/nope.png` included, is rendered as a page.
 
-`eventDispatchContract` is for `withEventReplay()`. The built `index.html`
-doesn't carry the script Angular needs to queue the clicks made before the page
-hydrates, so the handler adds it.
+<!-- include ../_shared/event-replay.md -->
 
 ## 5. Vite
 
@@ -90,10 +92,17 @@ server asset, which Nitro bundles into the server for every preset. In
 `vite dev` it gives the handler the `index.html` Vite serves, with Vite's dev
 transforms, so SSR behaves as it does in production.
 
-## 6. Run it
+## 6. Develop
 
 ```bash
-vite dev                          # http://localhost:3000
+vite dev   # http://localhost:3000
+```
+
+Pages are rendered by the handler and stream as they do in production.
+
+## 7. Build and run
+
+```bash
 vite build                        # node-server preset, to .output/
 node .output/server/index.mjs     # http://localhost:3000
 ```
@@ -102,7 +111,11 @@ node .output/server/index.mjs     # http://localhost:3000
 `.output/server`. The `node-server` output is self-contained: copy `.output`
 anywhere Node runs. `vite preview` serves it too.
 
-## 7. Deploy with a preset
+## 8. Check that it streams
+
+<!-- include ../_shared/check-it-streams.md url=http://localhost:3000/ -->
+
+## 9. Deploy with a preset
 
 The preset decides what `vite build` writes. Set it with `NITRO_PRESET`, or
 `preset` in the Nitro options:
@@ -115,7 +128,12 @@ NITRO_PRESET=bun vite build       # bun .output/server/index.mjs
 
 On Vercel and Netlify there is nothing to set: Nitro sees it is building there
 and picks the preset itself, so a build command of `vite build` is enough.
-[Nitro's deploy docs](https://nitro.build/deploy) cover each provider.
+[Nitro's deploy docs](https://nitro.build/deploy) cover each provider. Run
+the check above against the deployment, too.
+
+## 10. Stream something
+
+<!-- include ../_shared/stream-something.md -->
 
 ## Presets we checked
 
@@ -156,7 +174,3 @@ way with less in between. What it doesn't give you is the build: it has no
 presets and no Vite plugin, so serving the client build, loading the template
 and bundling the server would be yours to wire up. Use Nitro to reach the hosts
 it has presets for, and a dedicated adapter where one host matters on its own.
-
-## Stream something
-
-<!-- include ../_shared/stream-something.md -->

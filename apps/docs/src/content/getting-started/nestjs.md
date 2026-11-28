@@ -8,15 +8,27 @@ On `@nestjs/platform-fastify`, only the server entry, compression and static
 files change; [Fastify](#fastify) has those, and `apps/example-nestjs-fastify`
 is that setup.
 
-## 1. The browser config
+## Before you start
+
+<!-- include ../_shared/before-you-start.md -->
+
+## 1. Install
+
+```bash
+npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-nestjs@next \
+  @nestjs/common @nestjs/core @nestjs/platform-express reflect-metadata
+npm install -D @types/node
+```
+
+## 2. The browser config
 
 <!-- include ../_shared/browser-config.md -->
 
-## 2. The server config
+## 3. The server config
 
 <!-- include ../_shared/server-config.md -->
 
-## 3. The Nest module
+## 4. The Nest module
 
 Import `AngularStreamModule` into your root module, next to your controllers:
 
@@ -54,7 +66,10 @@ template is `dist/server/index.server.html`, and `staticDir` is the browser
 build in `dist/client`.
 
 `allowedHosts` must list every hostname the server answers for: Angular's SSR
-host guard rejects any other `host` header, and the server answers `403`.
+host guard rejects any other `host` header, and the server answers `403`. A
+`Host` header that is more than a host and a port is a `400`; see
+[What Nest sees of a page](#12-what-nest-sees-of-a-page).
+`eventDispatchContract` is as on [Node](node.md#4-the-server).
 
 The controller is an ordinary Nest controller:
 
@@ -77,7 +92,7 @@ When the options come from somewhere else, such as `ConfigService`, use
 `AngularStreamModule.forRootAsync({ imports, useFactory, inject })`; see
 [the reference](../reference/nestjs.md#angularstreammoduleforrootasync).
 
-## 4. The server entry
+## 5. The server entry
 
 ```ts title="src/server.ts"
 import 'reflect-metadata';
@@ -112,7 +127,7 @@ controller takes is rendered.
 `createRequestListener()` turns the app into a `node:http` request listener for
 `vite dev`. In production, `app.listen()` starts the server as usual.
 
-## 5. TypeScript
+## 6. TypeScript
 
 Nest reads constructor types from decorator metadata, so the tsconfig the app
 is built with needs both decorator flags:
@@ -135,7 +150,7 @@ warns at startup that `HelloController` "has no decorator metadata", passes
 `AngularStreamModule` itself is published without decorators, so it works
 however your app compiles them.
 
-## 6. Vite
+## 7. Vite
 
 ```ts title="vite.config.ts"
 import { angularStreamNest } from '@push-based/angular-ssr-stream-nestjs/vite';
@@ -161,7 +176,7 @@ transforms it, and sends it every other request Vite has no file or module for,
 so `/api/hello` reaches Nest in dev too. List it before ngp. In a build it does
 nothing.
 
-## 7. Develop
+## 8. Develop
 
 ```bash
 vite dev   # http://localhost:5173
@@ -171,7 +186,7 @@ Pages stream as they do in production, the API answers, and an edit to a
 controller or service is live on the next request. `import.meta.env.PROD` is
 `false` there, so `src/server.ts` doesn't call `listen()`.
 
-## 8. Build and run
+## 9. Build and run
 
 ```json title="package.json"
 {
@@ -192,23 +207,11 @@ node dist/server/server.js      # http://localhost:3000, or $PORT
 Vite left out of the bundle, so run it where the app's `node_modules` are, or
 install the production dependencies next to `dist/` in your image.
 
-Check that it streams:
+## 10. Check that it streams
 
-```bash
-curl -sN -o /dev/null --trace-time --trace-ascii - http://localhost:3000/ | grep 'Recv data'
-```
+<!-- include ../_shared/check-it-streams.md url=http://localhost:3000/ -->
 
-```text
-20:36:36.798526 <= Recv data, 3063 bytes (0xbf7)
-20:36:38.800019 <= Recv data, 807 bytes (0x327)
-```
-
-That's the example: the shell at once, and the widget's chunk two seconds
-later, when its data is there. One line for the whole page means something
-buffered it; see
-[Checking that a response streams](../guides/streaming-through-proxies.md#checking-that-a-response-streams).
-
-## 9. Static files
+## 11. Static files
 
 `staticDir` serves the browser build from the render route: a file in
 `dist/client` is sent from disk, anything else is rendered. A path that
@@ -224,7 +227,9 @@ app.useStaticAssets(fileURLToPath(new URL('../client/', import.meta.url)), { ind
 ```
 
 `index: false` matters: without it, `/` gets the unrendered `index.html` from
-the browser build. `/index.html` itself is still served from disk as it is.
+the browser build. `/index.html` itself is still served from disk as it is, the
+bare template, where every other setup on these pages renders it. `staticDir`
+doesn't have that gap.
 
 `ServeStaticModule` from `@nestjs/serve-static` answers every `GET` it can't
 find a file for with its own `index.html`, which leaves nothing for the Angular
@@ -251,7 +256,7 @@ route, whatever `exclude` says, and Fastify refuses to start with two
 catch-all routes (`FST_ERR_DUPLICATED_ROUTE`). Use `staticDir` or
 `@fastify/static` there; see [Fastify](#fastify).
 
-## 10. What Nest sees of a page
+## 12. What Nest sees of a page
 
 Pages aren't controller routes. The render route is added after everything
 else, so Nest's guards, interceptors and pipes never run for a page, and
@@ -275,7 +280,7 @@ render, and only if that fails too does the error reach the filters, as a
 cuts the connection, so the browser keeps what it has and no filter writes a
 JSON body into the page.
 
-## 11. Behind a proxy
+## 13. Behind a proxy
 
 A proxy, a CDN or compression middleware can hold the response back until it
 is complete. Pages carry `X-Accel-Buffering: no` for Nginx, and `compression`
@@ -284,7 +289,7 @@ read [Streaming through proxies](../guides/streaming-through-proxies.md).
 Behind a proxy that rewrites the host, set
 [`trustProxy`](../reference/node.md#createnodehandler).
 
-## 12. Stream something
+## 14. Stream something
 
 <!-- include ../_shared/stream-something.md -->
 
@@ -293,7 +298,7 @@ Behind a proxy that rewrites the host, set
 The same module renders pages on `@nestjs/platform-fastify`, with the same
 options and the same results: the API keeps `/api`, an unknown `/api/...`
 gets Nest's `404`, a missing file under `/assets/` is a `404`, and a bad
-`Host` is a `400`. Every step but static files (step 9) stays the same.
+`Host` is a `400`. Every step but static files stays the same.
 Install the Nest adapter, the stream's Fastify adapter, which the module loads
 only on Fastify, and `@fastify/compress` if you compress in Node:
 

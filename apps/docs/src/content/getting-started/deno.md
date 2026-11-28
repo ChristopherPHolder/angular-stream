@@ -8,24 +8,29 @@ The repository's `apps/example-deno` is this setup, and every block below is
 taken from it; its server is
 [`src/server.ts`](../../../../../apps/example-deno/src/server.ts).
 
-## 1. The browser config
+## Before you start
+
+<!-- include ../_shared/before-you-start.md -->
+
+## 1. Install
+
+```bash
+npm install @push-based/angular-ssr-stream-core@next
+npx jsr add @std/http
+```
+
+`@std/http` comes from JSR. pnpm (10.9 and later) and Yarn take a `jsr:`
+version directly instead: `pnpm add @std/http@jsr:^1.1.4`.
+
+## 2. The browser config
 
 <!-- include ../_shared/browser-config.md -->
 
-## 2. The server config
+## 3. The server config
 
 <!-- include ../_shared/server-config.md -->
 
-## 3. The server
-
-Install `@std/http` from JSR. pnpm (10.9 and later) and Yarn take a `jsr:`
-version directly; with npm, use `npx jsr add @std/http`.
-
-```bash
-pnpm add @std/http@jsr:^1.1.4
-```
-
-Then the server entry:
+## 4. The server
 
 ```ts title="src/server.ts"
 import { createStreamingHandler } from '@push-based/angular-ssr-stream-core/server';
@@ -76,12 +81,16 @@ and every request gets a fresh `Response` of it.
 `allowedHosts` must list every hostname the server answers for: Angular's SSR
 host guard rejects any other `host` header, and the server answers `403`.
 
+`Deno.serve()` listens on port 8000, Deno's default. To take the port from the
+environment, pass `{ port: Number(Deno.env.get('PORT') ?? 8000) }` as its first
+argument, and run Deno with `--allow-env`.
+
 Paths in the server are relative to `import.meta.dirname`, the bundle's
 folder, not to the working directory. Deno's `--allow-read` path is resolved
 against the working directory, though, so it has to point at `dist` from
 wherever the server is started.
 
-## 4. Vite
+## 5. Vite
 
 ```ts title="vite.config.ts"
 import { ngp } from '@push-based/vite-plugin-ngp';
@@ -130,7 +139,7 @@ declare namespace Deno {
 and add `deno.d.ts` to `include` in `tsconfig.app.json`. Deno itself has the
 full declarations (`deno types`).
 
-## 5. Build and run
+## 6. Build and run
 
 ```bash
 vite build
@@ -138,18 +147,13 @@ deno run --allow-net --allow-read=dist dist/server/server.js
 ```
 
 The server listens on port 8000. It needs to read `dist` and to listen, and no
-other permission. Check that it streams:
+other permission.
 
-```bash
-curl -N http://localhost:8000/
-```
+## 7. Check that it streams
 
-The shell, with the widget's placeholder, arrives at once, and each `@defer`
-block follows in a `<template data-ngs>` chunk when its data is there. A
-response that arrives all at once means something buffered it; see
-[Debugging and verifying](../guides/debugging.md).
+<!-- include ../_shared/check-it-streams.md url=http://localhost:8000/ -->
 
-### While developing
+## 8. Develop
 
 There is no dev server that renders in Deno: `vite dev` renders on Node. Rebuild
 on every change instead, and let Deno restart on every new build:
@@ -163,7 +167,11 @@ deno run --watch=dist/ --allow-net --allow-read=dist dist/server/server.js
 the server bundle's own modules. There is no hot module replacement, and the
 build is a production build, so Angular's dev-mode hydration checks are off.
 
-## 6. Deno Deploy
+## 9. Stream something
+
+<!-- include ../_shared/stream-something.md -->
+
+## Deno Deploy
 
 > [!WARNING]
 > Deno Deploy shuts down in April 2027; see
@@ -219,7 +227,7 @@ encoder as it's written, and the shell still arrives at once.
 > been run against a real Deno Deploy app, so check the result with
 > `curl -N https://<your app>/` after the first deploy.
 
-## 7. Supabase Edge Functions
+## Supabase Edge Functions
 
 Supabase Edge Functions run on Deno too, but they are built for APIs, not
 pages, and in practice they can't serve this app:
@@ -246,7 +254,3 @@ Each of these has a workaround, but together they make Supabase a poor host
 for a server-rendered app. Serve the pages from Deno Deploy or any host that
 runs Deno, and call your Supabase functions from there. This section has not
 been checked against Supabase.
-
-## 8. Stream something
-
-<!-- include ../_shared/stream-something.md -->

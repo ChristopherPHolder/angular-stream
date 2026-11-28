@@ -11,15 +11,26 @@ writes the deployment itself, in the layout of Vercel's
 > and run locally through Vercel's own Node.js launcher, where it streams; see
 > [What has been checked](#what-has-been-checked).
 
-## 1. The browser config
+## Before you start
+
+<!-- include ../_shared/before-you-start.md -->
+
+## 1. Install
+
+```bash
+npm install @push-based/angular-ssr-stream-core@next
+npm install -D @types/node vercel
+```
+
+## 2. The browser config
 
 <!-- include ../_shared/browser-config.md -->
 
-## 2. The server config
+## 3. The server config
 
 <!-- include ../_shared/server-config.md -->
 
-## 3. The function
+## 4. The function
 
 ```ts title="src/function.ts"
 import { readFile } from 'node:fs/promises';
@@ -50,12 +61,12 @@ server bundle: the built `index.html` with the script `withEventReplay()` needs,
 so the handler takes no `eventDispatchContract`. The build below copies it into
 the function, and the function reads it once per instance.
 
-`allowedHosts` must list every hostname the function answers for: Angular's SSR
-host guard rejects any other `host` header, and the function answers `403`.
+<!-- include ../_shared/allowed-hosts.md -->
+
 Each preview deployment has its own `*.vercel.app` hostname; `'*.vercel.app'`
 admits all of them, and the example lists that.
 
-## 4. Vite
+## 5. Vite
 
 ```ts title="vite.config.ts"
 import { cp, mkdir, rm, writeFile } from 'node:fs/promises';
@@ -156,7 +167,16 @@ Vercel would serve it for `/` before the function ever saw the request.
 
 Add `.vercel/` to `.gitignore`.
 
-## 5. Build and deploy
+## 6. Develop
+
+```bash
+vite dev   # http://localhost:5173
+```
+
+`vite dev` serves the app client-side, without a server render, and Angular
+logs NG0505 because there is no hydration data. Nothing streams until the build.
+
+## 7. Build and deploy
 
 Create a Vercel project for the app (in a monorepo, set its Root Directory to
 the app's folder). Vercel runs the app's `build` script, finds the
@@ -168,8 +188,15 @@ vercel build             # runs the build script; .vercel/output is the result
 vercel deploy --prebuilt # uploads .vercel/output
 ```
 
-`vite dev` serves the app client-side, without a server render, and Angular
-logs NG0505 because there is no hydration data. Nothing streams until the build.
+## 8. Check that it streams
+
+Against the deployment's address:
+
+<!-- include ../_shared/check-it-streams.md url=https://my-app.vercel.app/ -->
+
+## 9. Stream something
+
+<!-- include ../_shared/stream-something.md -->
 
 ## The Edge runtime
 
@@ -211,7 +238,3 @@ In this repository, with `apps/example-vercel`:
 
 Not checked: a real deployment. Vercel's CDN, its compression and its routing
 in front of the function have not been seen streaming this app.
-
-## Stream something
-
-<!-- include ../_shared/stream-something.md -->

@@ -5,20 +5,29 @@ and every other `GET` rendered as a streamed page by the `angularStream`
 plugin. The plugin is built on the [Node adapter](node.md), and dev mode uses
 its Vite plugin.
 
-## 1. The browser config
+## Before you start
 
-<!-- include ../_shared/browser-config.md -->
+<!-- include ../_shared/before-you-start.md -->
 
-## 2. The server config
-
-<!-- include ../_shared/server-config.md -->
-
-## 3. The server
+## 1. Install
 
 ```bash
 npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-node@next @push-based/angular-ssr-stream-fastify@next
 npm install fastify @fastify/static @fastify/compress
+npm install -D @types/node
 ```
+
+The Node adapter is for `vite dev`, through its Vite plugin.
+
+## 2. The browser config
+
+<!-- include ../_shared/browser-config.md -->
+
+## 3. The server config
+
+<!-- include ../_shared/server-config.md -->
+
+## 4. The server
 
 ```ts title="src/server.ts"
 import type { IncomingMessage, ServerResponse } from 'node:http';
@@ -111,20 +120,17 @@ wildcard it registers a route per file it finds at startup. `globIgnore`
 leaves out `index.html`, which is the browser build's copy of the template and
 would otherwise be served as `/index.html` and `/`, unrendered.
 
-`allowedHosts` must list every hostname the server answers for: Angular's SSR
-host guard rejects any other `host` header, and the server answers `403`.
+<!-- include ../_shared/allowed-hosts.md -->
+
+<!-- include ../_shared/event-replay.md -->
+
 Behind a proxy that rewrites the host, see
 [`trustProxy`](../reference/fastify.md#angularstream).
 
-`eventDispatchContract` is for `withEventReplay()`. The plugin adds it to the
-template unless it's there already, so a click made before the page hydrates is
-queued and replayed. Leave it out and those clicks are lost; the server logs a
-warning when that happens.
-
 `@fastify/compress` has to be registered before the plugin, and needs
-`flushOnIdle: true`; see [7. Compression](#7-compression).
+`flushOnIdle: true`; see [9. Compression](#9-compression).
 
-## 4. Vite
+## 5. Vite
 
 ```ts title="vite.config.ts"
 import { angularStreamNode } from '@push-based/angular-ssr-stream-node/vite';
@@ -163,7 +169,7 @@ the dev template on it. It restores `req.url` first: Vite has rewritten it to
 port of its own, and `@fastify/static` isn't registered: Vite serves the
 browser files.
 
-## 5. Develop
+## 6. Develop
 
 ```bash
 vite dev   # http://localhost:5173
@@ -182,7 +188,7 @@ An API outside `/api` needs its own prefix in `routes`. To check a page with
 curl -sN -H 'Accept: text/html' http://localhost:5173/
 ```
 
-## 6. Build and run
+## 7. Build and run
 
 ```json title="package.json"
 {
@@ -208,49 +214,28 @@ your image. Angular is bundled.
 default. In a container, or anywhere the server must be reached from another
 machine, listen on every interface with `app.listen({ port, host: '0.0.0.0' })`.
 
-Check that it streams before you put anything in front of it:
+## 8. Check that it streams
 
-```bash
-curl -sN -o /dev/null --trace-time --trace-ascii - http://localhost:3000/ | grep 'Recv data'
-```
+Before you put anything in front of the server:
 
-```text
-20:30:32.400163 <= Recv data, 3065 bytes (0xbf9)
-20:30:34.402703 <= Recv data, 812 bytes (0x32c)
-```
+<!-- include ../_shared/check-it-streams.md url=http://localhost:3000/ -->
 
-That's the example: the shell at once, and the widget's chunk two seconds
-later, when its data is there. One line for the whole page means something
-buffered it; see
-[Checking that a response streams](../guides/streaming-through-proxies.md#checking-that-a-response-streams).
-
-## 7. Compression
+## 9. Compression
 
 `@fastify/compress` compresses a page in an `onSend` hook, and by default
 holds the compressed output until the page is complete. With
-`app.register(fastifyCompress)` alone, the example's page arrives in one piece
-when the widget is done:
+`app.register(fastifyCompress)` alone, the page arrives in one piece when the
+last block is done. Run the check with `--compressed` to see it:
 
 ```bash
-curl -sN --compressed http://localhost:3000/ | perl -MTime::HiRes=time -ne '
-  BEGIN { $t0 = time }
-  printf "%5d ms  %s\n", (time - $t0) * 1000, $& if /data-placeholder|<template data-ngs="\w+"/'
-```
-
-```text
- 2003 ms  data-placeholder
- 2003 ms  <template data-ngs="d0"
+curl -sN --compressed -o /dev/null --trace-time --trace-ascii - http://localhost:3000/ | grep 'Recv data'
 ```
 
 `flushOnIdle: true` flushes the compressor whenever the page pauses, which is
 after each burst of chunks (chunks written in the same tick go out together),
-without resetting the compression state. With it, the same
-request streams, for gzip, Brotli, deflate and zstd alike:
-
-```text
-    0 ms  data-placeholder
- 2002 ms  <template data-ngs="d0"
-```
+without resetting the compression state. With it, the same request streams,
+for gzip, Brotli, deflate and zstd alike: the shell at once, each chunk when
+its data is there.
 
 Register `@fastify/compress` before the plugin: it hooks into each route as it
 is added, and doesn't touch routes added before it has loaded. A route added
@@ -269,7 +254,7 @@ app.register(angularStream, {
 
 Scripts, styles and API responses are still compressed.
 
-## 8. Behind a proxy
+## 10. Behind a proxy
 
 A proxy or a CDN can hold the response back until it is complete, and the page
 then arrives all at once. The plugin sends `X-Accel-Buffering: no` for Nginx;
@@ -281,6 +266,6 @@ not just the time to the shell: when it runs out mid-page, Fastify cuts the
 connection. Give the page route a longer one with
 `route: { handlerTimeout: 30_000 }`.
 
-## 9. Stream something
+## 11. Stream something
 
 <!-- include ../_shared/stream-something.md -->

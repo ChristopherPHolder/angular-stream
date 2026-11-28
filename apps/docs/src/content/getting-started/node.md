@@ -4,15 +4,26 @@ browser build served from disk by the same handler, and every other request
 rendered as a streamed page. The handler is also Connect and Express
 middleware, so the same steps hold for a server built on those.
 
-## 1. The browser config
+## Before you start
+
+<!-- include ../_shared/before-you-start.md -->
+
+## 1. Install
+
+```bash
+npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-node@next
+npm install -D @types/node
+```
+
+## 2. The browser config
 
 <!-- include ../_shared/browser-config.md -->
 
-## 2. The server config
+## 3. The server config
 
 <!-- include ../_shared/server-config.md -->
 
-## 3. The server
+## 4. The server
 
 ```ts title="src/server.ts"
 import { createServer } from 'node:http';
@@ -45,15 +56,13 @@ The file is built to `dist/server/server.js`, so both URLs are relative to
 that: the template is `dist/server/index.server.html`, and `staticDir` is the
 browser build in `dist/client`.
 
-`allowedHosts` must list every hostname the server answers for: Angular's SSR
-host guard rejects any other `host` header, and the server answers `403`.
-Behind a proxy that rewrites the host, see
-[`trustProxy`](../reference/node.md#createnodehandler).
+<!-- include ../_shared/allowed-hosts.md -->
 
-`eventDispatchContract` is for `withEventReplay()`. The handler adds it to the
-template unless it's there already, so a click made before the page hydrates is
-queued and replayed. Leave it out and those clicks are lost; the server logs a
-warning when that happens.
+<!-- include ../_shared/event-replay.md -->
+
+Behind a proxy that rewrites the host, see
+[`trustProxy`](../reference/node.md#createnodehandler). A `Host` header that
+can't be parsed at all is answered with `400`, before the check.
 
 `staticDir` serves the browser build's files: scripts, styles, icons. A
 request for anything else, `/` and `/index.html` included, is rendered as a
@@ -69,7 +78,7 @@ the app rather than the handler then; see
 The whole Express setup, with `express.static()`, API routes and
 `compression`, is on [Express](express.md).
 
-## 4. Vite
+## 5. Vite
 
 ```ts title="vite.config.ts"
 import { angularStreamNode } from '@push-based/angular-ssr-stream-node/vite';
@@ -96,7 +105,7 @@ streams as it does in production. List it before ngp, or the dev server
 refuses to start: ngp's own dev SSR would otherwise answer page requests first,
 and call the handler the wrong way. In a build the plugin does nothing.
 
-## 5. Develop
+## 6. Develop
 
 ```bash
 vite dev   # http://localhost:5173
@@ -106,7 +115,7 @@ The dev server serves the sources, and every page is rendered by your handler
 and streamed. `import.meta.env.PROD` is `false` there, so `src/server.ts`
 doesn't start a server of its own.
 
-## 6. Build and run
+## 7. Build and run
 
 ```json title="package.json"
 {
@@ -127,23 +136,13 @@ node dist/server/server.js      # http://localhost:3000, or $PORT
 bundle, so run it where the app's `node_modules` are, or install the
 production dependencies next to `dist/` in your image. Angular is bundled.
 
-Check that it streams before you put anything in front of it:
+## 8. Check that it streams
 
-```bash
-curl -sN -o /dev/null --trace-time --trace-ascii - http://localhost:3000/ | grep 'Recv data'
-```
+Before you put anything in front of the server:
 
-```text
-19:52:21.629836 <= Recv data, 3059 bytes (0xbf3)
-19:52:23.629224 <= Recv data, 807 bytes (0x327)
-```
+<!-- include ../_shared/check-it-streams.md url=http://localhost:3000/ -->
 
-That's the example: the shell at once, and the widget's chunk two seconds
-later, when its data is there. One line for the whole page means something
-buffered it; see
-[Checking that a response streams](../guides/streaming-through-proxies.md#checking-that-a-response-streams).
-
-## 7. Behind a proxy
+## 9. Behind a proxy
 
 A proxy, a CDN or compression middleware can hold the response back until it
 is complete, and the page then arrives all at once. The handler sends
@@ -151,6 +150,6 @@ is complete, and the page then arrives all at once. The handler sends
 `compression`; for the rest, read
 [Streaming through proxies](../guides/streaming-through-proxies.md).
 
-## 8. Stream something
+## 10. Stream something
 
 <!-- include ../_shared/stream-something.md -->

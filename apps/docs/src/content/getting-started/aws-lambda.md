@@ -15,19 +15,34 @@ and nothing in it is an npm dependency of the app, which CDK or SST would add.
 > [!IMPORTANT]
 > This setup has not been deployed. Everything on this page was built and run
 > locally, through a stand-in for the Lambda runtime and the Function URL (see
-> [Check that it streams](#7-check-that-it-streams)). Nothing was checked
+> [Check that it streams](#9-check-that-it-streams)). Nothing was checked
 > against a real AWS account. That includes CloudFront, which AWS doesn't
 > document as streaming either way.
 
-## 1. The browser config
+## Before you start
+
+<!-- include ../_shared/before-you-start.md -->
+
+## 1. Install
+
+```bash
+npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-aws-lambda@next
+npm install -D @types/node
+```
+
+The adapter needs neither the AWS SDK nor `@types/aws-lambda`. Deploying takes
+the [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
+and the AWS CLI, installed on their own.
+
+## 2. The browser config
 
 <!-- include ../_shared/browser-config.md -->
 
-## 2. The server config
+## 3. The server config
 
 <!-- include ../_shared/server-config.md -->
 
-## 3. The handler
+## 4. The handler
 
 ```ts title="src/lambda.ts"
 import { join } from 'node:path';
@@ -62,10 +77,9 @@ host the request is rendered for. Function URLs look like
 the function's region, so the pattern above matches any Function URL in the
 region the function is deployed to, whichever that is.
 
-`eventDispatchContract` is for `withEventReplay()`, as on
-[Cloudflare Workers](cloudflare-workers.md#3-the-worker).
+<!-- include ../_shared/event-replay.md -->
 
-## 4. Vite
+## 5. Vite
 
 ```ts title="vite.config.ts"
 import { ngp } from '@push-based/vite-plugin-ngp';
@@ -105,7 +119,7 @@ ngp's own `ssr` option stays off. It builds a `render(url, document)` entry,
 not a Lambda handler. ngp still compiles `src/lambda.ts` with its server
 compiler, since it's listed in `entries`.
 
-## 5. The function, CloudFront and S3
+## 6. The function, CloudFront and S3
 
 The whole template is
 [`apps/example-aws-lambda/template.yaml`](../../../../../apps/example-aws-lambda/template.yaml).
@@ -158,7 +172,14 @@ these patterns: Vite's hashed files under `assets/*`, plus `*.ico`, `*.svg` and
 other files. Everything that doesn't match goes to the function, which renders
 it as a page.
 
-## 6. Build and deploy
+## 7. Develop
+
+`vite dev` serves the app client-side, without the function: Angular renders it
+in the browser and logs NG0505, as there is no hydration data. To see it stream
+before a deploy, run the built function through the stand-in in
+[Check that it streams](#9-check-that-it-streams).
+
+## 8. Build and deploy
 
 ```bash
 vite build                                   # client to dist/client, handler to dist/server
@@ -174,11 +195,7 @@ template, which only the function reads.
 > These commands were not run. The template passes `cfn-lint` with the SAM
 > translator, but it has never been deployed.
 
-## 7. Check that it streams
-
-`curl -N` the page and note when each part arrives. The shell comes at once.
-Each `<template data-ngs>` chunk follows when its data does. A response that
-arrives all at once after the slowest request was buffered somewhere.
+## 9. Check that it streams
 
 Neither SAM local nor the Runtime Interface Emulator streams a response. The
 example has its own stand-in instead,
@@ -189,24 +206,22 @@ Runtime API, and `HttpResponseStream.from()` makes the first write send the
 JSON metadata prelude and eight null bytes. A Function URL in front reads the
 prelude for the status and headers, and forwards the rest as it arrives.
 
-```bash
-pnpm nx serve example-aws-lambda   # builds it first; http://localhost:3000/
-curl -sN http://localhost:3000/
-```
-
-Through the stand-in, the example's shell, with the widget's
-`data-placeholder`, arrives at about 0 ms. The widget's
-`<template data-ngs="d0">` arrives about 2000 ms later.
-
-After a deploy, check the Function URL first and then the CloudFront URL. If
-the Function URL streams and CloudFront doesn't, the buffering is in CloudFront.
+Copy the example's
+[`scripts/`](../../../../../apps/example-aws-lambda/scripts/serve.ts) folder,
+both files, into the app. They need nothing but Node:
 
 ```bash
-curl -sN https://<FunctionUrl>/
-curl -sN https://<SiteUrl>/
+vite build
+node scripts/serve.ts   # the built function behind a local Function URL, http://localhost:3000/
 ```
 
-## 8. Stream something
+<!-- include ../_shared/check-it-streams.md url=http://localhost:3000/ -->
+
+After a deploy, run it against the Function URL first and then the CloudFront
+URL (`SiteUrl`). If the Function URL streams and CloudFront doesn't, the
+buffering is in CloudFront.
+
+## 10. Stream something
 
 <!-- include ../_shared/stream-something.md -->
 

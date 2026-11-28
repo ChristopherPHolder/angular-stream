@@ -12,11 +12,15 @@ every path without a file is rendered and streamed. This is the setup of
 > later, and the page hydrates. It has not been checked against a real Fastly
 > deployment yet.
 
+## Before you start
+
+<!-- include ../_shared/before-you-start.md -->
+
 ## 1. Install
 
 ```bash
-pnpm add @push-based/angular-ssr-stream-core@next @fastly/compute-js-static-publish
-pnpm add -D @fastly/js-compute
+npm install @push-based/angular-ssr-stream-core@next @fastly/compute-js-static-publish
+npm install -D @fastly/js-compute
 ```
 
 `@fastly/js-compute` compiles the server bundle to Wasm (`js-compute-runtime`)
@@ -212,9 +216,7 @@ Four things here are for Compute:
 `*.edgecompute.app` one included: Angular's SSR host guard rejects any other
 `host` header, and the page answers `403`.
 
-`eventDispatchContract` is for `withEventReplay()`: the built `index.html`
-doesn't carry the script Angular needs to queue the clicks made before the page
-hydrates, so the handler adds it.
+<!-- include ../_shared/event-replay.md -->
 
 Don't open a KV Store, or anything else from `fastly:*`, at the top level of the
 module. `js-compute-runtime` runs the module once at build time to snapshot it,
@@ -312,7 +314,7 @@ manifest_version = 3
 name = "angular-ssr-stream-example"
 
 [scripts]
-build = "pnpm run build && pnpm run compile"
+build = "npm run build && npm run compile"
 
 [local_server.kv_stores]
 example-content = { file = "./static-publisher/kvstore.json", format = "json" }
@@ -324,14 +326,20 @@ example-content = { file = "./static-publisher/kvstore.json", format = "json" }
 static publisher writes locally. `[setup.kv_stores]` creates the real one on the
 first deploy. Add `bin/`, `pkg/` and `static-publisher/` to `.gitignore`.
 
-## 8. Build and run it locally
+## 8. Develop
+
+There is no dev server that runs the server side: `vite dev` alone serves the
+app client-side, without SSR, and Angular logs NG0505 as there is no hydration
+data. To see it stream, build it and run it in Viceroy.
+
+## 9. Build and run it locally
 
 The scripts in `package.json`:
 
 ```json title="package.json"
 {
   "scripts": {
-    "build": "vp build",
+    "build": "vite build",
     "compile": "js-compute-runtime dist/server/server.js bin/main.wasm",
     "content:local": "compute-js-static-publish publish-content --local",
     "start": "fastly compute serve --skip-build"
@@ -340,18 +348,22 @@ The scripts in `package.json`:
 ```
 
 ```bash
-pnpm build          # dist/client and dist/server/server.js
-pnpm compile        # bin/main.wasm
-pnpm content:local  # dist/client into Viceroy's KV Store
-pnpm start          # http://127.0.0.1:7676
+npm run build          # dist/client and dist/server/server.js
+npm run compile        # bin/main.wasm
+npm run content:local  # dist/client into Viceroy's KV Store
+npm start              # http://127.0.0.1:7676
 ```
 
-The browser app uses `vp`, Vite+'s CLI; `vite build` does the same. `compile`
-takes about 7 seconds. Publish the content again after each build, because the
-file names change, and restart Viceroy after a publish. There is no dev server
-that runs the server side: `vite dev` alone serves the app without SSR.
+`compile` takes about 7 seconds. Publish the content again after each build,
+because the file names change, and restart Viceroy after a publish.
 
-## 9. Deploy
+## 10. Check that it streams
+
+With Viceroy running:
+
+<!-- include ../_shared/check-it-streams.md url=http://127.0.0.1:7676/ -->
+
+## 11. Deploy
 
 > [!WARNING]
 > Unverified: no real deployment has been made. These are the steps from
@@ -361,15 +373,21 @@ With the Fastly CLI logged in:
 
 ```bash
 fastly compute publish
-FASTLY_API_TOKEN=<token> pnpm exec compute-js-static-publish publish-content
+FASTLY_API_TOKEN=<token> npx compute-js-static-publish publish-content
 ```
 
 `fastly compute publish` runs the `build` script from `fastly.toml`, packages
 `bin/main.wasm` and deploys it; the first time, it creates the service and the
-KV Store. `publish-content` then uploads `dist/client` to the store. It reads
-the token only from `FASTLY_API_TOKEN` or `--fastly-api-token`, not from the
-CLI's profile. After a new build, run both again, the content first: the new
-server expects the new file names.
+KV Store, which is why it comes first then. `publish-content` uploads
+`dist/client` to the store. It reads the token only from `FASTLY_API_TOKEN` or
+`--fastly-api-token`, not from the CLI's profile. On every later deploy, run
+them the other way round, the content first: the new server expects the new
+file names. Then check the service's `*.edgecompute.app` address the same way
+as Viceroy.
+
+## 12. Stream something
+
+<!-- include ../_shared/stream-something.md -->
 
 ## Limits
 
@@ -392,7 +410,3 @@ cancels the response body, so the page renders to its end, and the instance
 then exits with status 1: the log shows "JS event loop terminated without
 completing the request" for every aborted request. Nothing is sent and nothing
 else is affected, but the request still costs its full render.
-
-## Stream something
-
-<!-- include ../_shared/stream-something.md -->

@@ -304,7 +304,7 @@ The package is published without decorators: the module is a
 whatever compiles the app's own decorators. The app's controllers and
 services need `experimentalDecorators` and `emitDecoratorMetadata`, which
 Vite's transform reads from the tsconfig; see
-[TypeScript](../getting-started/nestjs.md#5-typescript).
+[TypeScript](../getting-started/nestjs.md#6-typescript).
 
 ## Other platforms
 

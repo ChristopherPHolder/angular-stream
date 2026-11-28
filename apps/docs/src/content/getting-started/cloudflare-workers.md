@@ -3,15 +3,26 @@ through Vite, the server bundle running directly in workerd, static assets
 served by Cloudflare's `ASSETS` binding, and every navigation falling through
 to the rendering Worker.
 
-## 1. The browser config
+## Before you start
+
+<!-- include ../_shared/before-you-start.md -->
+
+## 1. Install
+
+```bash
+npm install @push-based/angular-ssr-stream-core@next @push-based/angular-ssr-stream-cloudflare@next
+npm install -D @cloudflare/vite-plugin wrangler
+```
+
+## 2. The browser config
 
 <!-- include ../_shared/browser-config.md -->
 
-## 2. The server config
+## 3. The server config
 
 <!-- include ../_shared/server-config.md -->
 
-## 3. The Worker
+## 4. The Worker
 
 ```ts title="src/worker.ts"
 import eventDispatchContract from '@angular/core/event-dispatch-contract.min.js?raw';
@@ -27,15 +38,13 @@ export default createStreamingWorker({
 }) satisfies ExportedHandler<Env>;
 ```
 
-`allowedHosts` must list every hostname the Worker answers for: Angular's SSR
-host guard rejects any other `host` header, and the Worker answers `403`.
+<!-- include ../_shared/allowed-hosts.md -->
 
-`eventDispatchContract` is for `withEventReplay()`. The Worker renders into the
-built `index.html`, which doesn't carry the script Angular needs to queue the
-clicks made before the page hydrates, so the Worker adds it. Leave it out and
-those clicks are lost; the Worker logs a warning when that happens.
+<!-- include ../_shared/event-replay.md -->
 
-## 4. Wrangler
+The Worker fetches that `index.html` through the `ASSETS` binding.
+
+## 5. Wrangler
 
 ```jsonc title="wrangler.jsonc"
 {
@@ -54,7 +63,7 @@ those clicks are lost; the Worker logs a warning when that happens.
 through to the Worker, which fetches `/index.html` through `ASSETS` and renders
 the route into it. `index.html` is the template, not the page.
 
-## 5. Vite
+## 6. Vite
 
 ```ts title="vite.config.ts"
 import { cloudflare } from '@cloudflare/vite-plugin';
@@ -72,14 +81,23 @@ export default defineConfig({
 
 The Cloudflare plugin owns the `ssr` environment and runs it in workerd, so
 ngp's own `ssr` option stays off. ngp still compiles the Worker with its server
-compiler. In `vite dev` the `ASSETS` binding is backed by the dev server, so the
-template already carries Vite's transforms and SSR behaves as it does in
-production.
+compiler.
 
-## 6. Build and deploy
+## 7. Develop
+
+```bash
+vite dev   # http://localhost:5173
+```
+
+The Worker runs in workerd, and the `ASSETS` binding is backed by the dev
+server, so the template already carries Vite's transforms and pages stream as
+they do in production.
+
+## 8. Build and deploy
 
 ```bash
 vite build       # client to dist/client, Worker to dist/ssr
+vite preview     # the built Worker in workerd, http://localhost:4173
 wrangler deploy  # deploys the built Worker
 ```
 
@@ -87,6 +105,14 @@ wrangler deploy  # deploys the built Worker
 `.wrangler/deploy/config.json`, so `wrangler deploy` ships the built Worker
 rather than `wrangler.jsonc`, whose `main` is TypeScript source.
 
-## 7. Stream something
+## 9. Check that it streams
+
+With `vite preview` running:
+
+<!-- include ../_shared/check-it-streams.md url=http://localhost:4173/ -->
+
+After the deploy, run the same command against the Worker's address.
+
+## 10. Stream something
 
 <!-- include ../_shared/stream-something.md -->

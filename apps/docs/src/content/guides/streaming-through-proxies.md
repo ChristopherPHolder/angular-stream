@@ -56,7 +56,7 @@ it.
   every chunk, so `app.use(compression())` in front of the handler streams
   compressed pages with nothing more to do. Without the flush, the same
   response arrives in one piece when the last block is done.
-  [Express](../getting-started/express.md#7-check-that-it-streams-compressed)
+  [Express](../getting-started/express.md#compressed)
   shows where it goes among the other middleware, both responses as `curl`
   sees them, and how to leave pages out of it.
 - **Other middleware built on Node's `zlib`** (`@fastify/compress`,
@@ -76,7 +76,7 @@ it.
   `BROTLI_OPERATION_FLUSH` for `br` and `ZSTD_e_flush` for `zstd`. Version
   5.3 prefers zstd, which Chrome asks for, so leave none out. The setup, and
   the timings with and without it, are in
-  [Koa](../getting-started/koa.md#7-compression).
+  [Koa](../getting-started/koa.md#9-compression).
 - **Other middleware built on Node's `zlib`** (`@fastify/compress` and
   others) has to flush after each write as well. zlib does that when the
   stream is created with `flush: zlib.constants.Z_SYNC_FLUSH` (Brotli:

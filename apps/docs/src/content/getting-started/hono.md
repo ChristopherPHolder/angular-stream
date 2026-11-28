@@ -10,22 +10,28 @@ Node setup and
 [`apps/example-hono-workers`](../../../../../apps/example-hono-workers/src/worker.ts)
 the Workers one, as written here.
 
-```bash
-npm install @push-based/angular-ssr-stream-core@next hono @hono/node-server
-npm install -D @hono/vite-dev-server
-```
+## Before you start
+
+<!-- include ../_shared/before-you-start.md -->
 
 ## Node
 
-### 1. The browser config
+### 1. Install
+
+```bash
+npm install @push-based/angular-ssr-stream-core@next hono @hono/node-server
+npm install -D @hono/vite-dev-server @types/node
+```
+
+### 2. The browser config
 
 <!-- include ../_shared/browser-config.md -->
 
-### 2. The server config
+### 3. The server config
 
 <!-- include ../_shared/server-config.md -->
 
-### 3. The server
+### 4. The server
 
 ```ts title="src/server.ts"
 import { readFile } from 'node:fs/promises';
@@ -101,14 +107,11 @@ instead of a page. Vite puts the build's hashed files there, so after a deploy
 a browser still holding the old page asks for chunks that are gone; a page in
 their place would fail to load as a script.
 
-`allowedHosts` must list every hostname the server answers for: Angular's SSR
-host guard rejects any other `host` header, and the server answers `403`.
+<!-- include ../_shared/allowed-hosts.md -->
 
-`eventDispatchContract` is for `withEventReplay()`. The built `index.html`
-doesn't carry the script Angular needs to queue the clicks made before the page
-hydrates, so the handler adds it. Leave it out and those clicks are lost.
+<!-- include ../_shared/event-replay.md -->
 
-### 4. Vite
+### 5. Vite
 
 ```ts title="vite.config.ts"
 import devServer from '@hono/vite-dev-server';
@@ -133,10 +136,18 @@ Angular bundled in.
 In `vite dev`, `@hono/vite-dev-server` loads `src/server.ts` through Vite and
 hands it every request Vite doesn't serve itself, with the dev server as
 `c.env.vite`. The template then comes from `transformIndexHtml`, which already
-adds Vite's client, so `injectClientScript` stays off. The page streams in dev
-as it does in production.
+adds Vite's client, so `injectClientScript` stays off.
 
-### 5. Build and run
+### 6. Develop
+
+```bash
+vite dev   # http://localhost:5173
+```
+
+The page streams in dev as it does in production, and the API answers from
+the same app.
+
+### 7. Build and run
 
 ```bash
 vite build                  # client to dist/client, server to dist/server
@@ -148,7 +159,11 @@ any working directory. Deploy `dist` with `node_modules`: the server bundle
 includes Angular, and imports the rest of its dependencies, Hono among them,
 from there.
 
-### 6. Stream something
+### 8. Check that it streams
+
+<!-- include ../_shared/check-it-streams.md url=http://localhost:3000/ -->
+
+### 9. Stream something
 
 <!-- include ../_shared/stream-something.md -->
 

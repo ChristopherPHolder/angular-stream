@@ -30,7 +30,10 @@ Nothing in step 3 touches the network, so it works offline.
 
 ## Try it
 
+In a checkout of the repository:
+
 ```bash
+pnpm install
 pnpm nx build example-service-worker
 cd apps/example-service-worker && pnpm exec vp preview
 ```
@@ -41,14 +44,27 @@ which is the worker here. Then stop `vp preview`, or tick _Offline_
 in DevTools, and reload again. The shell still comes at once and the widget
 2 s later.
 
-`vp dev` serves the app client-rendered only: the worker is part of the build,
-and `main.ts` registers it in production builds only.
+In your own app, `vite build` and `vite preview` do the same. `vite dev` serves
+the app client-rendered only: the worker is part of the build, and `main.ts`
+registers it in production builds only.
 
 ## The setup
 
-The browser config and the server config are the ones every runtime uses; see
-steps 1 and 2 of [Cloudflare Workers](../getting-started/cloudflare-workers.md).
-What differs is the worker, its registration and the build.
+<!-- include ../_shared/before-you-start.md -->
+
+```bash
+npm install @push-based/angular-ssr-stream-core@next
+```
+
+### The browser config
+
+<!-- include ../_shared/browser-config.md -->
+
+### The server config
+
+<!-- include ../_shared/server-config.md -->
+
+What differs from a server is the worker, its registration and the build.
 
 ### The worker
 
@@ -266,3 +282,7 @@ cache of its own: Angular's cache names are internal, and the worker can't
   server: the server's first byte is as fast, and the worker adds 142 kB and a
   second place where the app renders. Nor does it help the first visit, search
   engines or link previews.
+
+## Stream something
+
+<!-- include ../_shared/stream-something.md -->
